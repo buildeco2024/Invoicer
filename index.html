@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ინვოისი.გე — შექმენი შენი ინვოისი მარტივად</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -108,6 +106,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 .type-pill.active{border-color:var(--gold);background:rgba(245,166,35,0.08);color:var(--ink);}
 .btn-submit{width:100%;padding:14px;background:var(--gold);border:none;border-radius:10px;font-size:15px;font-weight:700;color:var(--ink);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;margin-top:6px;}
 .btn-submit:hover{background:var(--gold2);transform:translateY(-1px);}
+button:disabled{opacity:.65;cursor:not-allowed;transform:none!important;}
 .auth-switch{text-align:center;margin-top:16px;font-size:13px;color:var(--muted);}
 .auth-switch a{color:var(--gold);cursor:pointer;font-weight:600;text-decoration:none;}
 .msg-error{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none;}
@@ -219,7 +218,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 .inv-pre-block h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
 .inv-pre-block p{font-size:14px;line-height:1.7;}
 .inv-pre-table{width:100%;border-collapse:collapse;margin-bottom:20px;}
-.inv-pre-table th{background:var(--ink);color:#fff;padding:10px 14px;font-size:12px;text-align:left;}
+.inv-pre-table th{background:var(--ink);color:#fff;padding:10px 14px;font-size:12px;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 .inv-pre-table th:last-child,.inv-pre-table td:last-child{text-align:right;}
 .inv-pre-table td{padding:11px 14px;font-size:13px;border-bottom:1px solid #eef0f5;}
 .inv-pre-totals{margin-left:auto;width:280px;}
@@ -262,17 +261,71 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 @keyframes spin{to{transform:rotate(360deg);}}
 
 /* RESPONSIVE */
-@media(max-width:768px){
-  .land-hero-inner{grid-template-columns:1fr;gap:40px;padding:100px 20px 60px;}
+@media(max-width:900px){
+  .land-nav{padding:14px 16px;}
+  .land-nav .brand{font-size:18px;}
+  .nav-btns{gap:8px;}
+  .btn-nav-login,.btn-nav-reg{padding:8px 12px;font-size:13px;}
+  .land-hero-inner{grid-template-columns:1fr;gap:28px;padding:96px 18px 48px;}
   .land-hero-img{display:none;}
-  .land-h1{font-size:38px;}
+  .land-h1{font-size:38px;line-height:1.1;}
+  .land-sub{font-size:16px;}
+  .land-stats{gap:18px;flex-wrap:wrap;margin-top:32px;}
+  .land-features{padding:56px 18px;}
+  .section-title{font-size:30px;margin-bottom:30px;}
   .features-grid{grid-template-columns:1fr;}
-  .land-nav{padding:16px 20px;}
-  .sidebar{width:200px;}
-  .main-content{margin-left:200px;padding:20px;}
-  .stats-grid{grid-template-columns:1fr;}
-  .profile-grid{grid-template-columns:1fr;}
-  .land-features{padding:60px 20px;}
+
+  #page-app{padding-bottom:74px;}
+  .app-layout{display:block;min-height:100vh;}
+  .sidebar{position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;height:74px;z-index:1000;border-top:1px solid rgba(255,255,255,.10);display:block;overflow:hidden;}
+  .sidebar-brand,.sidebar-user,.sidebar-footer{display:none;}
+  .sidebar-nav{display:flex;align-items:center;gap:6px;overflow-x:auto;padding:8px 8px;height:74px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .sidebar-nav::-webkit-scrollbar{display:none;}
+  .nav-item{min-width:76px;flex:0 0 auto;flex-direction:column;gap:3px;justify-content:center;text-align:center;font-size:10px;padding:7px 8px;margin:0;border-radius:12px;white-space:nowrap;}
+  .nav-item .icon{font-size:18px;width:auto;}
+  .main-content{margin-left:0;padding:18px 14px 92px;}
+  .page-header{align-items:flex-start;gap:12px;flex-direction:column;margin-bottom:18px;}
+  .page-title{font-size:25px;}
+  .page-header .btn-primary,.page-header .btn-outline{width:100%;justify-content:center;}
+  .stats-grid{grid-template-columns:1fr;gap:12px;}
+  .card{padding:16px;border-radius:12px;margin-bottom:14px;}
+  .profile-grid{grid-template-columns:1fr;gap:14px;}
+  .form-row,.fm-row{flex-direction:column;gap:0;}
+  .type-sel{display:grid;grid-template-columns:1fr;gap:8px;}
+  .modal{max-width:calc(100vw - 24px);padding:28px 18px;border-radius:16px;}
+
+  .data-table{display:block;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;}
+  .data-table th,.data-table td{padding:10px 12px;font-size:13px;}
+  .actions-bar{display:grid;grid-template-columns:1fr;gap:10px;}
+  .actions-bar button,.btn-primary,.btn-secondary,.btn-outline{justify-content:center;}
+
+  .inv-tabs{overflow-x:auto;gap:0;-webkit-overflow-scrolling:touch;}
+  .inv-tab{flex:0 0 auto;padding:11px 14px;font-size:13px;}
+  .prod-header{display:none;}
+  .prod-row{grid-template-columns:1fr 1fr 1fr 34px;gap:8px;background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:10px;margin-bottom:10px;}
+  .prod-row input:first-child{grid-column:1 / -1;}
+  .prod-total{text-align:left;background:#fff;border:1px solid var(--border);border-radius:7px;padding:8px 10px;}
+  .totals-panel{padding:16px;}
+
+  .inv-preview-wrap{max-width:100%;padding:22px 16px;border-radius:14px;overflow-x:auto;}
+  .inv-pre-header{gap:14px;flex-direction:column;}
+  .inv-pre-title{font-size:28px;}
+  .inv-pre-meta{grid-template-columns:1fr;gap:16px;}
+  .inv-pre-table{min-width:560px;}
+  .inv-pre-totals{width:100%;}
+  .inv-pre-bank{display:block;line-height:1.55;}
+  .inv-pre-bank-label{display:block;min-width:0;}
+}
+
+@media(max-width:420px){
+  .land-h1{font-size:32px;}
+  .land-cta{width:100%;justify-content:center;}
+  .land-stat-num{font-size:23px;}
+  .main-content{padding:14px 10px 92px;}
+  .card{padding:14px;}
+  .nav-item{min-width:68px;font-size:9px;}
+  .modal{padding:24px 14px;}
+  .btn-primary,.btn-secondary,.btn-outline,.btn-submit{width:100%;}
 }
 </style>
 </head>
@@ -1203,8 +1256,23 @@ async function deleteCatalogItem(id){
   await loadProducts(); renderCatalog(); populateCatalogPick();
 }
 
+
+function ensureXLSXLoaded(){
+  if(window.XLSX) return Promise.resolve();
+  if(window.__xlsxLoading) return window.__xlsxLoading;
+  window.__xlsxLoading = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = resolve;
+    s.onerror = () => reject(new Error('Excel ბიბლიოთეკა ვერ ჩაიტვირთა'));
+    document.head.appendChild(s);
+  });
+  return window.__xlsxLoading;
+}
+
 async function importExcel(input){
   const file=input.files[0]; if(!file) return;
+  try{ await ensureXLSXLoaded(); }catch(e){ toast(e.message || 'Excel იმპორტი ვერ ჩაიტვირთა','error'); return; }
   const reader=new FileReader();
   reader.onload=async e=>{
     const wb=XLSX.read(e.target.result,{type:'binary'});
@@ -1455,7 +1523,7 @@ async function downloadInvPDF(){
     --muted:#8a8fa8;
     --border:#e8eaf0;
   }
-  *{box-sizing:border-box;}
+  *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   html,body{margin:0;padding:0;background:#f4f5f9;color:var(--ink);font-family:'DM Sans', Arial, sans-serif;}
   .print-page{width:210mm;min-height:297mm;margin:0 auto;background:#fff;padding:18mm 16mm;}
   .inv-pre-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--gold);padding-bottom:18px;margin-bottom:24px;}
@@ -1464,8 +1532,9 @@ async function downloadInvPDF(){
   .inv-pre-meta{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:26px;}
   .inv-pre-block h4,.inv-pre-banks h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:0 0 8px;}
   .inv-pre-block p{font-size:14px;line-height:1.7;margin:0;}
-  .inv-pre-table{width:100%;border-collapse:collapse;margin-bottom:20px;}
-  .inv-pre-table th{background:var(--ink);color:#fff;padding:11px 14px;font-size:12px;text-align:left;}
+  .inv-pre-table{width:100%;border-collapse:collapse;margin-bottom:20px;border-radius:8px;overflow:hidden;}
+  .inv-pre-table thead{background:#0f0f1a;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .inv-pre-table th{background:#0f0f1a !important;color:#fff !important;padding:11px 14px;font-size:12px;text-align:left;font-weight:700;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   .inv-pre-table td{padding:11px 14px;font-size:13px;border-bottom:1px solid #eef0f5;}
   .inv-pre-table th:last-child,.inv-pre-table td:last-child{text-align:right;}
   .inv-pre-totals{margin-left:auto;width:290px;}
@@ -1479,6 +1548,7 @@ async function downloadInvPDF(){
   @media print{
     html,body{background:#fff;}
     .print-page{margin:0;box-shadow:none;width:210mm;min-height:297mm;}
+    .inv-pre-table thead,.inv-pre-table th{background:#0f0f1a !important;color:#fff !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   }
 </style>
 </head>
