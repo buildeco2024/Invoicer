@@ -6,6 +6,7 @@
 <title>ინვოისი.გე — შექმენი შენი ინვოისი მარტივად</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -1419,44 +1420,71 @@ async function saveInvoice(){
   toast('ინვოისი შენახულია ✓','success');
 }
 
-function downloadInvPDF(){
+async function downloadInvPDF(){
   buildInvPreview();
-  const {jsPDF}=window.jspdf;
-  const pdf=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
-  const p=userProfile||{};
-  const num=document.getElementById('ii-num').value;
-  const date=document.getElementById('ii-date').value;
-  const vatOn=document.getElementById('inv-vat').checked;
-  const sub=invProducts.reduce((s,p)=>s+(p.qty*p.price),0);
-  const vat=vatOn?sub*0.18:0;
-  const total=sub+vat;
 
-  pdf.setFontSize(22);pdf.setFont('helvetica','bold');
-  pdf.text('INVOICE',105,22,{align:'center'});
-  pdf.setFontSize(11);pdf.setFont('helvetica','normal');
-  pdf.text(`No: ${num}   Date: ${date}`,105,30,{align:'center'});
-  pdf.line(14,34,196,34);
-  pdf.setFontSize(10);
-  pdf.setFont('helvetica','bold');pdf.text('Sender:',14,42);
-  pdf.setFont('helvetica','normal');pdf.text(p.full_name||'',14,48);
-  let y=62;
-  pdf.setFont('helvetica','bold');
-  ['Description','Qty','Price','Total'].forEach((h,i)=>pdf.text(h,[14,110,140,172][i],y));
-  pdf.line(14,y+3,196,y+3);y+=10;
-  pdf.setFont('helvetica','normal');
-  invProducts.filter(p=>p.name||p.price).forEach(p=>{
-    pdf.text(p.name||'-',14,y);pdf.text(String(p.qty),110,y);
-    pdf.text(p.price.toFixed(2),140,y);pdf.text((p.qty*p.price).toFixed(2),172,y);y+=8;
-  });
-  pdf.line(14,y,196,y);y+=8;
-  if(vatOn){pdf.text(`VAT (18%): GEL ${vat.toFixed(2)}`,140,y);y+=8;}
-  pdf.setFont('helvetica','bold');
-  pdf.text(`TOTAL: GEL ${total.toFixed(2)}`,140,y);
-  userBanks.filter(b=>b.iban).forEach((b,i)=>{
-    if(i===0){y+=14;pdf.setFont('helvetica','bold');pdf.text('Bank Details:',14,y);y+=7;}
-    pdf.setFont('helvetica','normal');pdf.text(`${b.bank_name||'Bank'}: ${b.iban}`,14,y);y+=7;
-  });
-  pdf.save(`invoice-${num}.pdf`);
+  const preview = document.getElementById('inv-preview-content');
+  const num = document.getElementById('ii-num').value || '001';
+
+  if(!preview){
+    toast('PDF ვერ შეიქმნა: ინვოისის preview ვერ მოიძებნა', 'error');
+    return;
+  }
+
+  try{
+    toast('PDF მზადდება...', '');
+
+    const oldTransform = preview.style.transform;
+    const oldTransformOrigin = preview.style.transformOrigin;
+    preview.style.transform = 'none';
+    preview.style.transformOrigin = 'top left';
+
+    const canvas = await html2canvas(preview, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      windowWidth: preview.scrollWidth,
+      windowHeight: preview.scrollHeight
+    });
+
+    preview.style.transform = oldTransform;
+    preview.style.transformOrigin = oldTransformOrigin;
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+
+    const pageW = 210;
+    const pageH = 297;
+    const margin = 10;
+    const imgW = pageW - margin * 2;
+    const imgH = canvas.height * imgW / canvas.width;
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.98);
+
+    if(imgH <= pageH - margin * 2){
+      pdf.addImage(imgData, 'JPEG', margin, margin, imgW, imgH);
+    }else{
+      let remainingH = imgH;
+      let positionY = margin;
+      pdf.addImage(imgData, 'JPEG', margin, positionY, imgW, imgH);
+      remainingH -= (pageH - margin * 2);
+
+      while(remainingH > 0){
+        pdf.addPage();
+        positionY = margin - (imgH - remainingH);
+        pdf.addImage(imgData, 'JPEG', margin, positionY, imgW, imgH);
+        remainingH -= (pageH - margin * 2);
+      }
+    }
+
+    pdf.save(`ინვოისი №${num}.pdf`);
+    toast('PDF ჩამოიტვირთა ✓', 'success');
+  }catch(err){
+    console.error(err);
+    toast('PDF ვერ შეიქმნა: ' + (err.message || err), 'error');
+  }
 }
 
 function sendInvWhatsApp(){
