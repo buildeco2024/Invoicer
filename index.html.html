@@ -1280,24 +1280,34 @@ function renderDashInvoices(){
 // ========== INVOICE BUILDER ==========
 function addInvProduct(){
   invProducts.push({name:'',qty:1,price:0});
-  renderInvProducts(); calcInvTotals();
+  renderInvProducts();
+  calcInvTotals();
 }
-function removeInvProd(i){invProducts.splice(i,1);renderInvProducts();calcInvTotals();}
+function removeInvProd(i){
+  invProducts.splice(i,1);
+  renderInvProducts();
+  calcInvTotals();
+}
 function renderInvProducts(){
   const el=document.getElementById('inv-prod-rows');
   el.innerHTML=invProducts.map((p,i)=>`
     <div class="prod-row">
-      <input value="${p.name}" placeholder="დასახელება" oninput="invProducts[${i}].name=this.value">
-      <input type="number" value="${p.qty}" min="0" step="0.01" oninput="invProducts[${i}].qty=parseFloat(this.value)||0;calcInvTotals()">
-      <input type="number" value="${p.price||''}" placeholder="0.00" min="0" step="0.01" oninput="invProducts[${i}].price=parseFloat(this.value)||0;calcInvTotals()">
-      <div class="prod-total">${fmt(p.qty*p.price)}</div>
+      <input value="${p.name||''}" placeholder="დასახელება" oninput="invProducts[${i}].name=this.value">
+      <input type="number" value="${p.qty ?? ''}" min="0" step="0.01" oninput="invProducts[${i}].qty=parseFloat(this.value)||0;calcInvTotals()">
+      <input type="number" value="${p.price ? p.price : ''}" placeholder="0.00" min="0" step="0.01" oninput="invProducts[${i}].price=parseFloat(this.value)||0;calcInvTotals()">
+      <div class="prod-total" data-index="${i}">${fmt((p.qty||0)*(p.price||0))}</div>
       <button type="button" class="remove-btn" onclick="removeInvProd(${i})">✕</button>
     </div>
   `).join('');
 }
 function calcInvTotals(){
-  renderInvProducts();
-  const sub=invProducts.reduce((s,p)=>s+(p.qty*p.price),0);
+  // არ გადავხატოთ პროდუქტის ველები ყოველი კლავიშის დაჭერაზე,
+  // თორემ input კარგავს ფოკუსს/კურსორს. ვაახლებთ მხოლოდ ჯამებს.
+  invProducts.forEach((p,i)=>{
+    const rowTotal=document.querySelector(`.prod-total[data-index="${i}"]`);
+    if(rowTotal) rowTotal.textContent=fmt((p.qty||0)*(p.price||0));
+  });
+  const sub=invProducts.reduce((s,p)=>s+((p.qty||0)*(p.price||0)),0);
   const vatOn=document.getElementById('inv-vat').checked;
   const vat=vatOn?sub*0.18:0;
   const total=sub+vat;
