@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ინვოისი.გე — შექმენი შენი ინვოისი მარტივად</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0f0f1a;
+  --gold: #f5a623;
+  --gold2: #e8961a;
+  --cream: #fafaf7;
+  --white: #ffffff;
+  --muted: #8a8fa8;
+  --border: #e8eaf0;
+  --bg: #f4f5f9;
+  --card: #ffffff;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --radius: 14px;
+  --shadow: 0 4px 32px rgba(15,15,26,0.10);
+  --shadow-lg: 0 16px 64px rgba(15,15,26,0.16);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+
+/* ========== LANDING ========== */
+#page-landing{display:block;}
+.land-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;background:rgba(15,15,26,0.92);backdrop-filter:blur(12px);}
+.land-nav .brand{font-family:'Playfair Display',serif;font-size:22px;color:#fff;letter-spacing:-0.5px;}
+.land-nav .brand span{color:var(--gold);}
+.nav-btns{display:flex;gap:12px;align-items:center;}
+.btn-nav-login{background:transparent;border:1.5px solid rgba(255,255,255,0.3);color:#fff;padding:9px 22px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.btn-nav-login:hover{border-color:var(--gold);color:var(--gold);}
+.btn-nav-reg{background:var(--gold);border:none;color:var(--ink);padding:9px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.btn-nav-reg:hover{background:var(--gold2);transform:translateY(-1px);}
+
+.land-hero{min-height:100vh;background:var(--ink);display:flex;align-items:center;position:relative;overflow:hidden;}
+.land-hero::before{content:'';position:absolute;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(245,166,35,0.18) 0%,transparent 70%);pointer-events:none;}
+.land-hero::after{content:'';position:absolute;bottom:-100px;left:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(245,166,35,0.08) 0%,transparent 70%);pointer-events:none;}
+.land-hero-inner{max-width:1200px;margin:0 auto;padding:120px 48px 80px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;width:100%;}
+.land-hero-text{animation:fadeUp .8s ease both;}
+.land-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.3);color:var(--gold);padding:6px 14px;border-radius:100px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:24px;}
+.land-h1{font-family:'Playfair Display',serif;font-size:58px;line-height:1.05;color:#fff;margin-bottom:22px;font-weight:900;}
+.land-h1 span{color:var(--gold);}
+.land-sub{font-size:18px;color:rgba(255,255,255,0.6);line-height:1.7;margin-bottom:36px;font-weight:300;}
+.land-cta{display:inline-flex;align-items:center;gap:10px;background:var(--gold);color:var(--ink);padding:16px 32px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .25s;}
+.land-cta:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 12px 32px rgba(245,166,35,0.4);}
+.land-stats{display:flex;gap:32px;margin-top:48px;}
+.land-stat{color:#fff;}
+.land-stat-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--gold);}
+.land-stat-label{font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;}
+
+/* HERO IMAGE — office girl illustration */
+.land-hero-img{display:flex;justify-content:center;align-items:center;animation:fadeUp .8s .2s ease both;opacity:0;animation-fill-mode:forwards;}
+.hero-card-mock{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:24px;padding:32px;position:relative;backdrop-filter:blur(8px);}
+.hero-girl{font-size:120px;display:block;text-align:center;margin-bottom:16px;filter:drop-shadow(0 8px 24px rgba(0,0,0,0.3));}
+.hero-mock-invoice{background:rgba(255,255,255,0.95);border-radius:12px;padding:20px 24px;min-width:260px;}
+.hmi-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;border-bottom:2px solid var(--gold);padding-bottom:12px;}
+.hmi-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--ink);font-weight:900;}
+.hmi-num{font-size:11px;color:var(--muted);}
+.hmi-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.hmi-row{display:flex;justify-content:space-between;font-size:12px;color:#444;}
+.hmi-total{display:flex;justify-content:space-between;font-size:14px;font-weight:700;color:var(--ink);border-top:1px solid var(--border);padding-top:8px;}
+.hmi-total span:last-child{color:var(--gold);}
+.floating-badge{position:absolute;top:-16px;right:-16px;background:var(--gold);color:var(--ink);border-radius:100px;padding:8px 16px;font-size:12px;font-weight:700;box-shadow:0 4px 16px rgba(245,166,35,0.5);animation:float 3s ease-in-out infinite;}
+
+/* FEATURES */
+.land-features{background:var(--cream);padding:100px 48px;}
+.land-features-inner{max-width:1100px;margin:0 auto;}
+.section-label{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;}
+.section-title{font-family:'Playfair Display',serif;font-size:42px;color:var(--ink);margin-bottom:60px;font-weight:700;}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+.feature-card{background:var(--white);border-radius:16px;padding:32px;border:1px solid var(--border);transition:all .25s;}
+.feature-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);}
+.feature-icon{font-size:36px;margin-bottom:16px;display:block;}
+.feature-title{font-size:17px;font-weight:700;margin-bottom:8px;}
+.feature-desc{font-size:14px;color:var(--muted);line-height:1.6;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+
+/* ========== AUTH MODAL ========== */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,15,26,0.7);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:20px;padding:40px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);position:relative;}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;}
+.modal-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:28px;}
+.modal-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:28px;}
+.modal-tab{flex:1;padding:10px;background:none;border:none;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;}
+.modal-tab.active{color:var(--ink);border-bottom-color:var(--gold);}
+
+/* FORM */
+.fm-group{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.fm-label{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.5px;}
+.fm-input{border:1.5px solid var(--border);border-radius:9px;padding:11px 14px;font-size:14px;color:var(--ink);background:#fafafa;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;width:100%;}
+.fm-input:focus{border-color:var(--gold);background:#fff;}
+.fm-row{display:flex;gap:10px;}
+.fm-row .fm-group{flex:1;}
+.type-sel{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.type-pill{flex:1;min-width:80px;padding:9px 6px;border:2px solid var(--border);border-radius:8px;background:#fafafa;cursor:pointer;text-align:center;font-size:12px;font-weight:600;color:var(--muted);transition:all .18s;}
+.type-pill.active{border-color:var(--gold);background:rgba(245,166,35,0.08);color:var(--ink);}
+.btn-submit{width:100%;padding:14px;background:var(--gold);border:none;border-radius:10px;font-size:15px;font-weight:700;color:var(--ink);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;margin-top:6px;}
+.btn-submit:hover{background:var(--gold2);transform:translateY(-1px);}
+.auth-switch{text-align:center;margin-top:16px;font-size:13px;color:var(--muted);}
+.auth-switch a{color:var(--gold);cursor:pointer;font-weight:600;text-decoration:none;}
+.msg-error{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none;}
+.msg-success{background:#f0fdf4;border:1px solid #bbf7d0;color:#16a34a;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none;}
+
+/* ========== APP (logged in) ========== */
+#page-app{display:none;}
+.app-layout{display:flex;min-height:100vh;}
+.sidebar{width:240px;background:var(--ink);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:50;}
+.sidebar-brand{padding:24px 20px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.sidebar-brand-name{font-family:'Playfair Display',serif;font-size:18px;color:#fff;}
+.sidebar-brand-name span{color:var(--gold);}
+.sidebar-user{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.sidebar-user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sidebar-user-type{font-size:11px;color:var(--muted);margin-top:2px;}
+.sidebar-nav{flex:1;padding:16px 12px;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:9px;color:rgba(255,255,255,0.55);font-size:14px;font-weight:500;cursor:pointer;transition:all .18s;margin-bottom:4px;}
+.nav-item:hover{background:rgba(255,255,255,0.07);color:#fff;}
+.nav-item.active{background:rgba(245,166,35,0.15);color:var(--gold);}
+.nav-item .icon{font-size:18px;width:22px;text-align:center;}
+.sidebar-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,0.08);}
+.btn-logout{width:100%;padding:10px;background:transparent;border:1.5px solid rgba(255,255,255,0.15);border-radius:8px;color:rgba(255,255,255,0.5);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.btn-logout:hover{border-color:var(--danger);color:var(--danger);}
+
+.main-content{margin-left:240px;flex:1;padding:32px;}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+.page-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:var(--gold);border:none;border-radius:9px;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .18s;}
+.btn-primary:hover{background:var(--gold2);transform:translateY(-1px);}
+.btn-secondary{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:var(--ink);border:none;border-radius:9px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .18s;}
+.btn-secondary:hover{background:#2d2d4e;}
+.btn-outline{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:transparent;border:2px solid var(--border);border-radius:9px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .18s;}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+.btn-sm{padding:7px 14px;font-size:12px;border-radius:7px;}
+.btn-danger{background:var(--danger);color:#fff;border:none;padding:7px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+/* CARDS */
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;margin-bottom:20px;}
+.card-title{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.card-title::before{content:'';display:inline-block;width:3px;height:14px;background:var(--gold);border-radius:2px;}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;}
+.data-table th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+.data-table td{padding:13px 14px;font-size:14px;border-bottom:1px solid var(--border);}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:#fafafa;}
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
+.empty-state .empty-icon{font-size:48px;margin-bottom:12px;}
+.empty-state p{font-size:14px;}
+
+/* PROFILE */
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.logo-upload{border:2px dashed var(--border);border-radius:10px;padding:24px;text-align:center;cursor:pointer;color:var(--muted);font-size:13px;position:relative;transition:border .2s;}
+.logo-upload:hover{border-color:var(--gold);}
+.logo-upload input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.logo-preview-img{max-height:72px;max-width:180px;margin:0 auto 8px;display:block;border-radius:6px;}
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.form-label{font-size:12px;font-weight:600;color:var(--muted);}
+.form-input{border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;font-size:14px;color:var(--ink);background:#fafafa;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;width:100%;}
+.form-input:focus{border-color:var(--gold);background:#fff;}
+.form-row{display:flex;gap:12px;}
+.form-row .form-group{flex:1;}
+
+/* BANKS */
+.bank-row{display:flex;gap:10px;align-items:center;background:#f9fafb;border-radius:8px;padding:10px 12px;margin-bottom:8px;}
+.bank-row input{flex:1;border:1.5px solid var(--border);border-radius:7px;padding:8px 11px;font-size:13px;font-family:'DM Sans',sans-serif;background:#fff;outline:none;}
+.bank-row input:focus{border-color:var(--gold);}
+.add-row-btn{display:flex;align-items:center;gap:8px;width:100%;padding:10px;border:2px dashed var(--border);border-radius:8px;background:none;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;justify-content:center;transition:all .18s;font-family:'DM Sans',sans-serif;}
+.add-row-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+/* INVOICE BUILDER */
+.inv-tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:24px;}
+.inv-tab{padding:12px 20px;background:none;border:none;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;}
+.inv-tab.active{color:var(--ink);border-bottom-color:var(--gold);}
+.inv-section{display:none;}
+.inv-section.active{display:block;}
+
+/* PRODUCTS TABLE IN INVOICE */
+.prod-header{display:grid;grid-template-columns:3fr 70px 100px 100px 36px;gap:8px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;padding:0 4px;margin-bottom:6px;}
+.prod-row{display:grid;grid-template-columns:3fr 70px 100px 100px 36px;gap:8px;align-items:center;margin-bottom:8px;}
+.prod-row input,.prod-row select{border:1.5px solid var(--border);border-radius:7px;padding:8px 10px;font-size:13px;font-family:'DM Sans',sans-serif;background:#fafafa;outline:none;width:100%;transition:border .2s;}
+.prod-row input:focus,.prod-row select:focus{border-color:var(--gold);background:#fff;}
+.prod-total{font-size:13px;font-weight:700;text-align:right;padding-right:4px;}
+.remove-btn{background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:0 4px;}
+
+/* TOTALS */
+.totals-panel{background:var(--ink);border-radius:12px;padding:20px 24px;margin-top:16px;}
+.totals-line{display:flex;justify-content:space-between;font-size:14px;color:rgba(255,255,255,0.7);padding:5px 0;}
+.totals-line.grand{font-size:20px;font-weight:700;color:#fff;border-top:1px solid rgba(255,255,255,0.15);padding-top:14px;margin-top:8px;}
+.totals-line.grand span:last-child{color:var(--gold);}
+
+/* TOGGLE */
+.toggle-wrap{display:flex;align-items:center;gap:12px;margin:14px 0;}
+.toggle{position:relative;display:inline-block;width:40px;height:22px;}
+.toggle input{opacity:0;width:0;height:0;}
+.tog-slider{position:absolute;inset:0;background:var(--border);border-radius:22px;transition:.25s;cursor:pointer;}
+.tog-slider:before{content:'';position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.25s;}
+input:checked+.tog-slider{background:var(--gold);}
+input:checked+.tog-slider:before{transform:translateX(18px);}
+.toggle-label{font-size:13px;font-weight:600;}
+
+/* INVOICE PREVIEW */
+.inv-preview-wrap{background:#fff;border-radius:16px;box-shadow:var(--shadow-lg);padding:48px 44px;max-width:720px;margin:0 auto;}
+.inv-pre-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--gold);padding-bottom:22px;margin-bottom:28px;}
+.inv-pre-title{font-family:'Playfair Display',serif;font-size:32px;font-weight:900;color:var(--ink);}
+.inv-pre-num{font-size:13px;color:var(--muted);margin-top:4px;}
+.inv-pre-meta{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;}
+.inv-pre-block h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
+.inv-pre-block p{font-size:14px;line-height:1.7;}
+.inv-pre-table{width:100%;border-collapse:collapse;margin-bottom:20px;}
+.inv-pre-table th{background:var(--ink);color:#fff;padding:10px 14px;font-size:12px;text-align:left;}
+.inv-pre-table th:last-child,.inv-pre-table td:last-child{text-align:right;}
+.inv-pre-table td{padding:11px 14px;font-size:13px;border-bottom:1px solid #eef0f5;}
+.inv-pre-totals{margin-left:auto;width:280px;}
+.inv-pre-tot-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;color:var(--ink);}
+.inv-pre-tot-row.grand{font-size:17px;font-weight:800;border-top:2px solid var(--ink);padding-top:10px;margin-top:6px;}
+.inv-pre-banks{margin-top:28px;border-top:1px solid var(--border);padding-top:18px;}
+.inv-pre-banks h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;}
+.inv-pre-bank{font-size:13px;display:flex;gap:10px;margin-bottom:5px;}
+.inv-pre-bank-label{font-weight:700;min-width:90px;}
+.actions-bar{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px;}
+
+/* CLIENT SELECT */
+.client-select-wrap{position:relative;}
+.client-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--gold);border-radius:9px;box-shadow:var(--shadow);z-index:10;max-height:200px;overflow-y:auto;display:none;}
+.client-dropdown.open{display:block;}
+.client-opt{padding:10px 14px;font-size:14px;cursor:pointer;transition:background .15s;}
+.client-opt:hover{background:#fafafa;}
+
+/* CATALOG */
+.catalog-row{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;align-items:center;margin-bottom:8px;}
+.catalog-row input{border:1.5px solid var(--border);border-radius:7px;padding:8px 11px;font-size:13px;font-family:'DM Sans',sans-serif;background:#fafafa;outline:none;width:100%;transition:border .2s;}
+.catalog-row input:focus{border-color:var(--gold);background:#fff;}
+
+/* DASHBOARD STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:28px;}
+.stat-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 24px;}
+.stat-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px;}
+.stat-value{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--ink);}
+.stat-sub{font-size:12px;color:var(--muted);margin-top:4px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:14px 22px;border-radius:10px;font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{background:var(--success);}
+.toast.error{background:var(--danger);}
+
+/* LOADING */
+.loading{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--muted);font-size:14px;gap:12px;}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .land-hero-inner{grid-template-columns:1fr;gap:40px;padding:100px 20px 60px;}
+  .land-hero-img{display:none;}
+  .land-h1{font-size:38px;}
+  .features-grid{grid-template-columns:1fr;}
+  .land-nav{padding:16px 20px;}
+  .sidebar{width:200px;}
+  .main-content{margin-left:200px;padding:20px;}
+  .stats-grid{grid-template-columns:1fr;}
+  .profile-grid{grid-template-columns:1fr;}
+  .land-features{padding:60px 20px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ========== LANDING PAGE ========== -->
+<div id="page-landing">
+  <nav class="land-nav">
+    <div class="brand">ინვოისი<span>.გე</span></div>
+    <div class="nav-btns">
+      <button class="btn-nav-login" onclick="openAuth('login')">შესვლა</button>
+      <button class="btn-nav-reg" onclick="openAuth('register')">რეგისტრაცია</button>
+    </div>
+  </nav>
+
+  <section class="land-hero">
+    <div class="land-hero-inner">
+      <div class="land-hero-text">
+        <div class="land-badge">🇬🇪 ქართული ბიზნესისთვის</div>
+        <h1 class="land-h1">შექმენი შენი ინვოისი <span>მარტივად</span></h1>
+        <p class="land-sub">პროფესიული ინვოისები წუთებში. შეინახე კლიენტები, პროდუქცია და გაგზავნე PDF-ით პირდაპირ WhatsApp-ზე.</p>
+        <button class="land-cta" onclick="openAuth('register')">
+          უფასოდ დაიწყე →
+        </button>
+        <div class="land-stats">
+          <div class="land-stat"><div class="land-stat-num">100%</div><div class="land-stat-label">უფასო</div></div>
+          <div class="land-stat"><div class="land-stat-num">PDF</div><div class="land-stat-label">ექსპორტი</div></div>
+          <div class="land-stat"><div class="land-stat-num">18%</div><div class="land-stat-label">დღგ მხარდაჭერა</div></div>
+        </div>
+      </div>
+      <div class="land-hero-img">
+        <div class="hero-card-mock">
+          <div class="floating-badge">✅ ინვოისი გაგზავნილია!</div>
+          <span class="hero-girl">👩‍💼</span>
+          <div class="hero-mock-invoice">
+            <div class="hmi-top">
+              <div><div class="hmi-title">ინვოისი</div><div class="hmi-num">№ 2024-001</div></div>
+              <div style="font-size:11px;color:#888;text-align:right">შპს ბიზნესი<br>15 მაი, 2024</div>
+            </div>
+            <div class="hmi-rows">
+              <div class="hmi-row"><span>სერვისი A</span><span>₾350</span></div>
+              <div class="hmi-row"><span>სერვისი B</span><span>₾200</span></div>
+              <div class="hmi-row"><span>დღგ 18%</span><span>₾99</span></div>
+            </div>
+            <div class="hmi-total"><span>სულ</span><span>₾649</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="land-features">
+    <div class="land-features-inner">
+      <div class="section-label">ფიჩერები</div>
+      <h2 class="section-title">ყველაფერი რაც გჭირდება</h2>
+      <div class="features-grid">
+        <div class="feature-card"><span class="feature-icon">👤</span><div class="feature-title">კლიენტების ბაზა</div><div class="feature-desc">შეინახე კლიენტების მონაცემები ერთხელ და გამოიყენე ყოველ ინვოისზე.</div></div>
+        <div class="feature-card"><span class="feature-icon">📦</span><div class="feature-title">პროდუქტების კატალოგი</div><div class="feature-desc">Excel-იდან იმპორტი ან ხელით დამატება. ინვოისზე ერთი კლიკით ჩასმა.</div></div>
+        <div class="feature-card"><span class="feature-icon">📄</span><div class="feature-title">PDF + WhatsApp</div><div class="feature-desc">პროფესიული PDF გენერაცია და გაგზავნა WhatsApp-ით პირდაპირ.</div></div>
+        <div class="feature-card"><span class="feature-icon">🏦</span><div class="feature-title">საბანკო რეკვიზიტები</div><div class="feature-desc">მრავალი ბანკის ანგარიში — ყოველ ინვოისზე ავტომატურად ჩაისმება.</div></div>
+        <div class="feature-card"><span class="feature-icon">💰</span><div class="feature-title">დღგ 18%</div><div class="feature-desc">ავტომატური გამოთვლა. ჩართე ან გამორთე ერთი კლიკით.</div></div>
+        <div class="feature-card"><span class="feature-icon">🇬🇪</span><div class="feature-title">ქართულად</div><div class="feature-desc">სრულად ქართულ ენაზე. კომპანია, ფიზ. პირი, ინდ. მეწარმე — ყველა ტიპი.</div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ========== AUTH MODAL ========== -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAuth()">✕</button>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tab-login-btn" onclick="switchAuthTab('login')">შესვლა</button>
+      <button class="modal-tab" id="tab-reg-btn" onclick="switchAuthTab('register')">რეგისტრაცია</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="auth-login">
+      <div class="modal-title">მოგესალმებით! 👋</div>
+      <div class="modal-sub">შედი შენს ანგარიშში</div>
+      <div class="msg-error" id="login-error"></div>
+      <div class="fm-group"><label class="fm-label">ელ-ფოსტა</label><input class="fm-input" type="email" id="login-email" placeholder="you@example.com"></div>
+      <div class="fm-group"><label class="fm-label">პაროლი</label><input class="fm-input" type="password" id="login-pass" placeholder="••••••••"></div>
+      <button class="btn-submit" onclick="doLogin()">შესვლა</button>
+      <div class="auth-switch">არ გაქვს ანგარიში? <a onclick="switchAuthTab('register')">დარეგისტრირდი</a></div>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="auth-register" style="display:none">
+      <div class="modal-title">შექმენი ანგარიში</div>
+      <div class="modal-sub">ერთხელ შეავსე — ყოველთვის გამოიყენე</div>
+      <div class="msg-error" id="reg-error"></div>
+      <div class="msg-success" id="reg-success"></div>
+      <div style="margin-bottom:12px;font-size:12px;font-weight:600;color:var(--muted);">სუბიექტის ტიპი</div>
+      <div class="type-sel">
+        <div class="type-pill active" onclick="setRegType('company',this)">🏢 კომპანია</div>
+        <div class="type-pill" onclick="setRegType('individual',this)">👤 ფიზ. პირი</div>
+        <div class="type-pill" onclick="setRegType('entrepreneur',this)">💼 ინდ. მეწარმე</div>
+      </div>
+      <div class="fm-row">
+        <div class="fm-group"><label class="fm-label" id="reg-name-label">კომპანიის სახელი</label><input class="fm-input" id="reg-name" placeholder="შპს მაგალითი"></div>
+        <div class="fm-group"><label class="fm-label" id="reg-id-label">საიდ. კოდი</label><input class="fm-input" id="reg-idnum" placeholder="123456789"></div>
+      </div>
+      <div class="fm-group"><label class="fm-label">ელ-ფოსტა</label><input class="fm-input" type="email" id="reg-email" placeholder="you@example.com"></div>
+      <div class="fm-group"><label class="fm-label">პაროლი</label><input class="fm-input" type="password" id="reg-pass" placeholder="მინ. 6 სიმბოლო"></div>
+      <div class="fm-group"><label class="fm-label">დაბადების თარიღი</label><input class="fm-input" type="date" id="reg-birth"></div>
+      <button class="btn-submit" onclick="doRegister()">რეგისტრაცია</button>
+      <div class="auth-switch">გაქვს ანგარიში? <a onclick="switchAuthTab('login')">შედი</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== APP ========== -->
+<div id="page-app">
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand"><div class="sidebar-brand-name">ინვოისი<span>.გე</span></div></div>
+      <div class="sidebar-user">
+        <div class="sidebar-user-name" id="sb-username">—</div>
+        <div class="sidebar-user-type" id="sb-usertype">—</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-item active" onclick="showPage('dashboard')"><span class="icon">📊</span>მთავარი</div>
+        <div class="nav-item" onclick="showPage('invoice-new')"><span class="icon">➕</span>ახალი ინვოისი</div>
+        <div class="nav-item" onclick="showPage('invoices')"><span class="icon">📋</span>ინვოისები</div>
+        <div class="nav-item" onclick="showPage('clients')"><span class="icon">👥</span>კლიენტები</div>
+        <div class="nav-item" onclick="showPage('catalog')"><span class="icon">📦</span>პროდუქტები</div>
+        <div class="nav-item" onclick="showPage('profile')"><span class="icon">⚙️</span>პროფილი</div>
+      </nav>
+      <div class="sidebar-footer"><button class="btn-logout" onclick="doLogout()">გამოსვლა</button></div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+      <!-- DASHBOARD -->
+      <div id="pg-dashboard" class="app-page">
+        <div class="page-header"><h1 class="page-title">მთავარი</h1><button class="btn-primary" onclick="showPage('invoice-new')">➕ ახალი ინვოისი</button></div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">ინვოისები სულ</div><div class="stat-value" id="stat-total">0</div></div>
+          <div class="stat-card"><div class="stat-label">კლიენტები</div><div class="stat-value" id="stat-clients">0</div></div>
+          <div class="stat-card"><div class="stat-label">პროდუქტები</div><div class="stat-value" id="stat-products">0</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">ბოლო ინვოისები</div>
+          <div id="dash-invoices"><div class="loading"><div class="spinner"></div>იტვირთება...</div></div>
+        </div>
+      </div>
+
+      <!-- NEW INVOICE -->
+      <div id="pg-invoice-new" class="app-page" style="display:none">
+        <div class="page-header"><h1 class="page-title">ახალი ინვოისი</h1></div>
+        <div class="card">
+          <div class="inv-tabs">
+            <button class="inv-tab active" onclick="switchInvTab('info')">📋 ინფო</button>
+            <button class="inv-tab" onclick="switchInvTab('items')">📦 პროდუქტები</button>
+            <button class="inv-tab" onclick="switchInvTab('preview')">👁 გადახედვა</button>
+          </div>
+
+          <!-- INFO -->
+          <div class="inv-section active" id="inv-info">
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">ინვოისი №</label><input class="form-input" id="ii-num" value="001"></div>
+              <div class="form-group"><label class="form-label">თარიღი</label><input class="form-input" type="date" id="ii-date"></div>
+              <div class="form-group"><label class="form-label">გადახდის ვადა</label><input class="form-input" type="date" id="ii-due"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">კლიენტი</label>
+              <div class="client-select-wrap">
+                <input class="form-input" id="ii-client-search" placeholder="ძიება ან ახლის დამატება..." autocomplete="off" oninput="searchClients(this.value)" onfocus="openClientDD()">
+                <div class="client-dropdown" id="client-dd"></div>
+              </div>
+            </div>
+            <div id="selected-client-info" style="display:none;background:#f0fdf4;border-radius:8px;padding:12px 14px;font-size:13px;margin-bottom:14px;border:1px solid #bbf7d0;"></div>
+            <div id="new-client-fields" style="display:none">
+              <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.5px;">ახალი კლიენტი</div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">სახელი / კომპანია</label><input class="form-input" id="nc-name" placeholder="კლიენტის სახელი"></div>
+                <div class="form-group"><label class="form-label">საიდ. კოდი</label><input class="form-input" id="nc-id" placeholder=""></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">მისამართი</label><input class="form-input" id="nc-addr" placeholder=""></div>
+                <div class="form-group"><label class="form-label">ტელეფონი</label><input class="form-input" id="nc-phone" placeholder=""></div>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;margin-bottom:14px;">
+                <input type="checkbox" id="nc-save"> კლიენტების ბაზაში შენახვა
+              </label>
+            </div>
+            <div class="form-group"><label class="form-label">შენიშვნა</label><textarea class="form-input" id="ii-note" rows="3" placeholder="გადახდის პირობები..."></textarea></div>
+            <button class="btn-primary" onclick="switchInvTab('items')">შემდეგი → პროდუქტები</button>
+          </div>
+
+          <!-- ITEMS -->
+          <div class="inv-section" id="inv-items">
+            <div class="prod-header"><span>დასახელება</span><span>რაოდ.</span><span>ფასი ₾</span><span>ჯამი ₾</span><span></span></div>
+            <div id="inv-prod-rows"></div>
+            <button class="add-row-btn" onclick="addInvProduct()">+ პროდუქტის დამატება</button>
+            <div style="margin-top:10px;">
+              <select class="form-input" id="catalog-pick" onchange="addFromCatalog(this)" style="max-width:300px;margin-bottom:8px;">
+                <option value="">კატალოგიდან ჩასმა...</option>
+              </select>
+            </div>
+            <div class="toggle-wrap">
+              <label class="toggle"><input type="checkbox" id="inv-vat" onchange="calcInvTotals()"><span class="tog-slider"></span></label>
+              <span class="toggle-label">დღგ 18%</span>
+            </div>
+            <div class="totals-panel">
+              <div class="totals-line"><span>შუალედური ჯამი</span><span id="inv-sub">₾0.00</span></div>
+              <div class="totals-line" id="inv-vat-row" style="display:none"><span>დღგ (18%)</span><span id="inv-vat-amt">₾0.00</span></div>
+              <div class="totals-line grand"><span>სულ გადასახდელი</span><span id="inv-total">₾0.00</span></div>
+            </div>
+            <div style="display:flex;gap:12px;margin-top:16px;">
+              <button class="btn-outline" onclick="switchInvTab('info')">← უკან</button>
+              <button class="btn-primary" onclick="switchInvTab('preview')">გადახედვა →</button>
+            </div>
+          </div>
+
+          <!-- PREVIEW -->
+          <div class="inv-section" id="inv-preview">
+            <div class="inv-preview-wrap" id="inv-preview-content"></div>
+            <div class="actions-bar">
+              <button class="btn-primary" onclick="saveInvoice()">💾 შენახვა</button>
+              <button class="btn-secondary" onclick="downloadInvPDF()">⬇ PDF</button>
+              <button class="btn-outline" style="background:#25D366;color:#fff;border-color:#25D366;" onclick="sendInvWhatsApp()">📲 WhatsApp</button>
+              <button class="btn-outline" onclick="switchInvTab('items')">← რედაქტირება</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVOICES LIST -->
+      <div id="pg-invoices" class="app-page" style="display:none">
+        <div class="page-header"><h1 class="page-title">ინვოისები</h1><button class="btn-primary" onclick="showPage('invoice-new')">➕ ახალი</button></div>
+        <div class="card">
+          <div id="invoices-list"><div class="loading"><div class="spinner"></div>იტვირთება...</div></div>
+        </div>
+      </div>
+
+      <!-- CLIENTS -->
+      <div id="pg-clients" class="app-page" style="display:none">
+        <div class="page-header"><h1 class="page-title">კლიენტები</h1><button class="btn-primary" onclick="openClientModal()">➕ კლიენტის დამატება</button></div>
+        <div class="card">
+          <div id="clients-list"><div class="loading"><div class="spinner"></div>იტვირთება...</div></div>
+        </div>
+      </div>
+
+      <!-- CATALOG -->
+      <div id="pg-catalog" class="app-page" style="display:none">
+        <div class="page-header">
+          <h1 class="page-title">პროდუქტები</h1>
+          <div style="display:flex;gap:10px;">
+            <label class="btn-outline" style="cursor:pointer;display:inline-flex;align-items:center;gap:8px;">
+              📥 Excel-იდან იმპორტი <input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="importExcel(this)">
+            </label>
+            <button class="btn-primary" onclick="openCatalogModal()">➕ პროდუქტი</button>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:12px;font-size:13px;color:var(--muted);padding:14px 20px;">
+          💡 Excel ფაილი უნდა შეიცავდეს სვეტებს: <strong>სახელი, ერთეული, ფასი</strong>
+        </div>
+        <div class="card">
+          <div id="catalog-list"><div class="loading"><div class="spinner"></div>იტვირთება...</div></div>
+        </div>
+      </div>
+
+      <!-- PROFILE -->
+      <div id="pg-profile" class="app-page" style="display:none">
+        <div class="page-header"><h1 class="page-title">პროფილი</h1><button class="btn-primary" onclick="saveProfile()">💾 შენახვა</button></div>
+        <div class="profile-grid">
+          <div>
+            <div class="card">
+              <div class="card-title">ძირითადი ინფო</div>
+              <div style="margin-bottom:12px;font-size:12px;font-weight:600;color:var(--muted);">სუბიექტის ტიპი</div>
+              <div class="type-sel" style="margin-bottom:16px;">
+                <div class="type-pill active" id="ptype-company" onclick="setProfType('company',this)">🏢 კომპანია</div>
+                <div class="type-pill" id="ptype-individual" onclick="setProfType('individual',this)">👤 ფიზ. პირი</div>
+                <div class="type-pill" id="ptype-entrepreneur" onclick="setProfType('entrepreneur',this)">💼 ინდ. მეწარმე</div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label" id="prof-name-label">კომპანიის სახელი</label><input class="form-input" id="prof-name" placeholder="შპს მაგალითი"></div>
+                <div class="form-group"><label class="form-label">საიდ. კოდი</label><input class="form-input" id="prof-idnum"></div>
+              </div>
+              <div class="form-group"><label class="form-label">მისამართი</label><input class="form-input" id="prof-address"></div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">ტელეფონი</label><input class="form-input" id="prof-phone"></div>
+                <div class="form-group"><label class="form-label">ელ-ფოსტა</label><input class="form-input" id="prof-email"></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">ლოგო</div>
+              <div class="logo-upload" id="logo-drop">
+                <img id="logo-prev" class="logo-preview-img" style="display:none">
+                <span id="logo-ph">📎 ლოგოს ატვირთვა (PNG, JPG)</span>
+                <input type="file" accept="image/*" onchange="loadProfileLogo(this)">
+              </div>
+              <button class="btn-outline btn-sm" style="margin-top:8px;" onclick="removeProfileLogo()">✕ წაშლა</button>
+            </div>
+            <div class="card">
+              <div class="card-title">საბანკო ანგარიშები</div>
+              <div id="prof-banks"></div>
+              <button class="add-row-btn" onclick="addProfBank()">+ ბანკის დამატება</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- CLIENT MODAL -->
+<div class="modal-overlay" id="client-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('client-modal').classList.remove('open')">✕</button>
+    <div class="modal-title">კლიენტის დამატება</div>
+    <div class="form-row" style="margin-top:20px;">
+      <div class="form-group"><label class="form-label">სახელი / კომპანია</label><input class="form-input" id="cm-name" placeholder=""></div>
+      <div class="form-group"><label class="form-label">საიდ. კოდი</label><input class="form-input" id="cm-id" placeholder=""></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">მისამართი</label><input class="form-input" id="cm-addr"></div>
+      <div class="form-group"><label class="form-label">ტელეფონი</label><input class="form-input" id="cm-phone"></div>
+    </div>
+    <div class="form-group"><label class="form-label">ელ-ფოსტა</label><input class="form-input" id="cm-email" type="email"></div>
+    <button class="btn-submit" onclick="saveClient()">შენახვა</button>
+  </div>
+</div>
+
+<!-- CATALOG MODAL -->
+<div class="modal-overlay" id="catalog-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('catalog-modal').classList.remove('open')">✕</button>
+    <div class="modal-title">პროდუქტის დამატება</div>
+    <div class="form-group" style="margin-top:20px;"><label class="form-label">დასახელება</label><input class="form-input" id="cat-name" placeholder="სერვისი / პროდუქტი"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">ერთეული</label><input class="form-input" id="cat-unit" placeholder="ც., კგ., სთ."></div>
+      <div class="form-group"><label class="form-label">ფასი ₾</label><input class="form-input" type="number" id="cat-price" placeholder="0.00"></div>
+    </div>
+    <button class="btn-submit" onclick="saveCatalogItem()">შენახვა</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ========== SUPABASE ==========
+const SUPA_URL = 'https://cvqgtcgukqwpfgipdlxc.supabase.co';
+const SUPA_KEY = 'sb_publishable_3Ij89hmu_UGoLb8sO4dvgA_pSW6-Ra7';
+const { createClient } = supabase;
+const db = createClient(SUPA_URL, SUPA_KEY);
+
+// ========== STATE ==========
+let currentUser = null;
+let userProfile = null;
+let userBanks = [];
+let userClients = [];
+let userProducts = [];
+let userInvoices = [];
+let profileLogoUrl = null;
+let regType = 'company';
+let profType = 'company';
+let invProducts = [];
+let selectedClientId = null;
+let editingClientId = null;
+
+// ========== INIT ==========
+document.addEventListener('DOMContentLoaded', async () => {
+  const today = new Date();
+  const due = new Date(); due.setDate(due.getDate()+14);
+  if(document.getElementById('ii-date')) {
+    document.getElementById('ii-date').value = fmtDate(today);
+    document.getElementById('ii-due').value = fmtDate(due);
+  }
+  const {data:{session}} = await db.auth.getSession();
+  if(session) await loginSuccess(session.user);
+  db.auth.onAuthStateChange(async(_,session)=>{
+    if(session) await loginSuccess(session.user);
+    else showLanding();
+  });
+  document.addEventListener('click', e=>{
+    if(!e.target.closest('.client-select-wrap')) {
+      document.getElementById('client-dd').classList.remove('open');
+    }
+  });
+});
+
+function fmtDate(d){return d.toISOString().split('T')[0];}
+function fmt(n){return '₾'+(parseFloat(n)||0).toFixed(2);}
+function showLanding(){document.getElementById('page-landing').style.display='block';document.getElementById('page-app').style.display='none';}
+function showApp(){document.getElementById('page-landing').style.display='none';document.getElementById('page-app').style.display='block';}
+
+// ========== TOAST ==========
+function toast(msg, type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+(type||''); t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ========== AUTH ==========
+function openAuth(tab){document.getElementById('auth-modal').classList.add('open');switchAuthTab(tab);}
+function closeAuth(){document.getElementById('auth-modal').classList.remove('open');}
+function switchAuthTab(tab){
+  document.getElementById('auth-login').style.display=tab==='login'?'block':'none';
+  document.getElementById('auth-register').style.display=tab==='register'?'block':'none';
+  document.getElementById('tab-login-btn').classList.toggle('active',tab==='login');
+  document.getElementById('tab-reg-btn').classList.toggle('active',tab==='register');
+}
+function setRegType(type,el){
+  regType=type;
+  document.querySelectorAll('#auth-register .type-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  const labels={company:['კომპანიის სახელი','საიდ. კოდი'],individual:['სახელი და გვარი','პირ. № / ID'],entrepreneur:['სახ. / გვარი','საიდ. კოდი']};
+  document.getElementById('reg-name-label').textContent=labels[type][0];
+}
+
+async function doLogin(){
+  const email=document.getElementById('login-email').value;
+  const pass=document.getElementById('login-pass').value;
+  const err=document.getElementById('login-error');
+  err.style.display='none';
+  const {error}=await db.auth.signInWithPassword({email,password:pass});
+  if(error){err.textContent=error.message;err.style.display='block';}
+  else closeAuth();
+}
+
+async function doRegister(){
+  const name=document.getElementById('reg-name').value;
+  const idnum=document.getElementById('reg-idnum').value;
+  const email=document.getElementById('reg-email').value;
+  const pass=document.getElementById('reg-pass').value;
+  const birth=document.getElementById('reg-birth').value;
+  const err=document.getElementById('reg-error');
+  const suc=document.getElementById('reg-success');
+  err.style.display='none'; suc.style.display='none';
+  if(!name||!email||!pass){err.textContent='შეავსე სავალდებულო ველები';err.style.display='block';return;}
+  const {data,error}=await db.auth.signUp({email,password:pass,options:{data:{full_name:name}}});
+  if(error){err.textContent=error.message;err.style.display='block';return;}
+  if(data.user){
+    await db.from('profiles').upsert({
+      id:data.user.id,entity_type:regType,full_name:name,id_number:idnum,email,
+      birth_date:birth||null
+    });
+  }
+  suc.textContent='რეგისტრაცია წარმატებულია! გთხოვ შეამოწმე ელ-ფოსტა.';
+  suc.style.display='block';
+}
+
+async function doLogout(){await db.auth.signOut();}
+
+async function loginSuccess(user){
+  currentUser=user;
+  await loadProfile();
+  await loadClients();
+  await loadProducts();
+  await loadInvoices();
+  showApp();
+  showPage('dashboard');
+  setupSidebar();
+}
+
+// ========== PROFILE ==========
+async function loadProfile(){
+  let {data, error}=await db.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
+  if(error){
+    console.error(error);
+  }
+  if(!data){
+    const created = { id: currentUser.id, email: currentUser.email };
+    const { data: inserted, error: insertError } = await db.from('profiles').upsert(created, { onConflict: 'id' }).select('*').single();
+    if(insertError){
+      console.error(insertError);
+      userProfile = created;
+    }else{
+      userProfile = inserted;
+    }
+  }else{
+    userProfile=data;
+  }
+  profileLogoUrl=userProfile.logo_url || null;
+  const {data:banks}=await db.from('banks').select('*').eq('user_id',currentUser.id);
+  userBanks=banks||[];
+}
+
+function setupSidebar(){
+  if(!userProfile) return;
+  const types={company:'კომპანია',individual:'ფიზ. პირი',entrepreneur:'ინდ. მეწარმე'};
+  document.getElementById('sb-username').textContent=userProfile.full_name||currentUser.email;
+  document.getElementById('sb-usertype').textContent=types[userProfile.entity_type]||'';
+}
+
+function renderProfile(){
+  if(!userProfile) return;
+  const p=userProfile;
+  profType=p.entity_type||'company';
+  document.getElementById('prof-name').value=p.full_name||'';
+  document.getElementById('prof-idnum').value=p.id_number||'';
+  document.getElementById('prof-address').value=p.address||'';
+  document.getElementById('prof-phone').value=p.phone||'';
+  document.getElementById('prof-email').value=p.email||'';
+  ['company','individual','entrepreneur'].forEach(t=>{
+    document.getElementById('ptype-'+t).classList.toggle('active',t===profType);
+  });
+  if(p.logo_url){
+    document.getElementById('logo-prev').src=p.logo_url;
+    document.getElementById('logo-prev').style.display='block';
+    document.getElementById('logo-ph').style.display='none';
+  }
+  renderProfBanks();
+}
+
+function setProfType(type,el){
+  profType=type;
+  document.querySelectorAll('.profile-grid .type-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  const labels={company:'კომპანიის სახელი',individual:'სახელი და გვარი',entrepreneur:'სახ./გვარი (ინდ. მეწარმე)'};
+  document.getElementById('prof-name-label').textContent=labels[type];
+}
+
+function renderProfBanks(){
+  const el=document.getElementById('prof-banks');
+  el.innerHTML=userBanks.map((b,i)=>`
+    <div class="bank-row">
+      <input placeholder="ბანკი" value="${b.bank_name||''}" oninput="userBanks[${i}].bank_name=this.value">
+      <input placeholder="IBAN: GE..." value="${b.iban||''}" oninput="userBanks[${i}].iban=this.value">
+      <button class="remove-btn" onclick="removeProfBank(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function addProfBank(){userBanks.push({bank_name:'',iban:''});renderProfBanks();}
+function removeProfBank(i){userBanks.splice(i,1);renderProfBanks();}
+
+function loadProfileLogo(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    profileLogoUrl=e.target.result;
+    document.getElementById('logo-prev').src=profileLogoUrl;
+    document.getElementById('logo-prev').style.display='block';
+    document.getElementById('logo-ph').style.display='none';
+  };
+  reader.readAsDataURL(file);
+}
+function removeProfileLogo(){
+  profileLogoUrl=null;
+  document.getElementById('logo-prev').style.display='none';
+  document.getElementById('logo-ph').style.display='';
+}
+
+async function saveProfile(){
+  const upd = {
+    id: currentUser.id,
+    entity_type: profType,
+    full_name: document.getElementById('prof-name').value,
+    id_number: document.getElementById('prof-idnum').value,
+    address: document.getElementById('prof-address').value,
+    phone: document.getElementById('prof-phone').value,
+    email: document.getElementById('prof-email').value || currentUser.email,
+    logo_url: profileLogoUrl
+  };
+
+  const { error } = await db.from('profiles').upsert(upd, { onConflict: 'id' });
+  if (error) {
+    console.error(error);
+    toast('პროფილი ვერ შეინახა: ' + error.message, 'error');
+    return;
+  }
+
+  const { error: deleteBankError } = await db.from('banks').delete().eq('user_id', currentUser.id);
+  if (deleteBankError) {
+    console.error(deleteBankError);
+    toast('ბანკის ძველი მონაცემები ვერ წაიშალა: ' + deleteBankError.message, 'error');
+    return;
+  }
+
+  const bankRows = userBanks
+    .filter(b => (b.bank_name || b.iban) && b.iban)
+    .map(b => ({
+      user_id: currentUser.id,
+      bank_name: b.bank_name || '',
+      iban: b.iban || ''
+    }));
+
+  if (bankRows.length) {
+    const { error: bankError } = await db.from('banks').insert(bankRows);
+    if (bankError) {
+      console.error(bankError);
+      toast('ბანკი ვერ შეინახა: ' + bankError.message, 'error');
+      return;
+    }
+  }
+
+  userProfile = { ...userProfile, ...upd };
+  await loadProfile();
+  renderProfile();
+  setupSidebar();
+  toast('პროფილი შენახულია ✓', 'success');
+}
+
+// ========== CLIENTS ==========
+async function loadClients(){
+  const {data}=await db.from('clients').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+  userClients=data||[];
+}
+
+function renderClients(){
+  const el=document.getElementById('clients-list');
+  if(!userClients.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><p>კლიენტები არ გაქვს დამატებული</p></div>';return;}
+  el.innerHTML=`<table class="data-table">
+    <thead><tr><th>სახელი</th><th>საიდ. კოდი</th><th>ტელეფონი</th><th>ელ-ფოსტა</th><th></th></tr></thead>
+    <tbody>${userClients.map(c=>`
+      <tr>
+        <td><strong>${c.full_name||'—'}</strong></td>
+        <td>${c.id_number||'—'}</td>
+        <td>${c.phone||'—'}</td>
+        <td>${c.email||'—'}</td>
+        <td style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-outline btn-sm" onclick="editClient('${c.id}')">რედაქტირება</button>
+          <button class="btn-danger btn-sm" onclick="deleteClient('${c.id}')">წაშლა</button>
+        </td>
+      </tr>
+    `).join('')}</tbody>
+  </table>`;
+}
+
+function openClientModal(){
+  editingClientId = null;
+  document.querySelector('#client-modal .modal-title').textContent = 'კლიენტის დამატება';
+  ['cm-name','cm-id','cm-addr','cm-phone','cm-email'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('client-modal').classList.add('open');
+}
+
+function editClient(id){
+  const c = userClients.find(x => x.id === id);
+  if(!c) return;
+  editingClientId = id;
+  document.querySelector('#client-modal .modal-title').textContent = 'კლიენტის რედაქტირება';
+  document.getElementById('cm-name').value = c.full_name || '';
+  document.getElementById('cm-id').value = c.id_number || '';
+  document.getElementById('cm-addr').value = c.address || '';
+  document.getElementById('cm-phone').value = c.phone || '';
+  document.getElementById('cm-email').value = c.email || '';
+  document.getElementById('client-modal').classList.add('open');
+}
+
+async function saveClient(){
+  const name=document.getElementById('cm-name').value;
+  if(!name){toast('სახელი სავალდებულოა','error');return;}
+  const row={
+    user_id:currentUser.id,
+    full_name:name,
+    id_number:document.getElementById('cm-id').value,
+    address:document.getElementById('cm-addr').value,
+    phone:document.getElementById('cm-phone').value,
+    email:document.getElementById('cm-email').value
+  };
+
+  let result;
+  if(editingClientId){
+    result = await db.from('clients').update(row).eq('id',editingClientId).eq('user_id',currentUser.id);
+  }else{
+    result = await db.from('clients').insert(row);
+  }
+
+  if(result.error){
+    console.error(result.error);
+    toast('კლიენტი ვერ შეინახა: '+result.error.message,'error');
+    return;
+  }
+
+  editingClientId=null;
+  await loadClients();
+  renderClients();
+  document.getElementById('client-modal').classList.remove('open');
+  toast('კლიენტი შენახულია ✓','success');
+}
+
+async function deleteClient(id){
+  if(!confirm('წაშლა?')) return;
+  await db.from('clients').delete().eq('id',id);
+  await loadClients(); renderClients();
+}
+
+// Client search in invoice
+function searchClients(val){
+  const dd=document.getElementById('client-dd');
+  const filtered=userClients.filter(c=>c.full_name.toLowerCase().includes(val.toLowerCase()));
+  if(!filtered.length&&!val){dd.classList.remove('open');return;}
+  dd.innerHTML=filtered.map(c=>`<div class="client-opt" onclick="selectClient('${c.id}')">${c.full_name}${c.id_number?' ('+c.id_number+')':''}</div>`).join('');
+  if(!filtered.length) dd.innerHTML=`<div class="client-opt" onclick="useNewClient()">+ ახალი კლიენტი: "${val}"</div>`;
+  dd.classList.add('open');
+}
+function openClientDD(){searchClients(document.getElementById('ii-client-search').value);}
+function selectClient(id){
+  const c=userClients.find(x=>x.id===id);
+  selectedClientId=id;
+  document.getElementById('ii-client-search').value=c.full_name;
+  document.getElementById('client-dd').classList.remove('open');
+  document.getElementById('selected-client-info').style.display='block';
+  document.getElementById('selected-client-info').innerHTML=`✅ <strong>${c.full_name}</strong>${c.id_number?' | კოდი: '+c.id_number:''}${c.address?' | '+c.address:''}`;
+  document.getElementById('new-client-fields').style.display='none';
+}
+function useNewClient(){
+  selectedClientId=null;
+  document.getElementById('client-dd').classList.remove('open');
+  document.getElementById('new-client-fields').style.display='block';
+  document.getElementById('selected-client-info').style.display='none';
+  document.getElementById('nc-name').value=document.getElementById('ii-client-search').value;
+}
+
+// ========== PRODUCTS / CATALOG ==========
+async function loadProducts(){
+  const {data}=await db.from('products').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+  userProducts=data||[];
+}
+
+function renderCatalog(){
+  const el=document.getElementById('catalog-list');
+  if(!userProducts.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📦</div><p>პროდუქტები არ გაქვს დამატებული</p></div>';return;}
+  el.innerHTML=`<table class="data-table">
+    <thead><tr><th>დასახელება</th><th>ერთეული</th><th>ფასი</th><th></th></tr></thead>
+    <tbody>${userProducts.map(p=>`
+      <tr>
+        <td><strong>${p.name}</strong></td>
+        <td>${p.unit||'—'}</td>
+        <td><strong>${fmt(p.price)}</strong></td>
+        <td><button class="btn-danger btn-sm" onclick="deleteCatalogItem('${p.id}')">წაშლა</button></td>
+      </tr>
+    `).join('')}</tbody>
+  </table>`;
+}
+
+function openCatalogModal(){
+  ['cat-name','cat-unit','cat-price'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('catalog-modal').classList.add('open');
+}
+
+async function saveCatalogItem(){
+  const name=document.getElementById('cat-name').value;
+  if(!name){toast('სახელი სავალდებულოა','error');return;}
+  await db.from('products').insert({
+    user_id:currentUser.id,
+    name,unit:document.getElementById('cat-unit').value,
+    price:parseFloat(document.getElementById('cat-price').value)||0
+  });
+  await loadProducts(); renderCatalog(); populateCatalogPick();
+  document.getElementById('catalog-modal').classList.remove('open');
+  toast('პროდუქტი დამატებულია ✓','success');
+}
+
+async function deleteCatalogItem(id){
+  if(!confirm('წაშლა?')) return;
+  await db.from('products').delete().eq('id',id);
+  await loadProducts(); renderCatalog(); populateCatalogPick();
+}
+
+async function importExcel(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    const wb=XLSX.read(e.target.result,{type:'binary'});
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    const rows=XLSX.utils.sheet_to_json(ws,{header:1});
+    let imported=0;
+    for(let i=1;i<rows.length;i++){
+      const r=rows[i];
+      if(!r[0]) continue;
+      await db.from('products').insert({user_id:currentUser.id,name:String(r[0]),unit:String(r[1]||''),price:parseFloat(r[2])||0});
+      imported++;
+    }
+    await loadProducts(); renderCatalog(); populateCatalogPick();
+    toast(`${imported} პროდუქტი დაიმპორტდა ✓`,'success');
+  };
+  reader.readAsBinaryString(file);
+}
+
+function populateCatalogPick(){
+  const sel=document.getElementById('catalog-pick');
+  if(!sel) return;
+  sel.innerHTML='<option value="">კატალოგიდან ჩასმა...</option>'+
+    userProducts.map(p=>`<option value="${p.id}">${p.name} — ${fmt(p.price)}</option>`).join('');
+}
+
+function addFromCatalog(sel){
+  const id=sel.value; if(!id) return;
+  const p=userProducts.find(x=>x.id===id);
+  if(!p) return;
+  invProducts.push({name:p.name,qty:1,price:p.price});
+  renderInvProducts(); calcInvTotals();
+  sel.value='';
+}
+
+// ========== INVOICES ==========
+async function loadInvoices(){
+  const {data}=await db.from('invoices').select('*,clients(full_name)').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+  userInvoices=data||[];
+}
+
+function renderInvoices(){
+  const el=document.getElementById('invoices-list');
+  if(!userInvoices.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><p>ინვოისები ჯერ არ გაქვს</p></div>';return;}
+  el.innerHTML=`<table class="data-table">
+    <thead><tr><th>№</th><th>კლიენტი</th><th>თარიღი</th><th>სულ</th></tr></thead>
+    <tbody>${userInvoices.map(inv=>`
+      <tr>
+        <td><strong>#${inv.invoice_number}</strong></td>
+        <td>${inv.clients?.full_name||'—'}</td>
+        <td>${inv.invoice_date||'—'}</td>
+        <td><strong>${fmt(inv.total)}</strong></td>
+      </tr>
+    `).join('')}</tbody>
+  </table>`;
+}
+
+function renderDashInvoices(){
+  const el=document.getElementById('dash-invoices');
+  const recent=userInvoices.slice(0,5);
+  if(!recent.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><p>ინვოისები ჯერ არ გაქვს</p></div>';return;}
+  el.innerHTML=`<table class="data-table">
+    <thead><tr><th>№</th><th>კლიენტი</th><th>თარიღი</th><th>სულ</th></tr></thead>
+    <tbody>${recent.map(inv=>`
+      <tr>
+        <td><strong>#${inv.invoice_number}</strong></td>
+        <td>${inv.clients?.full_name||'—'}</td>
+        <td>${inv.invoice_date||'—'}</td>
+        <td><strong>${fmt(inv.total)}</strong></td>
+      </tr>
+    `).join('')}</tbody>
+  </table>`;
+}
+
+// ========== INVOICE BUILDER ==========
+function addInvProduct(){
+  invProducts.push({name:'',qty:1,price:0});
+  renderInvProducts(); calcInvTotals();
+}
+function removeInvProd(i){invProducts.splice(i,1);renderInvProducts();calcInvTotals();}
+function renderInvProducts(){
+  const el=document.getElementById('inv-prod-rows');
+  el.innerHTML=invProducts.map((p,i)=>`
+    <div class="prod-row">
+      <input value="${p.name}" placeholder="დასახელება" oninput="invProducts[${i}].name=this.value">
+      <input type="number" value="${p.qty}" min="0" step="0.01" oninput="invProducts[${i}].qty=parseFloat(this.value)||0;calcInvTotals()">
+      <input type="number" value="${p.price||''}" placeholder="0.00" min="0" step="0.01" oninput="invProducts[${i}].price=parseFloat(this.value)||0;calcInvTotals()">
+      <div class="prod-total">${fmt(p.qty*p.price)}</div>
+      <button class="remove-btn" onclick="removeInvProd(${i})">✕</button>
+    </div>
+  `).join('');
+}
+function calcInvTotals(){
+  renderInvProducts();
+  const sub=invProducts.reduce((s,p)=>s+(p.qty*p.price),0);
+  const vatOn=document.getElementById('inv-vat').checked;
+  const vat=vatOn?sub*0.18:0;
+  const total=sub+vat;
+  document.getElementById('inv-sub').textContent=fmt(sub);
+  document.getElementById('inv-vat-amt').textContent=fmt(vat);
+  document.getElementById('inv-total').textContent=fmt(total);
+  document.getElementById('inv-vat-row').style.display=vatOn?'':'none';
+}
+
+function switchInvTab(name){
+  document.querySelectorAll('.inv-tab').forEach((t,i)=>t.classList.toggle('active',['info','items','preview'][i]===name));
+  document.querySelectorAll('.inv-section').forEach((s,i)=>s.classList.toggle('active',['inv-info','inv-items','inv-preview'][i]==='inv-'+name));
+  if(name==='preview') buildInvPreview();
+}
+
+function buildInvPreview(){
+  const p=userProfile||{};
+  const num=document.getElementById('ii-num').value;
+  const date=document.getElementById('ii-date').value;
+  const due=document.getElementById('ii-due').value;
+  const note=document.getElementById('ii-note').value;
+  const vatOn=document.getElementById('inv-vat').checked;
+  const sub=invProducts.reduce((s,p)=>s+(p.qty*p.price),0);
+  const vat=vatOn?sub*0.18:0;
+  const total=sub+vat;
+
+  // client info
+  let clientHtml='—';
+  if(selectedClientId){
+    const c=userClients.find(x=>x.id===selectedClientId);
+    if(c) clientHtml=`<strong>${c.full_name}</strong>${c.id_number?'<br>კოდი: '+c.id_number:''}${c.address?'<br>'+c.address:''}`;
+  } else {
+    const cn=document.getElementById('nc-name')?.value;
+    if(cn) clientHtml=`<strong>${cn}</strong>`;
+  }
+
+  const logoHtml=profileLogoUrl?`<img src="${profileLogoUrl}" style="max-height:60px;max-width:160px;">`:
+    `<div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:900">${p.full_name||''}</div>`;
+
+  const banksHtml=userBanks.filter(b=>b.iban).map(b=>`
+    <div class="inv-pre-bank"><span class="inv-pre-bank-label">${b.bank_name||'ბანკი'}:</span><span>${b.iban}</span></div>
+  `).join('');
+
+  const rowsHtml=invProducts.filter(p=>p.name||p.price).map(p=>`
+    <tr><td>${p.name||'—'}</td><td style="text-align:center">${p.qty}</td><td style="text-align:right">${fmt(p.price)}</td><td style="text-align:right">${fmt(p.qty*p.price)}</td></tr>
+  `).join('');
+
+  document.getElementById('inv-preview-content').innerHTML=`
+    <div class="inv-pre-header">
+      <div>${logoHtml}</div>
+      <div style="text-align:right"><div class="inv-pre-title">ინვოისი</div><div class="inv-pre-num">№ ${num}</div></div>
+    </div>
+    <div class="inv-pre-meta">
+      <div class="inv-pre-block"><h4>გამგზავნი</h4><p><strong>${p.full_name||''}</strong>${p.id_number?'<br>კოდი: '+p.id_number:''}${p.address?'<br>'+p.address:''}${p.phone?'<br>'+p.phone:''}</p></div>
+      <div class="inv-pre-block"><h4>მიმღები</h4><p>${clientHtml}</p><div style="margin-top:10px;font-size:12px;color:#888">თარიღი: <strong>${date}</strong><br>ვადა: <strong>${due}</strong></div></div>
+    </div>
+    <table class="inv-pre-table">
+      <thead><tr><th>დასახელება</th><th style="text-align:center">რაოდ.</th><th style="text-align:right">ფასი</th><th style="text-align:right">ჯამი</th></tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>
+    <div class="inv-pre-totals">
+      <div class="inv-pre-tot-row"><span>შუალედური ჯამი</span><span>${fmt(sub)}</span></div>
+      ${vatOn?`<div class="inv-pre-tot-row"><span>დღგ (18%)</span><span>${fmt(vat)}</span></div>`:''}
+      <div class="inv-pre-tot-row grand"><span>სულ გადასახდელი</span><span>${fmt(total)}</span></div>
+    </div>
+    ${banksHtml?`<div class="inv-pre-banks"><h4>საბანკო რეკვიზიტები</h4>${banksHtml}</div>`:''}
+    ${note?`<div style="margin-top:20px;padding:14px;background:#f4f6f9;border-radius:8px;font-size:13px;color:#666">${note}</div>`:''}
+  `;
+}
+
+async function saveInvoice(){
+  const p=userProfile;
+  const vatOn=document.getElementById('inv-vat').checked;
+  const sub=invProducts.reduce((s,p)=>s+(p.qty*p.price),0);
+  const vat=vatOn?sub*0.18:0;
+  const total=sub+vat;
+
+  // save new client if needed
+  let cid=selectedClientId;
+  if(!cid){
+    const cn=document.getElementById('nc-name')?.value;
+    const saveNew=document.getElementById('nc-save')?.checked;
+    if(cn&&saveNew){
+      const {data}=await db.from('clients').insert({
+        user_id:currentUser.id,full_name:cn,
+        id_number:document.getElementById('nc-id').value,
+        address:document.getElementById('nc-addr').value,
+        phone:document.getElementById('nc-phone').value
+      }).select().single();
+      if(data){cid=data.id;await loadClients();}
+    }
+  }
+
+  const {data:inv}=await db.from('invoices').insert({
+    user_id:currentUser.id,
+    invoice_number:document.getElementById('ii-num').value,
+    client_id:cid||null,
+    invoice_date:document.getElementById('ii-date').value,
+    due_date:document.getElementById('ii-due').value,
+    vat_enabled:vatOn,note:document.getElementById('ii-note').value,
+    subtotal:sub,vat_amount:vat,total
+  }).select().single();
+
+  if(inv){
+    const items=invProducts.filter(p=>p.name||p.price).map(p=>({invoice_id:inv.id,name:p.name,qty:p.qty,price:p.price,total:p.qty*p.price}));
+    if(items.length) await db.from('invoice_items').insert(items);
+  }
+  await loadInvoices();
+  toast('ინვოისი შენახულია ✓','success');
+}
+
+async function downloadInvPDF(){
+  buildInvPreview();
+
+  const preview = document.getElementById('inv-preview-content');
+  const num = document.getElementById('ii-num').value || '001';
+
+  if(!preview){
+    toast('PDF ვერ შეიქმნა: ინვოისის preview ვერ მოიძებნა', 'error');
+    return;
+  }
+
+  try{
+    toast('PDF მზადდება...', '');
+
+    const oldTransform = preview.style.transform;
+    const oldTransformOrigin = preview.style.transformOrigin;
+    preview.style.transform = 'none';
+    preview.style.transformOrigin = 'top left';
+
+    const canvas = await html2canvas(preview, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      windowWidth: preview.scrollWidth,
+      windowHeight: preview.scrollHeight
+    });
+
+    preview.style.transform = oldTransform;
+    preview.style.transformOrigin = oldTransformOrigin;
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+
+    const pageW = 210;
+    const pageH = 297;
+    const margin = 10;
+    const imgW = pageW - margin * 2;
+    const imgH = canvas.height * imgW / canvas.width;
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.98);
+
+    if(imgH <= pageH - margin * 2){
+      pdf.addImage(imgData, 'JPEG', margin, margin, imgW, imgH);
+    }else{
+      let remainingH = imgH;
+      let positionY = margin;
+      pdf.addImage(imgData, 'JPEG', margin, positionY, imgW, imgH);
+      remainingH -= (pageH - margin * 2);
+
+      while(remainingH > 0){
+        pdf.addPage();
+        positionY = margin - (imgH - remainingH);
+        pdf.addImage(imgData, 'JPEG', margin, positionY, imgW, imgH);
+        remainingH -= (pageH - margin * 2);
+      }
+    }
+
+    pdf.save(`ინვოისი №${num}.pdf`);
+    toast('PDF ჩამოიტვირთა ✓', 'success');
+  }catch(err){
+    console.error(err);
+    toast('PDF ვერ შეიქმნა: ' + (err.message || err), 'error');
+  }
+}
+
+function sendInvWhatsApp(){
+  const num=document.getElementById('ii-num').value;
+  const vatOn=document.getElementById('inv-vat').checked;
+  const sub=invProducts.reduce((s,p)=>s+(p.qty*p.price),0);
+  const total=sub+(vatOn?sub*0.18:0);
+  const msg=encodeURIComponent(`გამარჯობა!\n\nგიგზავნით ინვოისს №${num}\nგადასახდელი: ${fmt(total)}\n\nგმადლობთ!`);
+  window.open(`https://wa.me/?text=${msg}`,'_blank');
+}
+
+// ========== PAGES ==========
+function showPage(name){
+  document.querySelectorAll('.app-page').forEach(p=>p.style.display='none');
+  document.getElementById('pg-'+name).style.display='block';
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const pages=['dashboard','invoice-new','invoices','clients','catalog','profile'];
+  const idx=pages.indexOf(name);
+  if(idx>=0) document.querySelectorAll('.nav-item')[idx].classList.add('active');
+
+  if(name==='dashboard'){
+    document.getElementById('stat-total').textContent=userInvoices.length;
+    document.getElementById('stat-clients').textContent=userClients.length;
+    document.getElementById('stat-products').textContent=userProducts.length;
+    renderDashInvoices();
+  }
+  if(name==='clients') renderClients();
+  if(name==='catalog'){renderCatalog();}
+  if(name==='profile') renderProfile();
+  if(name==='invoices') renderInvoices();
+  if(name==='invoice-new'){
+    invProducts=[];
+    selectedClientId=null;
+    document.getElementById('ii-client-search').value='';
+    document.getElementById('selected-client-info').style.display='none';
+    document.getElementById('new-client-fields').style.display='none';
+    document.getElementById('inv-vat').checked=false;
+    addInvProduct(); addInvProduct();
+    calcInvTotals(); populateCatalogPick();
+    switchInvTab('info');
+    // auto increment invoice number
+    const last=userInvoices[0];
+    if(last){
+      const n=parseInt(last.invoice_number)||0;
+      document.getElementById('ii-num').value=String(n+1).padStart(3,'0');
+    }
+  }
+}
+</script>
+</body>
+</html>
