@@ -6,7 +6,6 @@
 <title>ინვოისი.გე — შექმენი შენი ინვოისი მარტივად</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -30,7 +29,7 @@
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
 
 /* ========== LANDING ========== */
-#page-landing{display:block;}
+#page-landing{display:none;}
 .land-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;background:rgba(15,15,26,0.92);backdrop-filter:blur(12px);}
 .land-nav .brand{font-family:'Playfair Display',serif;font-size:22px;color:#fff;letter-spacing:-0.5px;}
 .land-nav .brand span{color:var(--gold);}
@@ -283,8 +282,8 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
   <nav class="land-nav">
     <div class="brand">ინვოისი<span>.გე</span></div>
     <div class="nav-btns">
-      <button class="btn-nav-login" onclick="openAuth('login')">შესვლა</button>
-      <button class="btn-nav-reg" onclick="openAuth('register')">რეგისტრაცია</button>
+      <button type="button" class="btn-nav-login" onclick="openAuth('login')">შესვლა</button>
+      <button type="button" class="btn-nav-reg" onclick="openAuth('register')">რეგისტრაცია</button>
     </div>
   </nav>
 
@@ -294,7 +293,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
         <div class="land-badge">🇬🇪 ქართული ბიზნესისთვის</div>
         <h1 class="land-h1">შექმენი შენი ინვოისი <span>მარტივად</span></h1>
         <p class="land-sub">პროფესიული ინვოისები წუთებში. შეინახე კლიენტები, პროდუქცია და გაგზავნე PDF-ით პირდაპირ WhatsApp-ზე.</p>
-        <button class="land-cta" onclick="openAuth('register')">
+        <button type="button" class="land-cta" onclick="openAuth('register')">
           უფასოდ დაიწყე →
         </button>
         <div class="land-stats">
@@ -343,10 +342,10 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 <!-- ========== AUTH MODAL ========== -->
 <div class="modal-overlay" id="auth-modal">
   <div class="modal">
-    <button class="modal-close" onclick="closeAuth()">✕</button>
+    <button type="button" class="modal-close" onclick="closeAuth()">✕</button>
     <div class="modal-tabs">
-      <button class="modal-tab active" id="tab-login-btn" onclick="switchAuthTab('login')">შესვლა</button>
-      <button class="modal-tab" id="tab-reg-btn" onclick="switchAuthTab('register')">რეგისტრაცია</button>
+      <button type="button" class="modal-tab active" id="tab-login-btn" onclick="switchAuthTab('login')">შესვლა</button>
+      <button type="button" class="modal-tab" id="tab-reg-btn" onclick="switchAuthTab('register')">რეგისტრაცია</button>
     </div>
 
     <!-- LOGIN -->
@@ -354,9 +353,9 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
       <div class="modal-title">მოგესალმებით! 👋</div>
       <div class="modal-sub">შედი შენს ანგარიშში</div>
       <div class="msg-error" id="login-error"></div>
-      <div class="fm-group"><label class="fm-label">ელ-ფოსტა</label><input class="fm-input" type="email" id="login-email" placeholder="you@example.com"></div>
-      <div class="fm-group"><label class="fm-label">პაროლი</label><input class="fm-input" type="password" id="login-pass" placeholder="••••••••"></div>
-      <button class="btn-submit" onclick="doLogin()">შესვლა</button>
+      <div class="fm-group"><label class="fm-label">ელ-ფოსტა</label><input class="fm-input" type="email" id="login-email" autocomplete="off" inputmode="email" placeholder="you@example.com" autocomplete="off" autocapitalize="none" spellcheck="false"></div>
+      <div class="fm-group"><label class="fm-label">პაროლი</label><input class="fm-input" type="password" id="login-pass" autocomplete="new-password" placeholder="••••••••" autocomplete="new-password"></div>
+      <button type="button" class="btn-submit" onclick="doLogin()">შესვლა</button>
       <div class="auth-switch">არ გაქვს ანგარიში? <a onclick="switchAuthTab('register')">დარეგისტრირდი</a></div>
     </div>
 
@@ -379,7 +378,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
       <div class="fm-group"><label class="fm-label">ელ-ფოსტა</label><input class="fm-input" type="email" id="reg-email" placeholder="you@example.com"></div>
       <div class="fm-group"><label class="fm-label">პაროლი</label><input class="fm-input" type="password" id="reg-pass" placeholder="მინ. 6 სიმბოლო"></div>
       <div class="fm-group"><label class="fm-label">დაბადების თარიღი</label><input class="fm-input" type="date" id="reg-birth"></div>
-      <button class="btn-submit" onclick="doRegister()">რეგისტრაცია</button>
+      <button type="button" class="btn-submit" onclick="doRegister()">რეგისტრაცია</button>
       <div class="auth-switch">გაქვს ანგარიში? <a onclick="switchAuthTab('login')">შედი</a></div>
     </div>
   </div>
@@ -403,7 +402,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
         <div class="nav-item" onclick="showPage('catalog')"><span class="icon">📦</span>პროდუქტები</div>
         <div class="nav-item" onclick="showPage('profile')"><span class="icon">⚙️</span>პროფილი</div>
       </nav>
-      <div class="sidebar-footer"><button class="btn-logout" onclick="doLogout()">გამოსვლა</button></div>
+      <div class="sidebar-footer"><button type="button" class="btn-logout" onclick="doLogout()">გამოსვლა</button></div>
     </aside>
 
     <!-- MAIN -->
@@ -411,7 +410,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 
       <!-- DASHBOARD -->
       <div id="pg-dashboard" class="app-page">
-        <div class="page-header"><h1 class="page-title">მთავარი</h1><button class="btn-primary" onclick="showPage('invoice-new')">➕ ახალი ინვოისი</button></div>
+        <div class="page-header"><h1 class="page-title">მთავარი</h1><button type="button" class="btn-primary" onclick="showPage('invoice-new')">➕ ახალი ინვოისი</button></div>
         <div class="stats-grid">
           <div class="stat-card"><div class="stat-label">ინვოისები სულ</div><div class="stat-value" id="stat-total">0</div></div>
           <div class="stat-card"><div class="stat-label">კლიენტები</div><div class="stat-value" id="stat-clients">0</div></div>
@@ -428,9 +427,9 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
         <div class="page-header"><h1 class="page-title">ახალი ინვოისი</h1></div>
         <div class="card">
           <div class="inv-tabs">
-            <button class="inv-tab active" onclick="switchInvTab('info')">📋 ინფო</button>
-            <button class="inv-tab" onclick="switchInvTab('items')">📦 პროდუქტები</button>
-            <button class="inv-tab" onclick="switchInvTab('preview')">👁 გადახედვა</button>
+            <button type="button" class="inv-tab active" onclick="switchInvTab('info')">📋 ინფო</button>
+            <button type="button" class="inv-tab" onclick="switchInvTab('items')">📦 პროდუქტები</button>
+            <button type="button" class="inv-tab" onclick="switchInvTab('preview')">👁 გადახედვა</button>
           </div>
 
           <!-- INFO -->
@@ -463,14 +462,14 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
               </label>
             </div>
             <div class="form-group"><label class="form-label">შენიშვნა</label><textarea class="form-input" id="ii-note" rows="3" placeholder="გადახდის პირობები..."></textarea></div>
-            <button class="btn-primary" onclick="switchInvTab('items')">შემდეგი → პროდუქტები</button>
+            <button type="button" class="btn-primary" onclick="switchInvTab('items')">შემდეგი → პროდუქტები</button>
           </div>
 
           <!-- ITEMS -->
           <div class="inv-section" id="inv-items">
             <div class="prod-header"><span>დასახელება</span><span>რაოდ.</span><span>ფასი ₾</span><span>ჯამი ₾</span><span></span></div>
             <div id="inv-prod-rows"></div>
-            <button class="add-row-btn" onclick="addInvProduct()">+ პროდუქტის დამატება</button>
+            <button type="button" class="add-row-btn" onclick="addInvProduct()">+ პროდუქტის დამატება</button>
             <div style="margin-top:10px;">
               <select class="form-input" id="catalog-pick" onchange="addFromCatalog(this)" style="max-width:300px;margin-bottom:8px;">
                 <option value="">კატალოგიდან ჩასმა...</option>
@@ -486,8 +485,8 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
               <div class="totals-line grand"><span>სულ გადასახდელი</span><span id="inv-total">₾0.00</span></div>
             </div>
             <div style="display:flex;gap:12px;margin-top:16px;">
-              <button class="btn-outline" onclick="switchInvTab('info')">← უკან</button>
-              <button class="btn-primary" onclick="switchInvTab('preview')">გადახედვა →</button>
+              <button type="button" class="btn-outline" onclick="switchInvTab('info')">← უკან</button>
+              <button type="button" class="btn-primary" onclick="switchInvTab('preview')">გადახედვა →</button>
             </div>
           </div>
 
@@ -495,10 +494,10 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
           <div class="inv-section" id="inv-preview">
             <div class="inv-preview-wrap" id="inv-preview-content"></div>
             <div class="actions-bar">
-              <button class="btn-primary" onclick="saveInvoice()">💾 შენახვა</button>
-              <button class="btn-secondary" onclick="downloadInvPDF()">⬇ PDF</button>
-              <button class="btn-outline" style="background:#25D366;color:#fff;border-color:#25D366;" onclick="sendInvWhatsApp()">📲 WhatsApp</button>
-              <button class="btn-outline" onclick="switchInvTab('items')">← რედაქტირება</button>
+              <button type="button" class="btn-primary" onclick="saveInvoice()">💾 შენახვა</button>
+              <button type="button" class="btn-secondary" onclick="downloadInvPDF()">⬇ PDF</button>
+              <button type="button" class="btn-outline" style="background:#25D366;color:#fff;border-color:#25D366;" onclick="sendInvWhatsApp()">📲 WhatsApp</button>
+              <button type="button" class="btn-outline" onclick="switchInvTab('items')">← რედაქტირება</button>
             </div>
           </div>
         </div>
@@ -506,7 +505,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 
       <!-- INVOICES LIST -->
       <div id="pg-invoices" class="app-page" style="display:none">
-        <div class="page-header"><h1 class="page-title">ინვოისები</h1><button class="btn-primary" onclick="showPage('invoice-new')">➕ ახალი</button></div>
+        <div class="page-header"><h1 class="page-title">ინვოისები</h1><button type="button" class="btn-primary" onclick="showPage('invoice-new')">➕ ახალი</button></div>
         <div class="card">
           <div id="invoices-list"><div class="loading"><div class="spinner"></div>იტვირთება...</div></div>
         </div>
@@ -514,7 +513,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 
       <!-- CLIENTS -->
       <div id="pg-clients" class="app-page" style="display:none">
-        <div class="page-header"><h1 class="page-title">კლიენტები</h1><button class="btn-primary" onclick="openClientModal()">➕ კლიენტის დამატება</button></div>
+        <div class="page-header"><h1 class="page-title">კლიენტები</h1><button type="button" class="btn-primary" onclick="openClientModal()">➕ კლიენტის დამატება</button></div>
         <div class="card">
           <div id="clients-list"><div class="loading"><div class="spinner"></div>იტვირთება...</div></div>
         </div>
@@ -528,7 +527,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
             <label class="btn-outline" style="cursor:pointer;display:inline-flex;align-items:center;gap:8px;">
               📥 Excel-იდან იმპორტი <input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="importExcel(this)">
             </label>
-            <button class="btn-primary" onclick="openCatalogModal()">➕ პროდუქტი</button>
+            <button type="button" class="btn-primary" onclick="openCatalogModal()">➕ პროდუქტი</button>
           </div>
         </div>
         <div class="card" style="margin-bottom:12px;font-size:13px;color:var(--muted);padding:14px 20px;">
@@ -541,7 +540,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 
       <!-- PROFILE -->
       <div id="pg-profile" class="app-page" style="display:none">
-        <div class="page-header"><h1 class="page-title">პროფილი</h1><button class="btn-primary" onclick="saveProfile()">💾 შენახვა</button></div>
+        <div class="page-header"><h1 class="page-title">პროფილი</h1><button type="button" class="btn-primary" onclick="saveProfile()">💾 შენახვა</button></div>
         <div class="profile-grid">
           <div>
             <div class="card">
@@ -571,12 +570,12 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
                 <span id="logo-ph">📎 ლოგოს ატვირთვა (PNG, JPG)</span>
                 <input type="file" accept="image/*" onchange="loadProfileLogo(this)">
               </div>
-              <button class="btn-outline btn-sm" style="margin-top:8px;" onclick="removeProfileLogo()">✕ წაშლა</button>
+              <button type="button" class="btn-outline btn-sm" style="margin-top:8px;" onclick="removeProfileLogo()">✕ წაშლა</button>
             </div>
             <div class="card">
               <div class="card-title">საბანკო ანგარიშები</div>
               <div id="prof-banks"></div>
-              <button class="add-row-btn" onclick="addProfBank()">+ ბანკის დამატება</button>
+              <button type="button" class="add-row-btn" onclick="addProfBank()">+ ბანკის დამატება</button>
             </div>
           </div>
         </div>
@@ -589,7 +588,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 <!-- CLIENT MODAL -->
 <div class="modal-overlay" id="client-modal">
   <div class="modal">
-    <button class="modal-close" onclick="document.getElementById('client-modal').classList.remove('open')">✕</button>
+    <button type="button" class="modal-close" onclick="document.getElementById('client-modal').classList.remove('open')">✕</button>
     <div class="modal-title">კლიენტის დამატება</div>
     <div class="form-row" style="margin-top:20px;">
       <div class="form-group"><label class="form-label">სახელი / კომპანია</label><input class="form-input" id="cm-name" placeholder=""></div>
@@ -600,21 +599,21 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
       <div class="form-group"><label class="form-label">ტელეფონი</label><input class="form-input" id="cm-phone"></div>
     </div>
     <div class="form-group"><label class="form-label">ელ-ფოსტა</label><input class="form-input" id="cm-email" type="email"></div>
-    <button class="btn-submit" onclick="saveClient()">შენახვა</button>
+    <button type="button" class="btn-submit" onclick="saveClient()">შენახვა</button>
   </div>
 </div>
 
 <!-- CATALOG MODAL -->
 <div class="modal-overlay" id="catalog-modal">
   <div class="modal">
-    <button class="modal-close" onclick="document.getElementById('catalog-modal').classList.remove('open')">✕</button>
+    <button type="button" class="modal-close" onclick="document.getElementById('catalog-modal').classList.remove('open')">✕</button>
     <div class="modal-title">პროდუქტის დამატება</div>
     <div class="form-group" style="margin-top:20px;"><label class="form-label">დასახელება</label><input class="form-input" id="cat-name" placeholder="სერვისი / პროდუქტი"></div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">ერთეული</label><input class="form-input" id="cat-unit" placeholder="ც., კგ., სთ."></div>
       <div class="form-group"><label class="form-label">ფასი ₾</label><input class="form-input" type="number" id="cat-price" placeholder="0.00"></div>
     </div>
-    <button class="btn-submit" onclick="saveCatalogItem()">შენახვა</button>
+    <button type="button" class="btn-submit" onclick="saveCatalogItem()">შენახვა</button>
   </div>
 </div>
 
@@ -626,7 +625,14 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 const SUPA_URL = 'https://cvqgtcgukqwpfgipdlxc.supabase.co';
 const SUPA_KEY = 'sb_publishable_3Ij89hmu_UGoLb8sO4dvgA_pSW6-Ra7';
 const { createClient } = supabase;
-const db = createClient(SUPA_URL, SUPA_KEY);
+const db = createClient(SUPA_URL, SUPA_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: false,
+    storageKey: 'invoicer-auth-v2'
+  }
+});
 
 // ========== STATE ==========
 let currentUser = null;
@@ -641,6 +647,9 @@ let profType = 'company';
 let invProducts = [];
 let selectedClientId = null;
 let editingClientId = null;
+let isLoggingOut = false;
+let authReady = false;
+let authSubscription = null;
 
 // ========== INIT ==========
 document.addEventListener('DOMContentLoaded', async () => {
@@ -650,23 +659,57 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('ii-date').value = fmtDate(today);
     document.getElementById('ii-due').value = fmtDate(due);
   }
-  const {data:{session}} = await db.auth.getSession();
-  if(session) await loginSuccess(session.user);
-  db.auth.onAuthStateChange(async(_,session)=>{
-    if(session) await loginSuccess(session.user);
-    else showLanding();
+
+  try{
+    const urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.has('loggedout')){
+      clearSupabaseStorage();
+      history.replaceState({}, document.title, window.location.pathname);
+      showLanding();
+    }else{
+      const { data: { session }, error } = await db.auth.getSession();
+      if(error) console.error(error);
+      if(session && session.user) await loginSuccess(session.user);
+      else showLanding();
+    }
+  }catch(e){
+    console.error(e);
+    showLanding();
+  }finally{
+    authReady = true;
+  }
+
+  const { data } = db.auth.onAuthStateChange(async(event, session)=>{
+    if(isLoggingOut) return;
+    if(event === 'SIGNED_OUT' || !session){
+      currentUser = null;
+      showLanding();
+      return;
+    }
+    if((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') && session.user){
+      await loginSuccess(session.user);
+    }
   });
+  authSubscription = data && data.subscription ? data.subscription : null;
+
   document.addEventListener('click', e=>{
     if(!e.target.closest('.client-select-wrap')) {
-      document.getElementById('client-dd').classList.remove('open');
+      const dd = document.getElementById('client-dd');
+      if(dd) dd.classList.remove('open');
     }
   });
 });
 
 function fmtDate(d){return d.toISOString().split('T')[0];}
 function fmt(n){return '₾'+(parseFloat(n)||0).toFixed(2);}
-function showLanding(){document.getElementById('page-landing').style.display='block';document.getElementById('page-app').style.display='none';}
-function showApp(){document.getElementById('page-landing').style.display='none';document.getElementById('page-app').style.display='block';}
+function showLanding(){
+  document.getElementById('page-landing').style.display='block';
+  document.getElementById('page-app').style.display='none';
+}
+function showApp(){
+  document.getElementById('page-landing').style.display='none';
+  document.getElementById('page-app').style.display='block';
+}
 
 // ========== TOAST ==========
 function toast(msg, type=''){
@@ -675,8 +718,58 @@ function toast(msg, type=''){
   setTimeout(()=>t.classList.remove('show'),3000);
 }
 
+function withTimeout(promise, ms, label){
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error((label || 'მოთხოვნა') + ' ძალიან დიდხანს გაგრძელდა')), ms))
+  ]);
+}
+
+
+
+function clearSupabaseStorage(){
+  try{
+    const keys = [];
+    for(let i=0; i<localStorage.length; i++) keys.push(localStorage.key(i));
+    keys.forEach(k => {
+      if(!k) return;
+      if(k.includes('supabase') || k.includes('sb-') || k.includes('invoicer-auth')) localStorage.removeItem(k);
+    });
+    const skeys = [];
+    for(let i=0; i<sessionStorage.length; i++) skeys.push(sessionStorage.key(i));
+    skeys.forEach(k => {
+      if(!k) return;
+      if(k.includes('supabase') || k.includes('sb-') || k.includes('invoicer-auth')) sessionStorage.removeItem(k);
+    });
+  }catch(e){ console.error(e); }
+}
+
+function resetLocalState(){
+  currentUser = null;
+  userProfile = null;
+  userBanks = [];
+  userClients = [];
+  userProducts = [];
+  userInvoices = [];
+  profileLogoUrl = null;
+  selectedClientId = null;
+  editingClientId = null;
+}
+
 // ========== AUTH ==========
-function openAuth(tab){document.getElementById('auth-modal').classList.add('open');switchAuthTab(tab);}
+function openAuth(tab){
+  const modal = document.getElementById('auth-modal');
+  modal.classList.add('open');
+  switchAuthTab(tab);
+  const err = document.getElementById('login-error');
+  if(err){ err.style.display='none'; err.textContent=''; }
+  if(tab === 'login'){
+    const email = document.getElementById('login-email');
+    const pass = document.getElementById('login-pass');
+    if(email) email.value = '';
+    if(pass) pass.value = '';
+  }
+}
 function closeAuth(){document.getElementById('auth-modal').classList.remove('open');}
 function switchAuthTab(tab){
   document.getElementById('auth-login').style.display=tab==='login'?'block':'none';
@@ -693,13 +786,39 @@ function setRegType(type,el){
 }
 
 async function doLogin(){
-  const email=document.getElementById('login-email').value;
-  const pass=document.getElementById('login-pass').value;
-  const err=document.getElementById('login-error');
-  err.style.display='none';
-  const {error}=await db.auth.signInWithPassword({email,password:pass});
-  if(error){err.textContent=error.message;err.style.display='block';}
-  else closeAuth();
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-error');
+  err.style.display = 'none';
+
+  if(!email || !pass){
+    err.textContent = 'ელ-ფოსტა და პაროლი შეავსე';
+    err.style.display = 'block';
+    return;
+  }
+
+  const btn = document.querySelector('#auth-login .btn-submit');
+  const oldText = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = 'შესვლა...'; }
+
+  try{
+    const { data, error } = await withTimeout(db.auth.signInWithPassword({ email, password: pass }), 12000, 'შესვლა');
+    if(error){
+      err.textContent = error.message;
+      err.style.display = 'block';
+      return;
+    }
+    if(data && data.user){
+      closeAuth();
+      await loginSuccess(data.user);
+    }
+  }catch(e){
+    console.error(e);
+    err.textContent = 'შესვლა ვერ მოხერხდა. სცადე თავიდან.';
+    err.style.display = 'block';
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = oldText || 'შესვლა'; }
+  }
 }
 
 async function doRegister(){
@@ -724,7 +843,32 @@ async function doRegister(){
   suc.style.display='block';
 }
 
-async function doLogout(){await db.auth.signOut();}
+async function doLogout(){
+  const btn = document.querySelector('.btn-logout');
+  const oldText = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = 'გამოსვლა...'; }
+  isLoggingOut = true;
+
+  try{
+    if(authSubscription) authSubscription.unsubscribe();
+  }catch(e){ console.error(e); }
+
+  try{
+    await withTimeout(db.auth.signOut({ scope: 'global' }), 8000, 'გამოსვლა');
+  }catch(e){
+    console.error(e);
+  }
+
+  clearSupabaseStorage();
+  resetLocalState();
+  closeAuth();
+  showLanding();
+
+  // სრული გასუფთავებისთვის გვერდს ვხსნით loggedout პარამეტრით.
+  // ასე refresh-ზე აღარ შემოვა ძველი session-ით.
+  window.location.replace(window.location.origin + window.location.pathname + '?loggedout=1');
+}
+
 
 async function loginSuccess(user){
   currentUser=user;
@@ -801,12 +945,12 @@ function renderProfBanks(){
     <div class="bank-row">
       <input placeholder="ბანკი" value="${b.bank_name||''}" oninput="userBanks[${i}].bank_name=this.value">
       <input placeholder="IBAN: GE..." value="${b.iban||''}" oninput="userBanks[${i}].iban=this.value">
-      <button class="remove-btn" onclick="removeProfBank(${i})">✕</button>
+      <button type="button" class="remove-btn" onclick="removeProfBank(${i})">✕</button>
     </div>
   `).join('');
 }
 
-function addProfBank(){userBanks.push({bank_name:'',iban:''});renderProfBanks();}
+function addProfBank(){userBanks.push({id:(crypto.randomUUID ? crypto.randomUUID() : String(Date.now())), bank_name:'', iban:''});renderProfBanks();}
 function removeProfBank(i){userBanks.splice(i,1);renderProfBanks();}
 
 function loadProfileLogo(input){
@@ -827,54 +971,79 @@ function removeProfileLogo(){
 }
 
 async function saveProfile(){
+  if(!currentUser){
+    toast('ჯერ შედი ანგარიშში', 'error');
+    return;
+  }
+
   const upd = {
     id: currentUser.id,
     entity_type: profType,
-    full_name: document.getElementById('prof-name').value,
-    id_number: document.getElementById('prof-idnum').value,
-    address: document.getElementById('prof-address').value,
-    phone: document.getElementById('prof-phone').value,
-    email: document.getElementById('prof-email').value || currentUser.email,
+    full_name: document.getElementById('prof-name').value.trim(),
+    id_number: document.getElementById('prof-idnum').value.trim(),
+    address: document.getElementById('prof-address').value.trim(),
+    phone: document.getElementById('prof-phone').value.trim(),
+    email: (document.getElementById('prof-email').value || currentUser.email || '').trim(),
     logo_url: profileLogoUrl
   };
 
-  const { error } = await db.from('profiles').upsert(upd, { onConflict: 'id' });
-  if (error) {
-    console.error(error);
-    toast('პროფილი ვერ შეინახა: ' + error.message, 'error');
-    return;
-  }
+  const btn = document.querySelector('#pg-profile .btn-primary');
+  const oldText = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = 'ინახება...'; }
 
-  const { error: deleteBankError } = await db.from('banks').delete().eq('user_id', currentUser.id);
-  if (deleteBankError) {
-    console.error(deleteBankError);
-    toast('ბანკის ძველი მონაცემები ვერ წაიშალა: ' + deleteBankError.message, 'error');
-    return;
-  }
+  try{
+    const { data: savedProfile, error } = await withTimeout(
+      db.from('profiles').upsert(upd, { onConflict: 'id' }).select('*').single(),
+      12000,
+      'პროფილის შენახვა'
+    );
 
-  const bankRows = userBanks
-    .filter(b => (b.bank_name || b.iban) && b.iban)
-    .map(b => ({
-      user_id: currentUser.id,
-      bank_name: b.bank_name || '',
-      iban: b.iban || ''
-    }));
-
-  if (bankRows.length) {
-    const { error: bankError } = await db.from('banks').insert(bankRows);
-    if (bankError) {
-      console.error(bankError);
-      toast('ბანკი ვერ შეინახა: ' + bankError.message, 'error');
+    if(error){
+      console.error(error);
+      toast('პროფილი ვერ შეინახა: ' + error.message, 'error');
       return;
     }
-  }
 
-  userProfile = { ...userProfile, ...upd };
-  await loadProfile();
-  renderProfile();
-  setupSidebar();
-  toast('პროფილი შენახულია ✓', 'success');
+    userProfile = savedProfile || { ...userProfile, ...upd };
+
+    // ბანკებს აღარ ვშლით. ვაახლებთ/ვამატებთ მხოლოდ შევსებულ რიგებს.
+    // ასე განმეორებით შენახვაზე აღარ გაიჭედება ძველი ბანკის წაშლის შეცდომაზე.
+    const bankRows = userBanks
+      .map(b => ({
+        id: b.id || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random())),
+        user_id: currentUser.id,
+        bank_name: (b.bank_name || '').trim(),
+        iban: (b.iban || '').trim()
+      }))
+      .filter(b => b.bank_name || b.iban);
+
+    userBanks = bankRows.map(b => ({ ...b }));
+
+    if(bankRows.length){
+      const { error: bankError } = await withTimeout(
+        db.from('banks').upsert(bankRows, { onConflict: 'id' }),
+        12000,
+        'ბანკების შენახვა'
+      );
+      if(bankError){
+        console.error(bankError);
+        toast('პროფილი შეინახა, მაგრამ ბანკი ვერ შეინახა: ' + bankError.message, 'error');
+        return;
+      }
+    }
+
+    await loadProfile();
+    renderProfile();
+    setupSidebar();
+    toast('პროფილი განახლდა ✓', 'success');
+  }catch(e){
+    console.error(e);
+    toast('პროფილი შეინახა, მაგრამ ბანკებზე შეფერხებაა: ' + (e.message || e), 'error');
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = oldText || '💾 შენახვა'; }
+  }
 }
+
 
 // ========== CLIENTS ==========
 async function loadClients(){
@@ -894,8 +1063,8 @@ function renderClients(){
         <td>${c.phone||'—'}</td>
         <td>${c.email||'—'}</td>
         <td style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn-outline btn-sm" onclick="editClient('${c.id}')">რედაქტირება</button>
-          <button class="btn-danger btn-sm" onclick="deleteClient('${c.id}')">წაშლა</button>
+          <button type="button" class="btn-outline btn-sm" onclick="editClient('${c.id}')">რედაქტირება</button>
+          <button type="button" class="btn-danger btn-sm" onclick="deleteClient('${c.id}')">წაშლა</button>
         </td>
       </tr>
     `).join('')}</tbody>
@@ -1003,7 +1172,7 @@ function renderCatalog(){
         <td><strong>${p.name}</strong></td>
         <td>${p.unit||'—'}</td>
         <td><strong>${fmt(p.price)}</strong></td>
-        <td><button class="btn-danger btn-sm" onclick="deleteCatalogItem('${p.id}')">წაშლა</button></td>
+        <td><button type="button" class="btn-danger btn-sm" onclick="deleteCatalogItem('${p.id}')">წაშლა</button></td>
       </tr>
     `).join('')}</tbody>
   </table>`;
@@ -1122,7 +1291,7 @@ function renderInvProducts(){
       <input type="number" value="${p.qty}" min="0" step="0.01" oninput="invProducts[${i}].qty=parseFloat(this.value)||0;calcInvTotals()">
       <input type="number" value="${p.price||''}" placeholder="0.00" min="0" step="0.01" oninput="invProducts[${i}].price=parseFloat(this.value)||0;calcInvTotals()">
       <div class="prod-total">${fmt(p.qty*p.price)}</div>
-      <button class="remove-btn" onclick="removeInvProd(${i})">✕</button>
+      <button type="button" class="remove-btn" onclick="removeInvProd(${i})">✕</button>
     </div>
   `).join('');
 }
@@ -1240,71 +1409,44 @@ async function saveInvoice(){
   toast('ინვოისი შენახულია ✓','success');
 }
 
-async function downloadInvPDF(){
+function downloadInvPDF(){
   buildInvPreview();
+  const {jsPDF}=window.jspdf;
+  const pdf=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
+  const p=userProfile||{};
+  const num=document.getElementById('ii-num').value;
+  const date=document.getElementById('ii-date').value;
+  const vatOn=document.getElementById('inv-vat').checked;
+  const sub=invProducts.reduce((s,p)=>s+(p.qty*p.price),0);
+  const vat=vatOn?sub*0.18:0;
+  const total=sub+vat;
 
-  const preview = document.getElementById('inv-preview-content');
-  const num = document.getElementById('ii-num').value || '001';
-
-  if(!preview){
-    toast('PDF ვერ შეიქმნა: ინვოისის preview ვერ მოიძებნა', 'error');
-    return;
-  }
-
-  try{
-    toast('PDF მზადდება...', '');
-
-    const oldTransform = preview.style.transform;
-    const oldTransformOrigin = preview.style.transformOrigin;
-    preview.style.transform = 'none';
-    preview.style.transformOrigin = 'top left';
-
-    const canvas = await html2canvas(preview, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-      windowWidth: preview.scrollWidth,
-      windowHeight: preview.scrollHeight
-    });
-
-    preview.style.transform = oldTransform;
-    preview.style.transformOrigin = oldTransformOrigin;
-
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('p', 'mm', 'a4');
-
-    const pageW = 210;
-    const pageH = 297;
-    const margin = 10;
-    const imgW = pageW - margin * 2;
-    const imgH = canvas.height * imgW / canvas.width;
-
-    const imgData = canvas.toDataURL('image/jpeg', 0.98);
-
-    if(imgH <= pageH - margin * 2){
-      pdf.addImage(imgData, 'JPEG', margin, margin, imgW, imgH);
-    }else{
-      let remainingH = imgH;
-      let positionY = margin;
-      pdf.addImage(imgData, 'JPEG', margin, positionY, imgW, imgH);
-      remainingH -= (pageH - margin * 2);
-
-      while(remainingH > 0){
-        pdf.addPage();
-        positionY = margin - (imgH - remainingH);
-        pdf.addImage(imgData, 'JPEG', margin, positionY, imgW, imgH);
-        remainingH -= (pageH - margin * 2);
-      }
-    }
-
-    pdf.save(`ინვოისი №${num}.pdf`);
-    toast('PDF ჩამოიტვირთა ✓', 'success');
-  }catch(err){
-    console.error(err);
-    toast('PDF ვერ შეიქმნა: ' + (err.message || err), 'error');
-  }
+  pdf.setFontSize(22);pdf.setFont('helvetica','bold');
+  pdf.text('INVOICE',105,22,{align:'center'});
+  pdf.setFontSize(11);pdf.setFont('helvetica','normal');
+  pdf.text(`No: ${num}   Date: ${date}`,105,30,{align:'center'});
+  pdf.line(14,34,196,34);
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica','bold');pdf.text('Sender:',14,42);
+  pdf.setFont('helvetica','normal');pdf.text(p.full_name||'',14,48);
+  let y=62;
+  pdf.setFont('helvetica','bold');
+  ['Description','Qty','Price','Total'].forEach((h,i)=>pdf.text(h,[14,110,140,172][i],y));
+  pdf.line(14,y+3,196,y+3);y+=10;
+  pdf.setFont('helvetica','normal');
+  invProducts.filter(p=>p.name||p.price).forEach(p=>{
+    pdf.text(p.name||'-',14,y);pdf.text(String(p.qty),110,y);
+    pdf.text(p.price.toFixed(2),140,y);pdf.text((p.qty*p.price).toFixed(2),172,y);y+=8;
+  });
+  pdf.line(14,y,196,y);y+=8;
+  if(vatOn){pdf.text(`VAT (18%): GEL ${vat.toFixed(2)}`,140,y);y+=8;}
+  pdf.setFont('helvetica','bold');
+  pdf.text(`TOTAL: GEL ${total.toFixed(2)}`,140,y);
+  userBanks.filter(b=>b.iban).forEach((b,i)=>{
+    if(i===0){y+=14;pdf.setFont('helvetica','bold');pdf.text('Bank Details:',14,y);y+=7;}
+    pdf.setFont('helvetica','normal');pdf.text(`${b.bank_name||'Bank'}: ${b.iban}`,14,y);y+=7;
+  });
+  pdf.save(`invoice-${num}.pdf`);
 }
 
 function sendInvWhatsApp(){
