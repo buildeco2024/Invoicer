@@ -1069,7 +1069,21 @@ function openAuth(tab){
     if(pass) pass.value = '';
   }
 }
-function closeAuth(){document.getElementById('auth-modal').classList.remove('open');}
+function closeAuth(){
+  const modal = document.getElementById('auth-modal');
+  if(modal) modal.classList.remove('open');
+
+  const loginError = document.getElementById('login-error');
+  const regError = document.getElementById('reg-error');
+  const regSuccess = document.getElementById('reg-success');
+
+  [loginError, regError, regSuccess].forEach(el=>{
+    if(el){
+      el.style.display = 'none';
+      el.textContent = '';
+    }
+  });
+}
 function switchAuthTab(tab){
   document.getElementById('auth-login').style.display=tab==='login'?'block':'none';
   document.getElementById('auth-register').style.display=tab==='register'?'block':'none';
@@ -1085,14 +1099,22 @@ function setRegType(type,el){
 }
 
 async function doLogin(){
-  const email = document.getElementById('login-email').value.trim();
-  const pass = document.getElementById('login-pass').value;
+  const emailEl = document.getElementById('login-email');
+  const passEl = document.getElementById('login-pass');
   const err = document.getElementById('login-error');
-  err.style.display = 'none';
+  const email = (emailEl?.value || '').trim();
+  const pass = passEl?.value || '';
+
+  if(err){
+    err.style.display = 'none';
+    err.textContent = '';
+  }
 
   if(!email || !pass){
-    err.textContent = 'ელ-ფოსტა და პაროლი შეავსე';
-    err.style.display = 'block';
+    if(err){
+      err.textContent = 'შეიყვანე ელ-ფოსტა და პაროლი.';
+      err.style.display = 'block';
+    }
     return;
   }
 
@@ -1101,20 +1123,41 @@ async function doLogin(){
   if(btn){ btn.disabled = true; btn.textContent = 'შესვლა...'; }
 
   try{
-    const { data, error } = await withTimeout(db.auth.signInWithPassword({ email, password: pass }), 12000, 'შესვლა');
+    const { data, error } = await withTimeout(
+      db.auth.signInWithPassword({ email, password: pass }),
+      12000,
+      'შესვლა'
+    );
+
     if(error){
-      err.textContent = error.message;
-      err.style.display = 'block';
+      if(err){
+        err.textContent = 'შესვლა ვერ მოხერხდა. შეამოწმე ელ-ფოსტა ან პაროლი.';
+        err.style.display = 'block';
+      }
       return;
     }
-    if(data && data.user){
+
+    const user = data?.user || data?.session?.user;
+    if(user){
+      if(err){
+        err.style.display = 'none';
+        err.textContent = '';
+      }
       closeAuth();
-      await loginSuccess(data.user);
+      await loginSuccess(user);
+      return;
+    }
+
+    if(err){
+      err.textContent = 'შესვლა ვერ მოხერხდა. სცადე თავიდან.';
+      err.style.display = 'block';
     }
   }catch(e){
     console.error(e);
-    err.textContent = 'შესვლა ვერ მოხერხდა. სცადე თავიდან.';
-    err.style.display = 'block';
+    if(err){
+      err.textContent = 'შესვლა ვერ მოხერხდა. სცადე თავიდან.';
+      err.style.display = 'block';
+    }
   }finally{
     if(btn){ btn.disabled = false; btn.textContent = oldText || 'შესვლა'; }
   }
@@ -1203,9 +1246,15 @@ async function loadProfile(){
 function setupSidebar(){
   if(!userProfile) return;
   const types={company:'კომპანია',individual:'ფიზ. პირი',entrepreneur:'ინდ. მეწარმე'};
-  document.getElementById('sb-username').textContent=userProfile.full_name||currentUser.email;
-  const idText = userProfile.id_number ? `ს/კ / პირადი №: ${userProfile.id_number}` : (types[userProfile.entity_type]||'');
-  document.getElementById('sb-usertype').textContent=idText;
+  const nameEl = document.getElementById('sb-username');
+  const typeEl = document.getElementById('sb-usertype');
+  if(nameEl) nameEl.textContent = userProfile.full_name || currentUser.email || '—';
+  if(typeEl){
+    const idValue = userProfile.id_number || '';
+    const baseText = idValue ? `ს/კ / პირადი №: ${idValue}` : (types[userProfile.entity_type] || '');
+    typeEl.__baseKa = baseText;
+    typeEl.textContent = baseText;
+  }
 }
 
 function renderProfile(){
@@ -2146,12 +2195,10 @@ setTimeout(()=>setLang(currentLang), 100);
   window.setupSidebar = function(){
     if(typeof oldSetup === 'function') oldSetup.apply(this, arguments);
     const sbType = document.getElementById('sb-usertype');
-    if(sbType && sbType.textContent.includes('ს/კ')){
-      sbType.__baseKa = sbType.textContent;
+    if(sbType && sbType.__baseKa){
       sbType.textContent = baseLang()==='ka' ? sbType.__baseKa : translateString(sbType.__baseKa);
     }
     updateMobileUserInfo();
-    window.applyTranslations(document.body);
   };
   const wrapNames = ['renderProfile','renderClients','renderCatalog','renderInvoices','renderDashboard','renderInvProducts','populateCatalogPick','showPage','viewInvoice','loadProfile','loadClients','loadProducts','loadInvoices','buildInvPreview','switchInvTab'];
   function wrapLater(){
