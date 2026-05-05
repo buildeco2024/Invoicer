@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Invoice.com.ge — შექმენი შენი ინვოისი მარტივად</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -260,6 +259,19 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 .spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
+
+
+/* FOOTER / LEGAL */
+.site-footer{background:#0f0f1a;color:rgba(255,255,255,.72);padding:34px 48px;border-top:1px solid rgba(255,255,255,.08);}
+.site-footer-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr;gap:24px;align-items:start;}
+.site-footer h4{color:#fff;font-size:15px;margin-bottom:8px;}
+.site-footer p,.site-footer a{font-size:13px;line-height:1.7;color:rgba(255,255,255,.68);text-decoration:none;}
+.site-footer a:hover{color:var(--gold);}
+.footer-links{display:flex;gap:14px;flex-wrap:wrap;justify-content:flex-end;}
+.legal-modal-content{font-size:13px;line-height:1.7;color:#444;}
+.legal-modal-content h3{font-family:'Playfair Display',serif;font-size:22px;color:var(--ink);margin-bottom:10px;}
+.legal-modal-content h4{font-size:14px;margin:14px 0 6px;color:var(--ink);}
+
 /* RESPONSIVE */
 @media(max-width:900px){
   .land-nav{padding:14px 16px;}
@@ -272,6 +284,9 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
   .land-sub{font-size:16px;}
   .land-stats{gap:18px;flex-wrap:wrap;margin-top:32px;}
   .land-features{padding:56px 18px;}
+  .site-footer{padding:26px 18px 92px;}
+  .site-footer-inner{grid-template-columns:1fr;}
+  .footer-links{justify-content:flex-start;}
   .section-title{font-size:30px;margin-bottom:30px;}
   .features-grid{grid-template-columns:1fr;}
 
@@ -346,7 +361,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
       <div class="land-hero-text">
         <div class="land-badge">🇬🇪 ქართული ბიზნესისთვის</div>
         <h1 class="land-h1">შექმენი შენი ინვოისი <span>მარტივად</span></h1>
-        <p class="land-sub">პროფესიული ინვოისები წუთებში. შეინახე კლიენტები, პროდუქცია და გაგზავნე PDF-ით პირდაპირ WhatsApp-ზე.</p>
+        <p class="land-sub">პროფესიული ინვოისები წუთებში. შეინახე კლიენტები, პროდუქცია და გაგზავნე PDF-ით WhatsApp-ზე ან Viber-ზე.</p>
         <button type="button" class="land-cta" onclick="openAuth('register')">
           უფასოდ დაიწყე →
         </button>
@@ -384,13 +399,37 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
       <div class="features-grid">
         <div class="feature-card"><span class="feature-icon">👤</span><div class="feature-title">კლიენტების ბაზა</div><div class="feature-desc">შეინახე კლიენტების მონაცემები ერთხელ და გამოიყენე ყოველ ინვოისზე.</div></div>
         <div class="feature-card"><span class="feature-icon">📦</span><div class="feature-title">პროდუქტების კატალოგი</div><div class="feature-desc">Excel-იდან იმპორტი ან ხელით დამატება. ინვოისზე ერთი კლიკით ჩასმა.</div></div>
-        <div class="feature-card"><span class="feature-icon">📄</span><div class="feature-title">PDF + WhatsApp</div><div class="feature-desc">პროფესიული PDF გენერაცია და გაგზავნა WhatsApp-ით პირდაპირ.</div></div>
+        <div class="feature-card"><span class="feature-icon">📄</span><div class="feature-title">PDF + WhatsApp/Viber</div><div class="feature-desc">პროფესიული PDF გენერაცია და გაგზავნა WhatsApp-ით ან Viber-ით.</div></div>
         <div class="feature-card"><span class="feature-icon">🏦</span><div class="feature-title">საბანკო რეკვიზიტები</div><div class="feature-desc">მრავალი ბანკის ანგარიში — ყოველ ინვოისზე ავტომატურად ჩაისმება.</div></div>
         <div class="feature-card"><span class="feature-icon">💰</span><div class="feature-title">დღგ 18%</div><div class="feature-desc">ავტომატური გამოთვლა. ჩართე ან გამორთე ერთი კლიკით.</div></div>
         <div class="feature-card"><span class="feature-icon">🇬🇪</span><div class="feature-title">ქართულად</div><div class="feature-desc">სრულად ქართულ ენაზე. კომპანია, ფიზ. პირი, ინდ. მეწარმე — ყველა ტიპი.</div></div>
       </div>
     </div>
   </section>
+
+
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <div>
+        <h4>Invoice.com.ge</h4>
+        <p>მფლობელი კომპანია: შპს ბილდეკო</p>
+        <p>ტელ: 551343410 · Email: Buildeco2024@gmail.com</p>
+      </div>
+      <div class="footer-links">
+        <a href="#" onclick="openLegal('privacy');return false;">Privacy Policy</a>
+        <a href="#" onclick="openLegal('terms');return false;">Terms & Conditions</a>
+        <a href="#" onclick="openLegal('contact');return false;">Contact</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- LEGAL MODAL -->
+<div class="modal-overlay" id="legal-modal">
+  <div class="modal">
+    <button type="button" class="modal-close" onclick="closeLegal()">✕</button>
+    <div id="legal-content" class="legal-modal-content"></div>
+  </div>
 </div>
 
 <!-- ========== AUTH MODAL ========== -->
@@ -547,7 +586,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
             </div>
             <div class="totals-panel">
               <div class="totals-line"><span>შუალედური ჯამი</span><span id="inv-sub">₾0.00</span></div>
-              <div class="totals-line" id="inv-vat-row" style="display:none"><span>მათ შორის დღგ 18%</span><span id="inv-vat-amt">₾0.00</span></div>
+              <div class="totals-line" id="inv-vat-row" style="display:none"><span>მათ შორის დღგ</span><span id="inv-vat-amt">₾0.00</span></div>
               <div class="totals-line grand"><span>სულ გადასახდელი</span><span id="inv-total">₾0.00</span></div>
             </div>
             <div style="display:flex;gap:12px;margin-top:16px;">
@@ -563,6 +602,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
               <button type="button" class="btn-primary" onclick="saveInvoice()">💾 შენახვა</button>
               <button type="button" class="btn-secondary" onclick="downloadInvPDF()">⬇ PDF</button>
               <button type="button" class="btn-outline" style="background:#25D366;color:#fff;border-color:#25D366;" onclick="sendInvWhatsApp()">📲 WhatsApp</button>
+              <button type="button" class="btn-outline" style="background:#7360f2;color:#fff;border-color:#7360f2;" onclick="sendInvViber()">💬 Viber</button>
               <button type="button" class="btn-outline" onclick="switchInvTab('items')">← რედაქტირება</button>
             </div>
           </div>
@@ -995,10 +1035,7 @@ async function doLogout(){
 
 async function loginSuccess(user){
   currentUser=user;
-  await loadProfile();
-  await loadClients();
-  await loadProducts();
-  await loadInvoices();
+  await Promise.all([loadProfile(), loadClients(), loadProducts(), loadInvoices()]);
   showApp();
   showPage('dashboard');
   setupSidebar();
@@ -1217,22 +1254,23 @@ function editClient(id){
 }
 
 async function saveClient(){
-  const name=document.getElementById('cm-name').value;
+  const name=document.getElementById('cm-name').value.trim();
   if(!name){toast('სახელი სავალდებულოა','error');return;}
   const row={
     user_id:currentUser.id,
     full_name:name,
-    id_number:document.getElementById('cm-id').value,
-    address:document.getElementById('cm-addr').value,
-    phone:document.getElementById('cm-phone').value,
-    email:document.getElementById('cm-email').value
+    id_number:document.getElementById('cm-id').value.trim(),
+    address:document.getElementById('cm-addr').value.trim(),
+    phone:document.getElementById('cm-phone').value.trim(),
+    email:document.getElementById('cm-email').value.trim()
   };
 
   let result;
   if(editingClientId){
-    result = await db.from('clients').update(row).eq('id',editingClientId).eq('user_id',currentUser.id);
+    // Upsert ინარჩუნებს იგივე ID-ს და ყოველ რედაქტირებაზე ნამდვილად ანახლებს ჩანაწერს.
+    result = await db.from('clients').upsert({ id: editingClientId, ...row }, { onConflict:'id' }).select().single();
   }else{
-    result = await db.from('clients').insert(row);
+    result = await db.from('clients').insert(row).select().single();
   }
 
   if(result.error){
@@ -1397,16 +1435,68 @@ function renderInvoices(){
   const el=document.getElementById('invoices-list');
   if(!userInvoices.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><p>ინვოისები ჯერ არ გაქვს</p></div>';return;}
   el.innerHTML=`<table class="data-table">
-    <thead><tr><th>№</th><th>კლიენტი</th><th>თარიღი</th><th>სულ</th></tr></thead>
+    <thead><tr><th>№</th><th>კლიენტი</th><th>თარიღი</th><th>სულ</th><th>მოქმედება</th></tr></thead>
     <tbody>${userInvoices.map(inv=>`
       <tr>
         <td><strong>#${inv.invoice_number}</strong></td>
         <td>${inv.clients?.full_name||'—'}</td>
         <td>${inv.invoice_date||'—'}</td>
         <td><strong>${fmt(inv.total)}</strong></td>
+        <td style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="btn-outline btn-sm" onclick="viewInvoice('${inv.id}')">ნახვა</button>
+          <button type="button" class="btn-danger btn-sm" onclick="deleteInvoice('${inv.id}')">წაშლა</button>
+        </td>
       </tr>
     `).join('')}</tbody>
   </table>`;
+}
+
+async function deleteInvoice(id){
+  if(!confirm('წავშალო ეს ინვოისი?')) return;
+  const {error}=await db.from('invoices').delete().eq('id',id).eq('user_id',currentUser.id);
+  if(error){toast('ინვოისი ვერ წაიშალა: '+error.message,'error');return;}
+  if(currentInvoiceId===id) currentInvoiceId=null;
+  await loadInvoices();
+  renderInvoices();
+  renderDashInvoices();
+  toast('ინვოისი წაიშალა ✓','success');
+}
+
+async function viewInvoice(id){
+  const {data:inv,error}=await db.from('invoices').select('*,clients(*)').eq('id',id).eq('user_id',currentUser.id).single();
+  if(error||!inv){toast('ინვოისი ვერ მოიძებნა','error');return;}
+  const {data:items,error:itemError}=await db.from('invoice_items').select('*').eq('invoice_id',id).order('id');
+  if(itemError){toast('ინვოისის პროდუქტები ვერ ჩაიტვირთა: '+itemError.message,'error');return;}
+
+  showPage('invoice-new');
+  currentInvoiceId=inv.id;
+  invoiceDirty=false;
+  document.getElementById('ii-num').value=inv.invoice_number||'001';
+  document.getElementById('ii-date').value=inv.invoice_date||fmtDate(new Date());
+  document.getElementById('ii-due').value=inv.due_date||fmtDate(new Date());
+  document.getElementById('ii-note').value=inv.note||'';
+  document.getElementById('inv-vat').checked=!!inv.vat_enabled;
+
+  invProducts=(items||[]).map(x=>({name:x.name||'',qty:Number(x.qty||0),price:Number(x.price||0)}));
+  if(!invProducts.length) invProducts=[{name:'',qty:1,price:0}];
+
+  selectedClientId=inv.client_id||null;
+  if(inv.clients){
+    document.getElementById('ii-client-search').value=inv.clients.full_name||'';
+    document.getElementById('selected-client-info').style.display='block';
+    document.getElementById('selected-client-info').innerHTML=`✅ <strong>${inv.clients.full_name||''}</strong>${inv.clients.id_number?' | კოდი: '+inv.clients.id_number:''}${inv.clients.address?' | '+inv.clients.address:''}`;
+    document.getElementById('selected-client-fields').style.display='block';
+    document.getElementById('sc-id').value=inv.clients.id_number||'';
+    document.getElementById('sc-addr').value=inv.clients.address||'';
+    document.getElementById('sc-phone').value=inv.clients.phone||'';
+    document.getElementById('sc-email').value=inv.clients.email||'';
+    document.getElementById('new-client-fields').style.display='none';
+  }
+
+  renderInvProducts();
+  calcInvTotals();
+  buildInvPreview();
+  switchInvTab('preview');
 }
 
 function renderDashInvoices(){
@@ -1707,22 +1797,44 @@ async function downloadInvPDF(){
   }
 }
 
+function buildShareMessage(){
+  const num=document.getElementById('ii-num').value;
+  const total=invProducts.reduce((s,p)=>s+((p.qty||0)*(p.price||0)),0);
+  return `გამარჯობა!\n\nგიგზავნით ინვოისს №${num}\nგადასახდელი: ${fmt(total)}\n\nPDF ინვოისი გაიხსნა ცალკე ფანჯარაში — შეინახეთ PDF და სურვილის შემთხვევაში მიამაგრეთ შეტყობინებას.`;
+}
+
 async function sendInvWhatsApp(){
   const savedId = await saveInvoice(true);
   if(!savedId) return;
   buildInvPreview();
-  const num=document.getElementById('ii-num').value;
-  const sub=invProducts.reduce((s,p)=>s+((p.qty||0)*(p.price||0)),0);
-  const total=sub;
-  const msg=encodeURIComponent(`გამარჯობა!
-
-გიგზავნით ინვოისს №${num}
-გადასახდელი: ${fmt(total)}
-
-PDF ინვოისი ცალკე ფანჯარაში გაიხსნება — ჩამოტვირთე და WhatsApp-ში მიამაგრე.`);
   await downloadInvPDF();
+  const msg=encodeURIComponent(buildShareMessage());
   window.open(`https://wa.me/?text=${msg}`,'_blank');
 }
+
+async function sendInvViber(){
+  const savedId = await saveInvoice(true);
+  if(!savedId) return;
+  buildInvPreview();
+  await downloadInvPDF();
+  const msg=encodeURIComponent(buildShareMessage());
+  window.open(`viber://forward?text=${msg}`,'_blank');
+}
+
+// ========== LEGAL ==========
+function openLegal(type){
+  const c=document.getElementById('legal-content');
+  const owner='<p><strong>მფლობელი:</strong> შპს ბილდეკო<br><strong>ტელ:</strong> 551343410<br><strong>Email:</strong> Buildeco2024@gmail.com</p>';
+  if(type==='privacy'){
+    c.innerHTML=`<h3>Privacy Policy</h3>${owner}<h4>მონაცემების გამოყენება</h4><p>საიტი ინახავს მხოლოდ იმ ინფორმაციას, რომელსაც მომხმარებელი თავად ავსებს: პროფილი, კლიენტები, პროდუქტები და ინვოისები. ეს მონაცემები გამოიყენება ინვოისების შექმნისა და შენახვისთვის.</p><h4>უსაფრთხოება</h4><p>ანგარიშები დაცულია ავტორიზაციით. თითოეული მომხმარებელი ხედავს მხოლოდ საკუთარ მონაცემებს.</p><h4>კონტაქტი</h4><p>კითხვების შემთხვევაში დაგვიკავშირდით მითითებულ ნომერზე ან ელ-ფოსტაზე.</p>`;
+  }else if(type==='terms'){
+    c.innerHTML=`<h3>Terms & Conditions</h3>${owner}<h4>სერვისის გამოყენება</h4><p>Invoice.com.ge განკუთვნილია ინვოისების შექმნის, შენახვისა და გადმოტვირთვისთვის. მომხმარებელი პასუხისმგებელია შეყვანილი ინფორმაციის სისწორეზე.</p><h4>შეზღუდვები</h4><p>აკრძალულია სერვისის გამოყენება უკანონო მიზნებისთვის ან სხვა პირის მონაცემების არამართლზომიერი დამუშავებისთვის.</p>`;
+  }else{
+    c.innerHTML=`<h3>Contact</h3>${owner}<p>დაგვიკავშირდით სამუშაო საკითხებზე ან ტექნიკური დახმარებისთვის.</p>`;
+  }
+  document.getElementById('legal-modal').classList.add('open');
+}
+function closeLegal(){document.getElementById('legal-modal').classList.remove('open');}
 
 // ========== PAGES ==========
 function showPage(name){
