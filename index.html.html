@@ -282,8 +282,9 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 
 
 /* FOOTER / LEGAL */
-.site-footer{background:#0f0f1a;color:rgba(255,255,255,.72);padding:34px 48px;border-top:1px solid rgba(255,255,255,.08);}
-.site-footer-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr;gap:24px;align-items:start;}
+.site-footer{background:#0f0f1a;color:rgba(255,255,255,.72);padding:34px 48px;border-top:1px solid rgba(255,255,255,.08);overflow:hidden;}
+.site-footer-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+.site-footer p,.site-footer a{word-break:break-word;overflow-wrap:anywhere;}
 .site-footer h4{color:#fff;font-size:15px;margin-bottom:8px;}
 .site-footer p,.site-footer a{font-size:13px;line-height:1.7;color:rgba(255,255,255,.68);text-decoration:none;}
 .site-footer a:hover{color:var(--gold);}
@@ -1130,6 +1131,17 @@ async function doLogin(){
     );
 
     if(error){
+      // Supabase sometimes returns an error but the session is actually created.
+      // Double-check by querying the current session before showing the error.
+      try{
+        const { data: sessionCheck } = await db.auth.getSession();
+        if(sessionCheck?.session?.user){
+          if(err){ err.style.display='none'; err.textContent=''; }
+          closeAuth();
+          await loginSuccess(sessionCheck.session.user);
+          return;
+        }
+      }catch(_){}
       if(err){
         err.textContent = 'შესვლა ვერ მოხერხდა. შეამოწმე ელ-ფოსტა ან პაროლი.';
         err.style.display = 'block';
@@ -1154,6 +1166,16 @@ async function doLogin(){
     }
   }catch(e){
     console.error(e);
+    // Even on exception, check if login actually succeeded
+    try{
+      const { data: sessionCheck } = await db.auth.getSession();
+      if(sessionCheck?.session?.user){
+        if(err){ err.style.display='none'; err.textContent=''; }
+        closeAuth();
+        await loginSuccess(sessionCheck.session.user);
+        return;
+      }
+    }catch(_){}
     if(err){
       err.textContent = 'შესვლა ვერ მოხერხდა. სცადე თავიდან.';
       err.style.display = 'block';
@@ -1248,10 +1270,16 @@ function setupSidebar(){
   const types={company:'კომპანია',individual:'ფიზ. პირი',entrepreneur:'ინდ. მეწარმე'};
   const nameEl = document.getElementById('sb-username');
   const typeEl = document.getElementById('sb-usertype');
-  if(nameEl) nameEl.textContent = userProfile.full_name || currentUser.email || '—';
+  const displayName = userProfile.full_name || (currentUser?.email ? currentUser.email.split('@')[0] : '—');
+  if(nameEl) nameEl.textContent = displayName;
   if(typeEl){
     const idValue = userProfile.id_number || '';
-    const baseText = idValue ? `ს/კ / პირადი №: ${idValue}` : (types[userProfile.entity_type] || '');
+    const entityLabel = types[userProfile.entity_type] || '';
+    let baseText = '';
+    if(idValue && entityLabel) baseText = `${entityLabel} · ${idValue}`;
+    else if(idValue) baseText = `ს/კ: ${idValue}`;
+    else if(entityLabel) baseText = entityLabel;
+    else baseText = currentUser?.email || '';
     typeEl.__baseKa = baseText;
     typeEl.textContent = baseText;
   }
