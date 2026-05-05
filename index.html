@@ -342,6 +342,25 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
   .modal{padding:24px 14px;}
   .btn-primary,.btn-secondary,.btn-outline,.btn-submit{width:100%;}
 }
+
+/* LANGUAGE */
+.lang-select{position:relative;display:inline-flex;align-items:center;}
+.lang-current{border:1.5px solid rgba(255,255,255,.28);background:rgba(255,255,255,.06);color:#fff;border-radius:9px;padding:8px 10px;cursor:pointer;font-size:14px;font-weight:700;line-height:1;}
+.lang-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);min-width:150px;overflow:hidden;z-index:2000;}
+.lang-select:hover .lang-menu,.lang-select.open .lang-menu{display:block;}
+.lang-menu button{display:flex;width:100%;gap:8px;align-items:center;background:#fff;border:0;padding:10px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;text-align:left;}
+.lang-menu button:hover{background:#fafafa;}
+.sidebar-brand{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.sidebar-brand .lang-current{padding:6px 8px;font-size:12px;border-color:rgba(255,255,255,.18);}
+.sidebar-brand .lang-menu{left:auto;right:0;}
+.site-footer{display:block;}
+#page-app{min-height:100vh;}
+@media(max-width:768px){.nav-btns{gap:8px}.lang-current{padding:8px}.lang-menu{right:-10px}.site-footer{padding-bottom:102px}.sidebar-brand{display:none!important;}}
+
+
+.app-mobile-top{display:none;}
+@media(max-width:768px){.app-mobile-top{display:flex;justify-content:flex-end;margin-bottom:10px}.app-mobile-top .lang-current{background:#0f0f1a;color:#fff;border-color:#0f0f1a}.app-mobile-top .lang-menu{right:0}}
+
 </style>
 </head>
 <body>
@@ -353,6 +372,14 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
     <div class="nav-btns">
       <button type="button" class="btn-nav-login" onclick="openAuth('login')">შესვლა</button>
       <button type="button" class="btn-nav-reg" onclick="openAuth('register')">რეგისტრაცია</button>
+      <div class="lang-select" id="landing-lang">
+        <button type="button" class="lang-current" onclick="toggleLangMenu('landing-lang')">🇬🇪 KA</button>
+        <div class="lang-menu">
+          <button type="button" onclick="setLang('ka')">🇬🇪 ქართული</button>
+          <button type="button" onclick="setLang('en')">🇬🇧 English</button>
+          <button type="button" onclick="setLang('ru')">🇷🇺 Русский</button>
+        </div>
+      </div>
     </div>
   </nav>
 
@@ -408,20 +435,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
   </section>
 
 
-  <footer class="site-footer">
-    <div class="site-footer-inner">
-      <div>
-        <h4>Invoice.com.ge</h4>
-        <p>მფლობელი კომპანია: შპს ბილდეკო</p>
-        <p>ტელ: 551343410 · Email: Buildeco2024@gmail.com</p>
-      </div>
-      <div class="footer-links">
-        <a href="#" onclick="openLegal('privacy');return false;">Privacy Policy</a>
-        <a href="#" onclick="openLegal('terms');return false;">Terms & Conditions</a>
-        <a href="#" onclick="openLegal('contact');return false;">Contact</a>
-      </div>
-    </div>
-  </footer>
+
 </div>
 
 <!-- LEGAL MODAL -->
@@ -484,7 +498,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
   <div class="app-layout">
     <!-- SIDEBAR -->
     <aside class="sidebar">
-      <div class="sidebar-brand"><div class="sidebar-brand-name">Invoice<span>.com.ge</span></div></div>
+      <div class="sidebar-brand"><div class="sidebar-brand-name">Invoice<span>.com.ge</span></div><div class="lang-select" id="app-lang"><button type="button" class="lang-current" onclick="toggleLangMenu('app-lang')">🇬🇪 KA</button><div class="lang-menu"><button type="button" onclick="setLang('ka')">🇬🇪 ქართული</button><button type="button" onclick="setLang('en')">🇬🇧 English</button><button type="button" onclick="setLang('ru')">🇷🇺 Русский</button></div></div></div>
       <div class="sidebar-user">
         <div class="sidebar-user-name" id="sb-username">—</div>
         <div class="sidebar-user-type" id="sb-usertype">—</div>
@@ -503,6 +517,8 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 
     <!-- MAIN -->
     <main class="main-content">
+
+      <div class="app-mobile-top"><div class="lang-select" id="app-mobile-lang"><button type="button" class="lang-current" onclick="toggleLangMenu('app-mobile-lang')">🇬🇪 KA</button><div class="lang-menu"><button type="button" onclick="setLang('ka')">🇬🇪 ქართული</button><button type="button" onclick="setLang('en')">🇬🇧 English</button><button type="button" onclick="setLang('ru')">🇷🇺 Русский</button></div></div></div>
 
       <!-- DASHBOARD -->
       <div id="pg-dashboard" class="app-page">
@@ -585,9 +601,9 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
               <span class="toggle-label">დღგ 18%</span>
             </div>
             <div class="totals-panel">
-              <div class="totals-line"><span>შუალედური ჯამი</span><span id="inv-sub">₾0.00</span></div>
-              <div class="totals-line" id="inv-vat-row" style="display:none"><span>მათ შორის დღგ</span><span id="inv-vat-amt">₾0.00</span></div>
-              <div class="totals-line grand"><span>სულ გადასახდელი</span><span id="inv-total">₾0.00</span></div>
+              <div class="totals-line"><span>${t('შუალედური ჯამი')}</span><span id="inv-sub">₾0.00</span></div>
+              <div class="totals-line" id="inv-vat-row" style="display:none"><span>${t('მათ შორის დღგ')}</span><span id="inv-vat-amt">₾0.00</span></div>
+              <div class="totals-line grand"><span>${t('სულ გადასახდელი')}</span><span id="inv-total">₾0.00</span></div>
             </div>
             <div style="display:flex;gap:12px;margin-top:16px;">
               <button type="button" class="btn-outline" onclick="switchInvTab('info')">← უკან</button>
@@ -690,6 +706,21 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
     </main>
   </div>
 </div>
+
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <div>
+        <h4>Invoice.com.ge</h4>
+        <p>მფლობელი კომპანია: შპს ბილდეკო</p>
+        <p>ტელ: 551343410 · Email: Buildeco2024@gmail.com</p>
+      </div>
+      <div class="footer-links">
+        <a href="#" onclick="openLegal('privacy');return false;">Privacy Policy</a>
+        <a href="#" onclick="openLegal('terms');return false;">Terms & Conditions</a>
+        <a href="#" onclick="openLegal('contact');return false;">Contact</a>
+      </div>
+    </div>
+  </footer>
 
 <!-- CLIENT MODAL -->
 <div class="modal-overlay" id="client-modal">
@@ -797,6 +828,7 @@ function clearInvoiceClientFields(){
 
 // ========== INIT ==========
 document.addEventListener('DOMContentLoaded', async () => {
+  setTimeout(()=>setLang(currentLang), 0);
   const today = new Date();
   const due = new Date(); due.setDate(due.getDate()+14);
   if(document.getElementById('ii-date')) {
@@ -1006,30 +1038,19 @@ async function doRegister(){
 }
 
 async function doLogout(){
-  const btn = document.querySelector('.btn-logout');
-  const oldText = btn ? btn.textContent : '';
-  if(btn){ btn.disabled = true; btn.textContent = 'გამოსვლა...'; }
+  // Fast logout: UI is changed immediately; Supabase signOut continues in the background.
   isLoggingOut = true;
-
-  try{
-    if(authSubscription) authSubscription.unsubscribe();
-  }catch(e){ console.error(e); }
-
-  try{
-    await withTimeout(db.auth.signOut({ scope: 'global' }), 8000, 'გამოსვლა');
-  }catch(e){
-    console.error(e);
-  }
-
   stopInactivityTimer();
-  clearSupabaseStorage();
+  try{ if(authSubscription) authSubscription.unsubscribe(); }catch(e){ console.error(e); }
   resetLocalState();
+  clearSupabaseStorage();
   closeAuth();
   showLanding();
-
-  // სრული გასუფთავებისთვის გვერდს ვხსნით loggedout პარამეტრით.
-  // ასე refresh-ზე აღარ შემოვა ძველი session-ით.
-  window.location.replace(window.location.origin + window.location.pathname + '?loggedout=1');
+  setLang(currentLang);
+  db.auth.signOut({ scope:'global' }).catch(e=>console.error(e));
+  setTimeout(()=>{
+    try{ clearSupabaseStorage(); }catch(e){}
+  }, 300);
 }
 
 
@@ -1039,6 +1060,7 @@ async function loginSuccess(user){
   showApp();
   showPage('dashboard');
   setupSidebar();
+  applyLanguage();
   resetInactivityTimer();
 }
 
@@ -1412,7 +1434,7 @@ async function importExcel(input){
 function populateCatalogPick(){
   const sel=document.getElementById('catalog-pick');
   if(!sel) return;
-  sel.innerHTML='<option value="">კატალოგიდან ჩასმა...</option>'+
+  sel.innerHTML='<option value="">'+t('კატალოგიდან ჩასმა...')+'</option>'+
     userProducts.map(p=>`<option value="${p.id}">${p.name} — ${fmt(p.price)}</option>`).join('');
 }
 
@@ -1531,7 +1553,7 @@ function renderInvProducts(){
   const el=document.getElementById('inv-prod-rows');
   el.innerHTML=invProducts.map((p,i)=>`
     <div class="prod-row">
-      <input value="${p.name||''}" placeholder="დასახელება" oninput="invProducts[${i}].name=this.value">
+      <input value="${p.name||''}" placeholder="${t('დასახელება')}" oninput="invProducts[${i}].name=this.value">
       <input type="number" value="${p.qty ?? ''}" min="0" step="0.01" oninput="invProducts[${i}].qty=parseFloat(this.value)||0;calcInvTotals()">
       <input type="number" value="${p.price ? p.price : ''}" placeholder="0.00" min="0" step="0.01" oninput="invProducts[${i}].price=parseFloat(this.value)||0;calcInvTotals()">
       <div class="prod-total" data-index="${i}">${fmt((p.qty||0)*(p.price||0))}</div>
@@ -1598,14 +1620,14 @@ function buildInvPreview(){
   const client=getInvoiceClientSnapshot();
   let clientHtml='—';
   if(client.full_name){
-    clientHtml=`<strong>${client.full_name}</strong>${client.id_number?'<br>კოდი: '+client.id_number:''}${client.address?'<br>'+client.address:''}${client.phone?'<br>'+client.phone:''}${client.email?'<br>'+client.email:''}`;
+    clientHtml=`<strong>${client.full_name}</strong>${client.id_number?'<br>'+t('კოდი')+': '+client.id_number:''}${client.address?'<br>'+client.address:''}${client.phone?'<br>'+client.phone:''}${client.email?'<br>'+client.email:''}`;
   }
 
   const logoHtml=profileLogoUrl?`<img src="${profileLogoUrl}" style="max-height:60px;max-width:160px;">`:
     `<div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:900">${p.full_name||''}</div>`;
 
   const banksHtml=userBanks.filter(b=>b.iban).map(b=>`
-    <div class="inv-pre-bank"><span class="inv-pre-bank-label">${b.bank_name||'ბანკი'}:</span><span>${b.iban}</span></div>
+    <div class="inv-pre-bank"><span class="inv-pre-bank-label">${b.bank_name||t('ბანკი')}:</span><span>${b.iban}</span></div>
   `).join('');
 
   const rowsHtml=invProducts.filter(p=>p.name||p.price).map(p=>`
@@ -1615,22 +1637,22 @@ function buildInvPreview(){
   document.getElementById('inv-preview-content').innerHTML=`
     <div class="inv-pre-header">
       <div>${logoHtml}</div>
-      <div style="text-align:right"><div class="inv-pre-title">ინვოისი</div><div class="inv-pre-num">№ ${num}</div></div>
+      <div style="text-align:right"><div class="inv-pre-title">${t('ინვოისი')}</div><div class="inv-pre-num">№ ${num}</div></div>
     </div>
     <div class="inv-pre-meta">
-      <div class="inv-pre-block"><h4>გამგზავნი</h4><p><strong>${p.full_name||''}</strong>${p.id_number?'<br>კოდი: '+p.id_number:''}${p.address?'<br>'+p.address:''}${p.phone?'<br>'+p.phone:''}</p></div>
-      <div class="inv-pre-block"><h4>მიმღები</h4><p>${clientHtml}</p><div style="margin-top:10px;font-size:12px;color:#888">თარიღი: <strong>${date}</strong><br>ვადა: <strong>${due}</strong></div></div>
+      <div class="inv-pre-block"><h4>${t('გამგზავნი')}</h4><p><strong>${p.full_name||''}</strong>${p.id_number?'<br>'+t('კოდი')+': '+p.id_number:''}${p.address?'<br>'+p.address:''}${p.phone?'<br>'+p.phone:''}</p></div>
+      <div class="inv-pre-block"><h4>${t('მიმღები')}</h4><p>${clientHtml}</p><div style="margin-top:10px;font-size:12px;color:#888">${t('თარიღი')}: <strong>${date}</strong><br>${t('ვადა')}: <strong>${due}</strong></div></div>
     </div>
     <table class="inv-pre-table">
-      <thead><tr><th>დასახელება</th><th style="text-align:center">რაოდ.</th><th style="text-align:right">ფასი</th><th style="text-align:right">ჯამი</th></tr></thead>
+      <thead><tr><th>${t('დასახელება')}</th><th style="text-align:center">${t('რაოდ.')}</th><th style="text-align:right">${t('ფასი')}</th><th style="text-align:right">${t('ჯამი')}</th></tr></thead>
       <tbody>${rowsHtml}</tbody>
     </table>
     <div class="inv-pre-totals">
-      <div class="inv-pre-tot-row"><span>შუალედური ჯამი</span><span>${fmt(sub)}</span></div>
-      ${vatOn?`<div class="inv-pre-tot-row"><span>მათ შორის დღგ</span><span>${fmt(vat)}</span></div>`:''}
-      <div class="inv-pre-tot-row grand"><span>სულ გადასახდელი</span><span>${fmt(total)}</span></div>
+      <div class="inv-pre-tot-row"><span>${t('შუალედური ჯამი')}</span><span>${fmt(sub)}</span></div>
+      ${vatOn?`<div class="inv-pre-tot-row"><span>${t('მათ შორის დღგ')}</span><span>${fmt(vat)}</span></div>`:''}
+      <div class="inv-pre-tot-row grand"><span>${t('სულ გადასახდელი')}</span><span>${fmt(total)}</span></div>
     </div>
-    ${banksHtml?`<div class="inv-pre-banks"><h4>საბანკო რეკვიზიტები</h4>${banksHtml}</div>`:''}
+    ${banksHtml?`<div class="inv-pre-banks"><h4>${t('საბანკო რეკვიზიტები')}</h4>${banksHtml}</div>`:''}
     ${note?`<div style="margin-top:20px;padding:14px;background:#f4f6f9;border-radius:8px;font-size:13px;color:#666">${note}</div>`:''}
   `;
 }
@@ -1824,13 +1846,29 @@ async function sendInvViber(){
 // ========== LEGAL ==========
 function openLegal(type){
   const c=document.getElementById('legal-content');
-  const owner='<p><strong>მფლობელი:</strong> შპს ბილდეკო<br><strong>ტელ:</strong> 551343410<br><strong>Email:</strong> Buildeco2024@gmail.com</p>';
+  const owner = currentLang==='ka'
+    ? '<p><strong>მფლობელი:</strong> შპს ბილდეკო<br><strong>ტელ:</strong> 551343410<br><strong>Email:</strong> Buildeco2024@gmail.com</p>'
+    : currentLang==='en'
+      ? '<p><strong>Owner:</strong> LLC Buildeco<br><strong>Phone:</strong> 551343410<br><strong>Email:</strong> Buildeco2024@gmail.com</p>'
+      : '<p><strong>Владелец:</strong> LLC Buildeco<br><strong>Тел:</strong> 551343410<br><strong>Email:</strong> Buildeco2024@gmail.com</p>';
   if(type==='privacy'){
-    c.innerHTML=`<h3>Privacy Policy</h3>${owner}<h4>მონაცემების გამოყენება</h4><p>საიტი ინახავს მხოლოდ იმ ინფორმაციას, რომელსაც მომხმარებელი თავად ავსებს: პროფილი, კლიენტები, პროდუქტები და ინვოისები. ეს მონაცემები გამოიყენება ინვოისების შექმნისა და შენახვისთვის.</p><h4>უსაფრთხოება</h4><p>ანგარიშები დაცულია ავტორიზაციით. თითოეული მომხმარებელი ხედავს მხოლოდ საკუთარ მონაცემებს.</p><h4>კონტაქტი</h4><p>კითხვების შემთხვევაში დაგვიკავშირდით მითითებულ ნომერზე ან ელ-ფოსტაზე.</p>`;
+    c.innerHTML = currentLang==='ka'
+      ? `<h3>Privacy Policy</h3>${owner}<h4>მონაცემების გამოყენება</h4><p>საიტი ინახავს მხოლოდ იმ ინფორმაციას, რომელსაც მომხმარებელი თავად ავსებს: პროფილი, კლიენტები, პროდუქტები და ინვოისები. ეს მონაცემები გამოიყენება ინვოისების შექმნისა და შენახვისთვის.</p><h4>უსაფრთხოება</h4><p>ანგარიშები დაცულია ავტორიზაციით. თითოეული მომხმარებელი ხედავს მხოლოდ საკუთარ მონაცემებს.</p><h4>კონტაქტი</h4><p>კითხვების შემთხვევაში დაგვიკავშირდით მითითებულ ნომერზე ან ელ-ფოსტაზე.</p>`
+      : currentLang==='en'
+        ? `<h3>Privacy Policy</h3>${owner}<h4>Data use</h4><p>The service stores only the information entered by the user: profile, clients, products, and invoices. This data is used to create, save, and manage invoices.</p><h4>Security</h4><p>Accounts are protected by authentication. Each user can access only their own data.</p><h4>Contact</h4><p>For questions, contact us by phone or email.</p>`
+        : `<h3>Политика конфиденциальности</h3>${owner}<h4>Использование данных</h4><p>Сервис хранит только данные, которые пользователь вводит сам: профиль, клиентов, товары и счета. Эти данные используются для создания и хранения счетов.</p><h4>Безопасность</h4><p>Аккаунты защищены авторизацией. Каждый пользователь видит только свои данные.</p><h4>Контакты</h4><p>По вопросам свяжитесь с нами по телефону или email.</p>`;
   }else if(type==='terms'){
-    c.innerHTML=`<h3>Terms & Conditions</h3>${owner}<h4>სერვისის გამოყენება</h4><p>Invoice.com.ge განკუთვნილია ინვოისების შექმნის, შენახვისა და გადმოტვირთვისთვის. მომხმარებელი პასუხისმგებელია შეყვანილი ინფორმაციის სისწორეზე.</p><h4>შეზღუდვები</h4><p>აკრძალულია სერვისის გამოყენება უკანონო მიზნებისთვის ან სხვა პირის მონაცემების არამართლზომიერი დამუშავებისთვის.</p>`;
+    c.innerHTML = currentLang==='ka'
+      ? `<h3>Terms & Conditions</h3>${owner}<h4>სერვისის გამოყენება</h4><p>Invoice.com.ge განკუთვნილია ინვოისების შექმნის, შენახვისა და გადმოტვირთვისთვის. მომხმარებელი პასუხისმგებელია შეყვანილი ინფორმაციის სისწორეზე.</p><h4>შეზღუდვები</h4><p>აკრძალულია სერვისის გამოყენება უკანონო მიზნებისთვის ან სხვა პირის მონაცემების არამართლზომიერი დამუშავებისთვის.</p>`
+      : currentLang==='en'
+        ? `<h3>Terms & Conditions</h3>${owner}<h4>Use of service</h4><p>Invoice.com.ge is intended for creating, saving, and downloading invoices. The user is responsible for the accuracy of entered information.</p><h4>Restrictions</h4><p>It is prohibited to use the service for illegal purposes or improper processing of another person’s data.</p>`
+        : `<h3>Условия использования</h3>${owner}<h4>Использование сервиса</h4><p>Invoice.com.ge предназначен для создания, сохранения и скачивания счетов. Пользователь отвечает за правильность введённых данных.</p><h4>Ограничения</h4><p>Запрещено использовать сервис в незаконных целях или неправомерно обрабатывать данные других лиц.</p>`;
   }else{
-    c.innerHTML=`<h3>Contact</h3>${owner}<p>დაგვიკავშირდით სამუშაო საკითხებზე ან ტექნიკური დახმარებისთვის.</p>`;
+    c.innerHTML = currentLang==='ka'
+      ? `<h3>Contact</h3>${owner}<p>დაგვიკავშირდით სამუშაო საკითხებზე ან ტექნიკური დახმარებისთვის.</p>`
+      : currentLang==='en'
+        ? `<h3>Contact</h3>${owner}<p>Contact us for business questions or technical support.</p>`
+        : `<h3>Контакты</h3>${owner}<p>Свяжитесь с нами по рабочим вопросам или для технической помощи.</p>`;
   }
   document.getElementById('legal-modal').classList.add('open');
 }
@@ -1878,7 +1916,10 @@ function showPage(name){
       document.getElementById('ii-num').value='001';
     }
   }
+  setTimeout(applyLanguage, 0);
 }
+
+setTimeout(()=>setLang(currentLang), 100);
 </script>
 </body>
 </html>
