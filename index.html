@@ -4,7 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Invoice.com.ge — შექმენი შენი ინვოისი მარტივად</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+
+// ========== LANGUAGE WRAPPERS ==========
+(function(){
+  const names = ['renderProfile','renderClients','renderCatalog','renderInvoices','renderDashboard','buildInvPreview','renderInvProducts','populateCatalogPick','showPage','viewInvoice','loadProfile','loadClients','loadProducts','loadInvoices'];
+  names.forEach(name=>{
+    const original = window[name];
+    if(typeof original !== 'function' || original.__langWrapped) return;
+    const wrapped = function(...args){
+      const result = original.apply(this,args);
+      if(result && typeof result.then === 'function') result.finally(()=>translateDynamic());
+      else translateDynamic();
+      return result;
+    };
+    wrapped.__langWrapped = true;
+    window[name] = wrapped;
+  });
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>setLang(currentLang),50));
+})();
+
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -186,7 +206,7 @@ button:disabled{opacity:.65;cursor:not-allowed;transform:none!important;}
 
 /* PRODUCTS TABLE IN INVOICE */
 .prod-header{display:grid;grid-template-columns:3fr 70px 100px 100px 36px;gap:8px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;padding:0 4px;margin-bottom:6px;}
-.prod-row{display:grid;grid-template-columns:3fr 70px 100px 100px 36px;gap:8px;align-items:center;margin-bottom:8px;}
+.prod-row{display:grid;grid-template-columns:3fr 70px 100px 100px 36px;gap:0;align-items:center;margin-bottom:8px;}
 .prod-row input,.prod-row select{border:1.5px solid var(--border);border-radius:7px;padding:8px 10px;font-size:13px;font-family:'DM Sans',sans-serif;background:#fafafa;outline:none;width:100%;transition:border .2s;}
 .prod-row input:focus,.prod-row select:focus{border-color:var(--gold);background:#fff;}
 .prod-total{font-size:13px;font-weight:700;text-align:right;padding-right:4px;}
@@ -237,7 +257,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 .client-opt:hover{background:#fafafa;}
 
 /* CATALOG */
-.catalog-row{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;align-items:center;margin-bottom:8px;}
+.catalog-row{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:0;align-items:center;margin-bottom:8px;}
 .catalog-row input{border:1.5px solid var(--border);border-radius:7px;padding:8px 11px;font-size:13px;font-family:'DM Sans',sans-serif;background:#fafafa;outline:none;width:100%;transition:border .2s;}
 .catalog-row input:focus{border-color:var(--gold);background:#fff;}
 
@@ -346,9 +366,9 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 /* LANGUAGE */
 .lang-select{position:relative;display:inline-flex;align-items:center;}
 .lang-current{border:1.5px solid rgba(255,255,255,.28);background:rgba(255,255,255,.06);color:#fff;border-radius:9px;padding:8px 10px;cursor:pointer;font-size:14px;font-weight:700;line-height:1;}
-.lang-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);min-width:150px;overflow:hidden;z-index:2000;}
+.lang-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);min-width:54px;overflow:hidden;z-index:2000;}
 .lang-select:hover .lang-menu,.lang-select.open .lang-menu{display:block;}
-.lang-menu button{display:flex;width:100%;gap:8px;align-items:center;background:#fff;border:0;padding:10px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;text-align:left;}
+.lang-menu button{display:flex;width:100%;gap:0;align-items:center;background:#fff;border:0;padding:10px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:20px;text-align:center;justify-content:center;}
 .lang-menu button:hover{background:#fafafa;}
 .sidebar-brand{display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .sidebar-brand .lang-current{padding:6px 8px;font-size:12px;border-color:rgba(255,255,255,.18);}
@@ -373,11 +393,11 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
       <button type="button" class="btn-nav-login" onclick="openAuth('login')">შესვლა</button>
       <button type="button" class="btn-nav-reg" onclick="openAuth('register')">რეგისტრაცია</button>
       <div class="lang-select" id="landing-lang">
-        <button type="button" class="lang-current" onclick="toggleLangMenu('landing-lang')">🇬🇪 KA</button>
+        <button type="button" class="lang-current" onclick="toggleLangMenu('landing-lang')">🇬🇪</button>
         <div class="lang-menu">
-          <button type="button" onclick="setLang('ka')">🇬🇪 ქართული</button>
-          <button type="button" onclick="setLang('en')">🇬🇧 English</button>
-          <button type="button" onclick="setLang('ru')">🇷🇺 Русский</button>
+          <button type="button" onclick="setLang('ka')" title="ქართული">🇬🇪</button>
+          <button type="button" onclick="setLang('en')" title="English">🇬🇧</button>
+          <button type="button" onclick="setLang('ru')" title="Русский">🇷🇺</button>
         </div>
       </div>
     </div>
@@ -386,7 +406,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
   <section class="land-hero">
     <div class="land-hero-inner">
       <div class="land-hero-text">
-        <div class="land-badge">🇬🇪 ქართული ბიზნესისთვის</div>
+        <div class="land-badge">🇬🇪 ბიზნესისთვის</div>
         <h1 class="land-h1">შექმენი შენი ინვოისი <span>მარტივად</span></h1>
         <p class="land-sub">პროფესიული ინვოისები წუთებში. შეინახე კლიენტები, პროდუქცია და გაგზავნე PDF-ით WhatsApp-ზე ან Viber-ზე.</p>
         <button type="button" class="land-cta" onclick="openAuth('register')">
@@ -498,7 +518,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
   <div class="app-layout">
     <!-- SIDEBAR -->
     <aside class="sidebar">
-      <div class="sidebar-brand"><div class="sidebar-brand-name">Invoice<span>.com.ge</span></div><div class="lang-select" id="app-lang"><button type="button" class="lang-current" onclick="toggleLangMenu('app-lang')">🇬🇪 KA</button><div class="lang-menu"><button type="button" onclick="setLang('ka')">🇬🇪 ქართული</button><button type="button" onclick="setLang('en')">🇬🇧 English</button><button type="button" onclick="setLang('ru')">🇷🇺 Русский</button></div></div></div>
+      <div class="sidebar-brand"><div class="sidebar-brand-name">Invoice<span>.com.ge</span></div><div class="lang-select" id="app-lang"><button type="button" class="lang-current" onclick="toggleLangMenu('app-lang')">🇬🇪</button><div class="lang-menu"><button type="button" onclick="setLang('ka')" title="ქართული">🇬🇪</button><button type="button" onclick="setLang('en')" title="English">🇬🇧</button><button type="button" onclick="setLang('ru')" title="Русский">🇷🇺</button></div></div></div>
       <div class="sidebar-user">
         <div class="sidebar-user-name" id="sb-username">—</div>
         <div class="sidebar-user-type" id="sb-usertype">—</div>
@@ -518,7 +538,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
     <!-- MAIN -->
     <main class="main-content">
 
-      <div class="app-mobile-top"><div class="lang-select" id="app-mobile-lang"><button type="button" class="lang-current" onclick="toggleLangMenu('app-mobile-lang')">🇬🇪 KA</button><div class="lang-menu"><button type="button" onclick="setLang('ka')">🇬🇪 ქართული</button><button type="button" onclick="setLang('en')">🇬🇧 English</button><button type="button" onclick="setLang('ru')">🇷🇺 Русский</button></div></div></div>
+      <div class="app-mobile-top"><div class="lang-select" id="app-mobile-lang"><button type="button" class="lang-current" onclick="toggleLangMenu('app-mobile-lang')">🇬🇪</button><div class="lang-menu"><button type="button" onclick="setLang('ka')" title="ქართული">🇬🇪</button><button type="button" onclick="setLang('en')" title="English">🇬🇧</button><button type="button" onclick="setLang('ru')" title="Русский">🇷🇺</button></div></div></div>
 
       <!-- DASHBOARD -->
       <div id="pg-dashboard" class="app-page">
@@ -825,6 +845,84 @@ function setupLoginEnterKey(){
 function clearInvoiceClientFields(){
   ['sc-id','sc-phone','sc-addr','sc-email'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
 }
+
+
+// ========== LANGUAGE ==========
+const LANG_FLAGS = { ka: '🇬🇪', en: '🇬🇧', ru: '🇷🇺' };
+let currentLang = localStorage.getItem('invoice_lang') || 'ka';
+
+const UI_TRANSLATIONS = {
+  en: {
+    'შესვლა':'Login','რეგისტრაცია':'Register','ქართული ბიზნესისთვის':'For Georgian business','შექმენი შენი ინვოისი მარტივად':'Create your invoice easily','პროფესიული ინვოისები წუთებში. შეინახე კლიენტები, პროდუქცია და გაგზავნე PDF-ით WhatsApp-ზე ან Viber-ზე.':'Professional invoices in minutes. Save clients, products and send PDF via WhatsApp or Viber.','უფასოდ დაიწყე →':'Start free →','უფასო':'Free','ექსპორტი':'Export','დღგ მხარდაჭერა':'VAT support','ფიჩერები':'Features','ყველაფერი რაც გჭირდება':'Everything you need','კლიენტების ბაზა':'Client database','შეინახე კლიენტების მონაცემები ერთხელ და გამოიყენე ყოველ ინვოისზე.':'Save client details once and use them in every invoice.','პროდუქტების კატალოგი':'Product catalog','Excel-იდან იმპორტი ან ხელით დამატება. ინვოისზე ერთი კლიკით ჩასმა.':'Import from Excel or add manually. Add to invoices in one click.','PDF + WhatsApp/Viber':'PDF + WhatsApp/Viber','პროფესიული PDF გენერაცია და გაგზავნა WhatsApp/Viber-ით.':'Generate professional PDFs and send via WhatsApp/Viber.','საბანკო რეკვიზიტები':'Bank details','მრავალი ბანკის ანგარიში — ყოველ ინვოისზე ავტომატურად ჩაისმება.':'Multiple bank accounts automatically appear on each invoice.','დღგ 18%':'VAT 18%','ავტომატური გამოთვლა. ჩართე ან გამორთე ერთი კლიკით.':'Automatic calculation. Enable or disable in one click.','ქართულად':'In Georgian','სრულად ქართულ ენაზე. კომპანია, ფიზ. პირი, ინდ. მეწარმე — ყველა ტიპი.':'Fully localized. Company, individual and entrepreneur supported.','მოგესალმებით! 👋':'Welcome! 👋','შედი შენს ანგარიშში':'Sign in to your account','ელ-ფოსტა':'Email','პაროლი':'Password','არ გაქვს ანგარიში?':'No account?','დარეგისტრირდი':'Register','შექმენი ანგარიში':'Create account','ერთხელ შეავსე — ყოველთვის გამოიყენე':'Fill once — use every time','სუბიექტის ტიპი':'Entity type','კომპანია':'Company','ფიზ. პირი':'Individual','ინდ. მეწარმე':'Entrepreneur','კომპანიის სახელი':'Company name','სახელი და გვარი':'Full name','საიდ. კოდი':'ID number','პირ. № / ID':'Personal ID','მინ. 6 სიმბოლო':'Min. 6 characters','დაბადების თარიღი':'Birth date','გაქვს ანგარიში?':'Already have an account?','შედი':'Login','მთავარი':'Dashboard','ახალი ინვოისი':'New invoice','ინვოისები':'Invoices','კლიენტები':'Clients','პროდუქტები':'Products','პროფილი':'Profile','გამოსვლა':'Logout','ინვოისები სულ':'Total invoices','ბოლო ინვოისები':'Recent invoices','ინფო':'Info','პროდუქტები':'Items','გადახედვა':'Preview','ინვოისი №':'Invoice No.','თარიღი':'Date','გადახდის ვადა':'Due date','კლიენტი':'Client','ძიება ან ახლის დამატება...':'Search or add new...','ახალი კლიენტი':'New client','სახელი / კომპანია':'Name / Company','მისამართი':'Address','ტელეფონი':'Phone','კლიენტების ბაზაში შენახვა':'Save to client database','შენიშვნა':'Note','გადახდის პირობები...':'Payment terms...','შემდეგი → პროდუქტები':'Next → Items','დასახელება':'Description','რაოდ.':'Qty','ფასი ₾':'Price ₾','ჯამი ₾':'Total ₾','პროდუქტის დამატება':'Add item','კატალოგიდან ჩასმა...':'Add from catalog...','შუალედური ჯამი':'Subtotal','მათ შორის დღგ':'Including VAT','სულ გადასახდელი':'Total due','უკან':'Back','რედაქტირება':'Edit','შენახვა':'Save','PDF':'PDF','WhatsApp':'WhatsApp','Viber':'Viber','ახალი':'New','სულ':'Total','მოქმედება':'Actions','ნახვა':'View','წაშლა':'Delete','კლიენტის დამატება':'Add client','კლიენტის რედაქტირება':'Edit client','პროდუქტი':'Product','Excel-იდან იმპორტი':'Import from Excel','Excel ფაილი უნდა შეიცავდეს სვეტებს:':'Excel file must contain columns:','სახელი, ერთეული, ფასი':'Name, Unit, Price','ერთეული':'Unit','ძირითადი ინფო':'Main info','ლოგო':'Logo','ლოგოს ატვირთვა (PNG, JPG)':'Upload logo (PNG, JPG)','ბანკის დამატება':'Add bank','ბანკი':'Bank','საბანკო ანგარიშები':'Bank accounts','გამგზავნი':'Sender','მიმღები':'Recipient','კოდი':'ID','საბანკო რეკვიზიტები':'Bank details','სულ გადასახდელი':'Total due','მფლობელი კომპანია':'Owner company','კონფიდენციალურობა':'Privacy Policy','წესები და პირობები':'Terms & Conditions','კონტაქტი':'Contact','ყველა უფლება დაცულია':'All rights reserved','ჯერ შედი ანგარიშში':'Please log in first','პროფილი განახლდა ✓':'Profile updated ✓','კლიენტი შენახულია ✓':'Client saved ✓','ინვოისი შენახულია ✓':'Invoice saved ✓','ინვოისი წაიშალა ✓':'Invoice deleted ✓'
+  },
+  ru: {
+    'შესვლა':'Войти','რეგისტრაცია':'Регистрация','ქართული ბიზნესისთვის':'Для бизнеса','შექმენი შენი ინვოისი მარტივად':'Создавайте счета легко','პროფესიული ინვოისები წუთებში. შეინახე კლიენტები, პროდუქცია და გაგზავნე PDF-ით WhatsApp-ზე ან Viber-ზე.':'Профессиональные счета за минуты. Сохраняйте клиентов, товары и отправляйте PDF через WhatsApp или Viber.','უფასოდ დაიწყე →':'Начать бесплатно →','უფასო':'Бесплатно','ექსპორტი':'Экспорт','დღგ მხარდაჭერა':'Поддержка НДС','ფიჩერები':'Функции','ყველაფერი რაც გჭირდება':'Все, что нужно','კლიენტების ბაზა':'База клиентов','შეინახე კლიენტების მონაცემები ერთხელ და გამოიყენე ყოველ ინვოისზე.':'Сохраните данные клиента один раз и используйте в каждом счете.','პროდუქტების კატალოგი':'Каталог товаров','Excel-იდან იმპორტი ან ხელით დამატება. ინვოისზე ერთი კლიკით ჩასმა.':'Импорт из Excel или ручное добавление. Один клик для счета.','PDF + WhatsApp/Viber':'PDF + WhatsApp/Viber','პროფესიული PDF გენერაცია და გაგზავნა WhatsApp/Viber-ით.':'Создание профессионального PDF и отправка через WhatsApp/Viber.','საბანკო რეკვიზიტები':'Банковские реквизиты','მრავალი ბანკის ანგარიში — ყოველ ინვოისზე ავტომატურად ჩაისმება.':'Несколько банковских счетов автоматически попадают в счет.','დღგ 18%':'НДС 18%','ავტომატური გამოთვლა. ჩართე ან გამორთე ერთი კლიკით.':'Автоматический расчет. Включайте/выключайте одним кликом.','ქართულად':'На грузинском','სრულად ქართულ ენაზე. კომპანია, ფიზ. პირი, ინდ. მეწარმე — ყველა ტიპი.':'Полная локализация. Компания, физлицо и предприниматель.','მოგესალმებით! 👋':'Добро пожаловать! 👋','შედი შენს ანგარიშში':'Войдите в аккаунт','ელ-ფოსტა':'Email','პაროლი':'Пароль','არ გაქვს ანგარიში?':'Нет аккаунта?','დარეგისტრირდი':'Зарегистрируйтесь','შექმენი ანგარიში':'Создать аккаунт','ერთხელ შეავსე — ყოველთვის გამოიყენე':'Заполните один раз — используйте всегда','სუბიექტის ტიპი':'Тип субъекта','კომპანია':'Компания','ფიზ. პირი':'Физ. лицо','ინდ. მეწარმე':'Предприниматель','კომპანიის სახელი':'Название компании','სახელი და გვარი':'Имя и фамилия','საიდ. კოდი':'Идентификационный код','პირ. № / ID':'Личный номер / ID','მინ. 6 სიმბოლო':'Мин. 6 символов','დაბადების თარიღი':'Дата рождения','გაქვს ანგარიში?':'Уже есть аккаунт?','შედი':'Войти','მთავარი':'Главная','ახალი ინვოისი':'Новый счет','ინვოისები':'Счета','კლიენტები':'Клиенты','პროდუქტები':'Товары','პროფილი':'Профиль','გამოსვლა':'Выход','ინვოისები სულ':'Всего счетов','ბოლო ინვოისები':'Последние счета','ინფო':'Инфо','პროდუქტები':'Позиции','გადახედვა':'Просмотр','ინვოისი №':'Счет №','თარიღი':'Дата','გადახდის ვადა':'Срок оплаты','კლიენტი':'Клиент','ძიება ან ახლის დამატება...':'Поиск или добавить нового...','ახალი კლიენტი':'Новый клиент','სახელი / კომპანია':'Имя / Компания','მისამართი':'Адрес','ტელეფონი':'Телефон','კლიენტების ბაზაში შენახვა':'Сохранить в базе клиентов','შენიშვნა':'Примечание','გადახდის პირობები...':'Условия оплаты...','შემდეგი → პროდუქტები':'Далее → Позиции','დასახელება':'Описание','რაოდ.':'Кол-во','ფასი ₾':'Цена ₾','ჯამი ₾':'Итого ₾','პროდუქტის დამატება':'Добавить позицию','კატალოგიდან ჩასმა...':'Добавить из каталога...','შუალედური ჯამი':'Промежуточный итог','მათ შორის დღგ':'Включая НДС','სულ გადასახდელი':'К оплате','უკან':'Назад','რედაქტირება':'Редактировать','შენახვა':'Сохранить','PDF':'PDF','WhatsApp':'WhatsApp','Viber':'Viber','ახალი':'Новый','სულ':'Итого','მოქმედება':'Действия','ნახვა':'Открыть','წაშლა':'Удалить','კლიენტის დამატება':'Добавить клиента','კლიენტის რედაქტირება':'Редактировать клиента','პროდუქტი':'Товар','Excel-იდან იმპორტი':'Импорт из Excel','Excel ფაილი უნდა შეიცავდეს სვეტებს:':'Файл Excel должен содержать столбцы:','სახელი, ერთეული, ფასი':'Название, Ед., Цена','ერთეული':'Ед.','ძირითადი ინფო':'Основная информация','ლოგო':'Логотип','ლოგოს ატვირთვა (PNG, JPG)':'Загрузить логотип (PNG, JPG)','ბანკის დამატება':'Добавить банк','ბანკი':'Банк','საბანკო ანგარიშები':'Банковские счета','გამგზავნი':'Отправитель','მიმღები':'Получатель','კოდი':'Код','საბანკო რეკვიზიტები':'Банковские реквизиты','მფლობელი კომპანია':'Компания-владелец','კონფიდენციალურობა':'Политика конфиденциальности','წესები და პირობები':'Условия использования','კონტაქტი':'Контакт','ყველა უფლება დაცულია':'Все права защищены','ჯერ შედი ანგარიშში':'Сначала войдите','პროფილი განახლდა ✓':'Профиль обновлен ✓','კლიენტი შენახულია ✓':'Клиент сохранен ✓','ინვოისი შენახულია ✓':'Счет сохранен ✓','ინვოისი წაიშალა ✓':'Счет удален ✓'
+  }
+};
+
+function trText(original){
+  if(!original) return original;
+  if(currentLang === 'ka') return original;
+  const clean = String(original).replace(/\s+/g,' ').trim();
+  const translated = UI_TRANSLATIONS[currentLang]?.[clean];
+  if(!translated) return original;
+  return String(original).replace(clean, translated);
+}
+
+function toggleLangMenu(id){
+  const box = document.getElementById(id);
+  if(!box) return;
+  document.querySelectorAll('.lang-select.open').forEach(x=>{ if(x.id !== id) x.classList.remove('open'); });
+  box.classList.toggle('open');
+}
+
+function updateLangButtons(){
+  document.querySelectorAll('.lang-current').forEach(btn=>{ btn.textContent = LANG_FLAGS[currentLang] || '🇬🇪'; });
+}
+
+function applyTranslations(root=document.body){
+  if(!root) return;
+  updateLangButtons();
+  const skipTags = new Set(['SCRIPT','STYLE','TEXTAREA','INPUT','SELECT','OPTION']);
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node){
+      const parent = node.parentElement;
+      if(!parent || skipTags.has(parent.tagName)) return NodeFilter.FILTER_REJECT;
+      if(parent.closest && parent.closest('.lang-select')) return NodeFilter.FILTER_REJECT;
+      if(!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const nodes=[];
+  while(walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(node=>{
+    if(!node.__origText) node.__origText = node.nodeValue;
+    node.nodeValue = currentLang === 'ka' ? node.__origText : trText(node.__origText);
+  });
+  root.querySelectorAll && root.querySelectorAll('[placeholder]').forEach(el=>{
+    if(!el.dataset.origPlaceholder) el.dataset.origPlaceholder = el.getAttribute('placeholder') || '';
+    el.setAttribute('placeholder', currentLang === 'ka' ? el.dataset.origPlaceholder : trText(el.dataset.origPlaceholder));
+  });
+}
+
+function setLang(lang){
+  if(!LANG_FLAGS[lang]) lang = 'ka';
+  currentLang = lang;
+  localStorage.setItem('invoice_lang', currentLang);
+  document.documentElement.lang = currentLang;
+  document.querySelectorAll('.lang-select.open').forEach(x=>x.classList.remove('open'));
+  applyTranslations(document.body);
+  if(typeof buildInvPreview === 'function'){
+    const preview = document.getElementById('inv-preview-content');
+    if(preview && preview.innerHTML.trim()) applyTranslations(preview);
+  }
+}
+
+function translateDynamic(){ setTimeout(()=>applyTranslations(document.body), 0); }
+
+document.addEventListener('click', e=>{
+  if(!e.target.closest || !e.target.closest('.lang-select')) document.querySelectorAll('.lang-select.open').forEach(x=>x.classList.remove('open'));
+});
 
 // ========== INIT ==========
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1740,6 +1838,7 @@ async function downloadInvPDF(){
   const savedId = await saveInvoice(true);
   if(!savedId) return;
   buildInvPreview();
+  applyTranslations(document.getElementById('inv-preview-content'));
 
   const preview = document.getElementById('inv-preview-content');
   const num = document.getElementById('ii-num').value || '001';
