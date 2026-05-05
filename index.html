@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ინვოისი.გე — შექმენი შენი ინვოისი მარტივად</title>
+<title>Invoice.com.ge — შექმენი შენი ინვოისი მარტივად</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -334,7 +334,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 <!-- ========== LANDING PAGE ========== -->
 <div id="page-landing">
   <nav class="land-nav">
-    <div class="brand">ინვოისი<span>.გე</span></div>
+    <div class="brand">Invoice<span>.com.ge</span></div>
     <div class="nav-btns">
       <button type="button" class="btn-nav-login" onclick="openAuth('login')">შესვლა</button>
       <button type="button" class="btn-nav-reg" onclick="openAuth('register')">რეგისტრაცია</button>
@@ -432,6 +432,8 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
       <div class="fm-group"><label class="fm-label">ელ-ფოსტა</label><input class="fm-input" type="email" id="reg-email" placeholder="you@example.com"></div>
       <div class="fm-group"><label class="fm-label">პაროლი</label><input class="fm-input" type="password" id="reg-pass" placeholder="მინ. 6 სიმბოლო"></div>
       <div class="fm-group"><label class="fm-label">დაბადების თარიღი</label><input class="fm-input" type="date" id="reg-birth"></div>
+      <div class="fm-group"><label class="fm-label">მისამართი</label><input class="fm-input" id="reg-address" placeholder="მისამართი"></div>
+      <div class="fm-group"><label class="fm-label">ტელეფონი</label><input class="fm-input" id="reg-phone" placeholder="ტელეფონი"></div>
       <button type="button" class="btn-submit" onclick="doRegister()">რეგისტრაცია</button>
       <div class="auth-switch">გაქვს ანგარიში? <a onclick="switchAuthTab('login')">შედი</a></div>
     </div>
@@ -443,7 +445,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
   <div class="app-layout">
     <!-- SIDEBAR -->
     <aside class="sidebar">
-      <div class="sidebar-brand"><div class="sidebar-brand-name">ინვოისი<span>.გე</span></div></div>
+      <div class="sidebar-brand"><div class="sidebar-brand-name">Invoice<span>.com.ge</span></div></div>
       <div class="sidebar-user">
         <div class="sidebar-user-name" id="sb-username">—</div>
         <div class="sidebar-user-type" id="sb-usertype">—</div>
@@ -455,6 +457,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
         <div class="nav-item" onclick="showPage('clients')"><span class="icon">👥</span>კლიენტები</div>
         <div class="nav-item" onclick="showPage('catalog')"><span class="icon">📦</span>პროდუქტები</div>
         <div class="nav-item" onclick="showPage('profile')"><span class="icon">⚙️</span>პროფილი</div>
+        <div class="nav-item nav-logout" onclick="doLogout()"><span class="icon">🚪</span>გამოსვლა</div>
       </nav>
       <div class="sidebar-footer"><button type="button" class="btn-logout" onclick="doLogout()">გამოსვლა</button></div>
     </aside>
@@ -501,6 +504,15 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
               </div>
             </div>
             <div id="selected-client-info" style="display:none;background:#f0fdf4;border-radius:8px;padding:12px 14px;font-size:13px;margin-bottom:14px;border:1px solid #bbf7d0;"></div>
+            <div id="selected-client-fields" style="display:none;background:#fafafa;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;">
+              <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.5px;">კლიენტის მონაცემები ინვოისისთვის</div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">საიდ. კოდი / პირადი №</label><input class="form-input" id="sc-id" placeholder=""></div>
+                <div class="form-group"><label class="form-label">ტელეფონი</label><input class="form-input" id="sc-phone" placeholder=""></div>
+              </div>
+              <div class="form-group"><label class="form-label">მისამართი</label><input class="form-input" id="sc-addr" placeholder=""></div>
+              <div class="form-group"><label class="form-label">ელ-ფოსტა</label><input class="form-input" id="sc-email" type="email" placeholder=""></div>
+            </div>
             <div id="new-client-fields" style="display:none">
               <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.5px;">ახალი კლიენტი</div>
               <div class="form-row">
@@ -704,6 +716,44 @@ let editingClientId = null;
 let isLoggingOut = false;
 let authReady = false;
 let authSubscription = null;
+let inactivityTimer = null;
+const INACTIVITY_LIMIT_MS = 10 * 60 * 1000;
+let currentInvoiceId = null;
+let invoiceDirty = true;
+
+function markInvoiceDirty(){ invoiceDirty = true; }
+function stopInactivityTimer(){
+  if(inactivityTimer) clearTimeout(inactivityTimer);
+  inactivityTimer = null;
+}
+function resetInactivityTimer(){
+  if(!currentUser || isLoggingOut) return;
+  stopInactivityTimer();
+  inactivityTimer = setTimeout(() => {
+    toast('10 წუთი არააქტიური იყავი — უსაფრთხოებისთვის გამოხვედი', 'error');
+    doLogout();
+  }, INACTIVITY_LIMIT_MS);
+}
+function setupInactivityWatcher(){
+  ['click','mousemove','keydown','touchstart','scroll'].forEach(ev => {
+    window.addEventListener(ev, resetInactivityTimer, { passive:true });
+  });
+}
+function setupLoginEnterKey(){
+  ['login-email','login-pass'].forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('keydown', e => {
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        doLogin();
+      }
+    });
+  });
+}
+function clearInvoiceClientFields(){
+  ['sc-id','sc-phone','sc-addr','sc-email'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+}
 
 // ========== INIT ==========
 document.addEventListener('DOMContentLoaded', async () => {
@@ -751,6 +801,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       const dd = document.getElementById('client-dd');
       if(dd) dd.classList.remove('open');
     }
+  });
+  setupLoginEnterKey();
+  setupInactivityWatcher();
+  ['ii-num','ii-date','ii-due','ii-note','ii-client-search','nc-name','nc-id','nc-addr','nc-phone','sc-id','sc-addr','sc-phone','sc-email','inv-vat'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('input', markInvoiceDirty);
+    if(el) el.addEventListener('change', markInvoiceDirty);
   });
 });
 
@@ -808,6 +865,9 @@ function resetLocalState(){
   profileLogoUrl = null;
   selectedClientId = null;
   editingClientId = null;
+  currentInvoiceId = null;
+  invoiceDirty = true;
+  stopInactivityTimer();
 }
 
 // ========== AUTH ==========
@@ -876,22 +936,30 @@ async function doLogin(){
 }
 
 async function doRegister(){
-  const name=document.getElementById('reg-name').value;
-  const idnum=document.getElementById('reg-idnum').value;
-  const email=document.getElementById('reg-email').value;
+  const name=document.getElementById('reg-name').value.trim();
+  const idnum=document.getElementById('reg-idnum').value.trim();
+  const email=document.getElementById('reg-email').value.trim();
   const pass=document.getElementById('reg-pass').value;
   const birth=document.getElementById('reg-birth').value;
+  const address=(document.getElementById('reg-address')?.value || '').trim();
+  const phone=(document.getElementById('reg-phone')?.value || '').trim();
   const err=document.getElementById('reg-error');
   const suc=document.getElementById('reg-success');
   err.style.display='none'; suc.style.display='none';
   if(!name||!email||!pass){err.textContent='შეავსე სავალდებულო ველები';err.style.display='block';return;}
-  const {data,error}=await db.auth.signUp({email,password:pass,options:{data:{full_name:name}}});
+  const {data,error}=await db.auth.signUp({email,password:pass,options:{data:{full_name:name,entity_type:regType,id_number:idnum,address,phone,birth_date:birth||null}}});
   if(error){err.textContent=error.message;err.style.display='block';return;}
   if(data.user){
     await db.from('profiles').upsert({
-      id:data.user.id,entity_type:regType,full_name:name,id_number:idnum,email,
+      id:data.user.id,
+      entity_type:regType,
+      full_name:name,
+      id_number:idnum,
+      email,
+      address,
+      phone,
       birth_date:birth||null
-    });
+    }, { onConflict:'id' });
   }
   suc.textContent='რეგისტრაცია წარმატებულია! გთხოვ შეამოწმე ელ-ფოსტა.';
   suc.style.display='block';
@@ -913,6 +981,7 @@ async function doLogout(){
     console.error(e);
   }
 
+  stopInactivityTimer();
   clearSupabaseStorage();
   resetLocalState();
   closeAuth();
@@ -933,6 +1002,7 @@ async function loginSuccess(user){
   showApp();
   showPage('dashboard');
   setupSidebar();
+  resetInactivityTimer();
 }
 
 // ========== PROFILE ==========
@@ -962,7 +1032,8 @@ function setupSidebar(){
   if(!userProfile) return;
   const types={company:'კომპანია',individual:'ფიზ. პირი',entrepreneur:'ინდ. მეწარმე'};
   document.getElementById('sb-username').textContent=userProfile.full_name||currentUser.email;
-  document.getElementById('sb-usertype').textContent=types[userProfile.entity_type]||'';
+  const idText = userProfile.id_number ? `ს/კ / პირადი №: ${userProfile.id_number}` : (types[userProfile.entity_type]||'');
+  document.getElementById('sb-usertype').textContent=idText;
 }
 
 function renderProfile(){
@@ -1200,14 +1271,23 @@ function selectClient(id){
   document.getElementById('client-dd').classList.remove('open');
   document.getElementById('selected-client-info').style.display='block';
   document.getElementById('selected-client-info').innerHTML=`✅ <strong>${c.full_name}</strong>${c.id_number?' | კოდი: '+c.id_number:''}${c.address?' | '+c.address:''}`;
+  document.getElementById('selected-client-fields').style.display='block';
+  document.getElementById('sc-id').value=c.id_number||'';
+  document.getElementById('sc-addr').value=c.address||'';
+  document.getElementById('sc-phone').value=c.phone||'';
+  document.getElementById('sc-email').value=c.email||'';
   document.getElementById('new-client-fields').style.display='none';
+  markInvoiceDirty();
 }
 function useNewClient(){
   selectedClientId=null;
   document.getElementById('client-dd').classList.remove('open');
   document.getElementById('new-client-fields').style.display='block';
   document.getElementById('selected-client-info').style.display='none';
+  document.getElementById('selected-client-fields').style.display='none';
+  clearInvoiceClientFields();
   document.getElementById('nc-name').value=document.getElementById('ii-client-search').value;
+  markInvoiceDirty();
 }
 
 // ========== PRODUCTS / CATALOG ==========
@@ -1392,6 +1472,28 @@ function switchInvTab(name){
   if(name==='preview') buildInvPreview();
 }
 
+function getInvoiceClientSnapshot(){
+  if(selectedClientId){
+    const c=userClients.find(x=>x.id===selectedClientId) || {};
+    return {
+      id:selectedClientId,
+      full_name:document.getElementById('ii-client-search').value || c.full_name || '',
+      id_number:document.getElementById('sc-id')?.value || c.id_number || '',
+      address:document.getElementById('sc-addr')?.value || c.address || '',
+      phone:document.getElementById('sc-phone')?.value || c.phone || '',
+      email:document.getElementById('sc-email')?.value || c.email || ''
+    };
+  }
+  return {
+    id:null,
+    full_name:document.getElementById('nc-name')?.value || document.getElementById('ii-client-search')?.value || '',
+    id_number:document.getElementById('nc-id')?.value || '',
+    address:document.getElementById('nc-addr')?.value || '',
+    phone:document.getElementById('nc-phone')?.value || '',
+    email:''
+  };
+}
+
 function buildInvPreview(){
   const p=userProfile||{};
   const num=document.getElementById('ii-num').value;
@@ -1399,18 +1501,14 @@ function buildInvPreview(){
   const due=document.getElementById('ii-due').value;
   const note=document.getElementById('ii-note').value;
   const vatOn=document.getElementById('inv-vat').checked;
-  const sub=invProducts.reduce((s,p)=>s+(p.qty*p.price),0);
+  const sub=invProducts.reduce((s,p)=>s+((p.qty||0)*(p.price||0)),0);
   const vat=vatOn?sub*0.18:0;
   const total=sub;
 
-  // client info
+  const client=getInvoiceClientSnapshot();
   let clientHtml='—';
-  if(selectedClientId){
-    const c=userClients.find(x=>x.id===selectedClientId);
-    if(c) clientHtml=`<strong>${c.full_name}</strong>${c.id_number?'<br>კოდი: '+c.id_number:''}${c.address?'<br>'+c.address:''}`;
-  } else {
-    const cn=document.getElementById('nc-name')?.value;
-    if(cn) clientHtml=`<strong>${cn}</strong>`;
+  if(client.full_name){
+    clientHtml=`<strong>${client.full_name}</strong>${client.id_number?'<br>კოდი: '+client.id_number:''}${client.address?'<br>'+client.address:''}${client.phone?'<br>'+client.phone:''}${client.email?'<br>'+client.email:''}`;
   }
 
   const logoHtml=profileLogoUrl?`<img src="${profileLogoUrl}" style="max-height:60px;max-width:160px;">`:
@@ -1421,7 +1519,7 @@ function buildInvPreview(){
   `).join('');
 
   const rowsHtml=invProducts.filter(p=>p.name||p.price).map(p=>`
-    <tr><td>${p.name||'—'}</td><td style="text-align:center">${p.qty}</td><td style="text-align:right">${fmt(p.price)}</td><td style="text-align:right">${fmt(p.qty*p.price)}</td></tr>
+    <tr><td>${p.name||'—'}</td><td style="text-align:center">${p.qty||0}</td><td style="text-align:right">${fmt(p.price||0)}</td><td style="text-align:right">${fmt((p.qty||0)*(p.price||0))}</td></tr>
   `).join('');
 
   document.getElementById('inv-preview-content').innerHTML=`
@@ -1447,48 +1545,88 @@ function buildInvPreview(){
   `;
 }
 
-async function saveInvoice(){
-  const p=userProfile;
+async function saveInvoice(silent=false){
+  if(!currentUser){ toast('ჯერ შედი ანგარიშში','error'); return null; }
+  if(currentInvoiceId && !invoiceDirty && silent) return currentInvoiceId;
+
   const vatOn=document.getElementById('inv-vat').checked;
-  const sub=invProducts.reduce((s,p)=>s+(p.qty*p.price),0);
+  const sub=invProducts.reduce((s,p)=>s+((p.qty||0)*(p.price||0)),0);
   const vat=vatOn?sub*0.18:0;
   const total=sub;
+  const client=getInvoiceClientSnapshot();
 
-  // save new client if needed
   let cid=selectedClientId;
-  if(!cid){
-    const cn=document.getElementById('nc-name')?.value;
+  if(cid){
+    // კლიენტის ძირითადი მონაცემები განვაახლოთ, თუ ინვოისის შექმნისას ჩაასწორე.
+    await db.from('clients').update({
+      id_number:client.id_number,
+      address:client.address,
+      phone:client.phone,
+      email:client.email
+    }).eq('id',cid).eq('user_id',currentUser.id);
+    await loadClients();
+  }
+
+  if(!cid && client.full_name){
     const saveNew=document.getElementById('nc-save')?.checked;
-    if(cn&&saveNew){
-      const {data}=await db.from('clients').insert({
-        user_id:currentUser.id,full_name:cn,
-        id_number:document.getElementById('nc-id').value,
-        address:document.getElementById('nc-addr').value,
-        phone:document.getElementById('nc-phone').value
+    if(saveNew){
+      const {data,error}=await db.from('clients').insert({
+        user_id:currentUser.id,
+        full_name:client.full_name,
+        id_number:client.id_number,
+        address:client.address,
+        phone:client.phone
       }).select().single();
-      if(data){cid=data.id;await loadClients();}
+      if(error){ toast('კლიენტი ვერ შეინახა: '+error.message,'error'); return null; }
+      if(data){cid=data.id;selectedClientId=cid;await loadClients();}
     }
   }
 
-  const {data:inv}=await db.from('invoices').insert({
+  const invoiceRow={
     user_id:currentUser.id,
     invoice_number:document.getElementById('ii-num').value,
     client_id:cid||null,
     invoice_date:document.getElementById('ii-date').value,
     due_date:document.getElementById('ii-due').value,
-    vat_enabled:vatOn,note:document.getElementById('ii-note').value,
-    subtotal:sub,vat_amount:vat,total
-  }).select().single();
+    vat_enabled:vatOn,
+    note:document.getElementById('ii-note').value,
+    subtotal:sub,
+    vat_amount:vat,
+    total
+  };
 
-  if(inv){
-    const items=invProducts.filter(p=>p.name||p.price).map(p=>({invoice_id:inv.id,name:p.name,qty:p.qty,price:p.price,total:p.qty*p.price}));
-    if(items.length) await db.from('invoice_items').insert(items);
+  let inv=null, error=null;
+  if(currentInvoiceId){
+    const res=await db.from('invoices').update(invoiceRow).eq('id',currentInvoiceId).eq('user_id',currentUser.id).select().single();
+    inv=res.data; error=res.error;
+  }else{
+    const res=await db.from('invoices').insert(invoiceRow).select().single();
+    inv=res.data; error=res.error;
   }
+
+  if(error){
+    console.error(error);
+    toast('ინვოისი ვერ შეინახა: '+error.message,'error');
+    return null;
+  }
+
+  currentInvoiceId=inv.id;
+  await db.from('invoice_items').delete().eq('invoice_id',inv.id);
+  const items=invProducts.filter(p=>p.name||p.price).map(p=>({invoice_id:inv.id,name:p.name,qty:p.qty||0,price:p.price||0,total:(p.qty||0)*(p.price||0)}));
+  if(items.length){
+    const {error:itemError}=await db.from('invoice_items').insert(items);
+    if(itemError){ toast('ინვოისის პროდუქტები ვერ შეინახა: '+itemError.message,'error'); return null; }
+  }
+
+  invoiceDirty=false;
   await loadInvoices();
-  toast('ინვოისი შენახულია ✓','success');
+  if(!silent) toast('ინვოისი შენახულია ✓','success');
+  return currentInvoiceId;
 }
 
 async function downloadInvPDF(){
+  const savedId = await saveInvoice(true);
+  if(!savedId) return;
   buildInvPreview();
 
   const preview = document.getElementById('inv-preview-content');
@@ -1569,12 +1707,20 @@ async function downloadInvPDF(){
   }
 }
 
-function sendInvWhatsApp(){
+async function sendInvWhatsApp(){
+  const savedId = await saveInvoice(true);
+  if(!savedId) return;
+  buildInvPreview();
   const num=document.getElementById('ii-num').value;
-  const vatOn=document.getElementById('inv-vat').checked;
-  const sub=invProducts.reduce((s,p)=>s+(p.qty*p.price),0);
+  const sub=invProducts.reduce((s,p)=>s+((p.qty||0)*(p.price||0)),0);
   const total=sub;
-  const msg=encodeURIComponent(`გამარჯობა!\n\nგიგზავნით ინვოისს №${num}\nგადასახდელი: ${fmt(total)}\n\nგმადლობთ!`);
+  const msg=encodeURIComponent(`გამარჯობა!
+
+გიგზავნით ინვოისს №${num}
+გადასახდელი: ${fmt(total)}
+
+PDF ინვოისი ცალკე ფანჯარაში გაიხსნება — ჩამოტვირთე და WhatsApp-ში მიამაგრე.`);
+  await downloadInvPDF();
   window.open(`https://wa.me/?text=${msg}`,'_blank');
 }
 
@@ -1600,8 +1746,12 @@ function showPage(name){
   if(name==='invoice-new'){
     invProducts=[];
     selectedClientId=null;
+    currentInvoiceId=null;
+    invoiceDirty=true;
     document.getElementById('ii-client-search').value='';
     document.getElementById('selected-client-info').style.display='none';
+    const scf=document.getElementById('selected-client-fields'); if(scf) scf.style.display='none';
+    clearInvoiceClientFields();
     document.getElementById('new-client-fields').style.display='none';
     document.getElementById('inv-vat').checked=false;
     addInvProduct(); addInvProduct();
@@ -1612,6 +1762,8 @@ function showPage(name){
     if(last){
       const n=parseInt(last.invoice_number)||0;
       document.getElementById('ii-num').value=String(n+1).padStart(3,'0');
+    }else{
+      document.getElementById('ii-num').value='001';
     }
   }
 }
