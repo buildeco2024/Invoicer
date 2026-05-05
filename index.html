@@ -381,6 +381,21 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 .app-mobile-top{display:none;}
 @media(max-width:768px){.app-mobile-top{display:flex;justify-content:flex-end;margin-bottom:10px}.app-mobile-top .lang-current{background:#0f0f1a;color:#fff;border-color:#0f0f1a}.app-mobile-top .lang-menu{right:0}}
 
+
+/* FULL I18N + USER INFO FIX */
+@media(min-width:769px){
+  .sidebar-brand{display:flex!important;}
+  .sidebar-user{display:block!important;}
+  .sidebar-footer{display:block!important;}
+}
+.app-mobile-user{display:none;}
+@media(max-width:768px){
+  .app-mobile-top{justify-content:space-between!important;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow);}
+  .app-mobile-user{display:block;min-width:0;}
+  .app-mobile-user-name{font-weight:800;font-size:13px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px;}
+  .app-mobile-user-id{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px;margin-top:2px;}
+}
+
 </style>
 </head>
 <body>
@@ -2019,6 +2034,146 @@ function showPage(name){
 }
 
 setTimeout(()=>setLang(currentLang), 100);
+</script>
+<script>
+// ========== COMPLETE TRANSLATION + SIDEBAR USER FIX ==========
+(function(){
+  const FLAGS = {ka:'🇬🇪', en:'🇬🇧', ru:'🇷🇺'};
+  const EN = {
+    'შესვლა':'Login','რეგისტრაცია':'Register','შესვლა...':'Logging in...','ინახება...':'Saving...','შედი':'Login','შედი შენს ანგარიშში':'Sign in to your account','მოგესალმებით! 👋':'Welcome! 👋','არ გაქვს ანგარიში?':'No account?','დარეგისტრირდი':'Register','გაქვს ანგარიში?':'Already have an account?','შექმენი ანგარიში':'Create account','ერთხელ შეავსე — ყოველთვის გამოიყენე':'Fill once — use every time','სუბიექტის ტიპი':'Entity type','ელ-ფოსტა':'Email','პაროლი':'Password','მინ. 6 სიმბოლო':'Min. 6 characters','დაბადების თარიღი':'Birth date','კომპანია':'Company','ფიზ. პირი':'Individual','ინდ. მეწარმე':'Entrepreneur','კომპანიის სახელი':'Company name','სახელი და გვარი':'Full name','საიდ. კოდი':'ID number','საიდ. კოდი / პირადი №':'ID / personal number','პირ. № / ID':'Personal ID','შპს მაგალითი':'Example LLC','შეავსე სავალდებულო ველები':'Please fill required fields','ელ-ფოსტა და პაროლი შეავსე':'Enter email and password','შესვლა ვერ მოხერხდა. სცადე თავიდან.':'Login failed. Try again.','რეგისტრაცია წარმატებულია! გთხოვ შეამოწმე ელ-ფოსტა.':'Registration successful. Please check your email.',
+    '🇬🇪 ბიზნესისთვის':'For business','ქართული ბიზნესისთვის':'For Georgian business','შექმენი შენი ინვოისი':'Create your invoice','მარტივად':'easily','შექმენი შენი ინვოისი მარტივად':'Create your invoice easily','პროფესიული ინვოისები წუთებში. შეინახე კლიენტები, პროდუქცია და გაგზავნე PDF-ით WhatsApp-ზე ან Viber-ზე.':'Professional invoices in minutes. Save clients, products and send PDFs via WhatsApp or Viber.','უფასოდ დაიწყე →':'Start free →','უფასო':'Free','ექსპორტი':'Export','დღგ მხარდაჭერა':'VAT support','ფიჩერები':'Features','ყველაფერი რაც გჭირდება':'Everything you need','კლიენტების ბაზა':'Client database','შეინახე კლიენტების მონაცემები ერთხელ და გამოიყენე ყოველ ინვოისზე.':'Save client details once and use them on every invoice.','პროდუქტების კატალოგი':'Product catalog','Excel-იდან იმპორტი ან ხელით დამატება. ინვოისზე ერთი კლიკით ჩასმა.':'Import from Excel or add manually. Add to invoices in one click.','PDF + WhatsApp/Viber':'PDF + WhatsApp/Viber','პროფესიული PDF გენერაცია და გაგზავნა WhatsApp-ით ან Viber-ით.':'Generate professional PDFs and send via WhatsApp or Viber.','პროფესიული PDF გენერაცია და გაგზავნა WhatsApp/Viber-ით.':'Generate professional PDFs and send via WhatsApp/Viber.','საბანკო რეკვიზიტები':'Bank details','მრავალი ბანკის ანგარიში — ყოველ ინვოისზე ავტომატურად ჩაისმება.':'Multiple bank accounts are added automatically to every invoice.','დღგ 18%':'VAT 18%','ავტომატური გამოთვლა. ჩართე ან გამორთე ერთი კლიკით.':'Automatic calculation. Enable or disable in one click.','ქართულად':'Localized','სრულად ქართულ ენაზე. კომპანია, ფიზ. პირი, ინდ. მეწარმე — ყველა ტიპი.':'Fully localized. Company, individual and entrepreneur are supported.','✅ ინვოისი გაგზავნილია!':'✅ Invoice sent!','ინვოისი':'Invoice','სერვისი A':'Service A','სერვისი B':'Service B','შპს ბიზნესი':'Business LLC',
+    'მთავარი':'Dashboard','ახალი ინვოისი':'New invoice','ინვოისები':'Invoices','კლიენტები':'Clients','პროდუქტები':'Products','პროფილი':'Profile','გამოსვლა':'Logout','ინვოისები სულ':'Total invoices','ბოლო ინვოისები':'Recent invoices','კლიენტები არ გაქვს დამატებული':'No clients added yet','პროდუქტები არ გაქვს დამატებული':'No products added yet','ინვოისები ჯერ არ გაქვს':'No invoices yet','იტვირთება...':'Loading...','სულ':'Total','მოქმედება':'Actions','ნახვა':'View','წაშლა':'Delete','რედაქტირება':'Edit','ახალი':'New','➕ ახალი':'➕ New','➕ ახალი ინვოისი':'➕ New invoice','➕ კლიენტის დამატება':'➕ Add client','➕ პროდუქტი':'➕ Product','📥 Excel-იდან იმპორტი':'📥 Import from Excel',
+    'ინფო':'Info','📋 ინფო':'📋 Info','📦 პროდუქტები':'📦 Items','გადახედვა':'Preview','👁 გადახედვა':'👁 Preview','ინვოისი №':'Invoice No.','თარიღი':'Date','გადახდის ვადა':'Due date','ვადა':'Due date','კლიენტი':'Client','ძიება ან ახლის დამატება...':'Search or add new...','კლიენტის მონაცემები ინვოისისთვის':'Client details for invoice','ახალი კლიენტი':'New client','კლიენტის სახელი':'Client name','სახელი / კომპანია':'Name / Company','მისამართი':'Address','ტელეფონი':'Phone','ტელ:':'Phone:','კლიენტების ბაზაში შენახვა':'Save to client database','შენიშვნა':'Note','გადახდის პირობები...':'Payment terms...','შემდეგი → პროდუქტები':'Next → Items','დასახელება':'Description','რაოდ.':'Qty','ფასი':'Price','ფასი ₾':'Price ₾','ჯამი':'Total','ჯამი ₾':'Total ₾','პროდუქტის დამატება':'Add item','+ პროდუქტის დამატება':'Add item','კატალოგიდან ჩასმა...':'Add from catalog...','შუალედური ჯამი':'Subtotal','მათ შორის დღგ':'Including VAT','სულ გადასახდელი':'Total due','უკან':'Back','← უკან':'← Back','← რედაქტირება':'← Edit','გადახედვა →':'Preview →','💾 შენახვა':'💾 Save','შენახვა':'Save','PDF':'PDF','WhatsApp':'WhatsApp','Viber':'Viber','გამგზავნი':'Sender','მიმღები':'Recipient','კოდი':'ID','ბანკი':'Bank','საბანკო ანგარიშები':'Bank accounts','+ ბანკის დამატება':'Add bank','ბანკის დამატება':'Add bank','ლოგო':'Logo','📎 ლოგოს ატვირთვა (PNG, JPG)':'📎 Upload logo (PNG, JPG)','ლოგოს ატვირთვა (PNG, JPG)':'Upload logo (PNG, JPG)','ძირითადი ინფო':'Main information','ც., კგ., სთ.':'pcs, kg, hr','სერვისი / პროდუქტი':'Service / Product','ერთეული':'Unit','Excel ფაილი უნდა შეიცავდეს სვეტებს:':'Excel file must contain columns:','სახელი, ერთეული, ფასი':'Name, Unit, Price','პროდუქტი':'Product','პროდუქტი დაიმპორტდა ✓':'product imported ✓',
+    'კლიენტის დამატება':'Add client','კლიენტის რედაქტირება':'Edit client','სახელი':'Name','სახელი სავალდებულოა':'Name is required','წაშლა?':'Delete?','წავშალო ეს ინვოისი?':'Delete this invoice?','კლიენტი შენახულია ✓':'Client saved ✓','პროფილი განახლდა ✓':'Profile updated ✓','პროდუქტი დამატებულია ✓':'Product added ✓','ინვოისი შენახულია ✓':'Invoice saved ✓','ინვოისი წაიშალა ✓':'Invoice deleted ✓','ჯერ შედი ანგარიშში':'Please log in first','PDF ფანჯარა გაიხსნა — აირჩიე Save as PDF':'PDF window opened — choose Save as PDF','ბრაუზერმა დაბლოკა PDF ფანჯარა. Pop-up დაუშვი და თავიდან სცადე.':'The browser blocked the PDF window. Allow pop-ups and try again.','10 წუთი არააქტიური იყავი — უსაფრთხოებისთვის გამოხვედი':'You were inactive for 10 minutes — logged out for security.',
+    'მფლობელი კომპანია':'Owner company','მფლობელი კომპანია: შპს ბილდეკო':'Owner company: Buildeco LLC','მფლობელი:':'Owner:','კონფიდენციალურობა':'Privacy Policy','წესები და პირობები':'Terms & Conditions','კონტაქტი':'Contact','ყველა უფლება დაცულია':'All rights reserved','უსაფრთხოება':'Security','მონაცემების გამოყენება':'Data usage','სერვისის გამოყენება':'Use of service','შეზღუდვები':'Restrictions','დაგვიკავშირდით სამუშაო საკითხებზე ან ტექნიკური დახმარებისთვის.':'Contact us for business matters or technical support.','კითხვების შემთხვევაში დაგვიკავშირდით მითითებულ ნომერზე ან ელ-ფოსტაზე.':'For questions, contact us using the phone number or email provided.','საიტი ინახავს მხოლოდ იმ ინფორმაციას, რომელსაც მომხმარებელი თავად ავსებს: პროფილი, კლიენტები, პროდუქტები და ინვოისები. ეს მონაცემები გამოიყენება ინვოისების შექმნისა და შენახვისთვის.':'The site stores only the information entered by the user: profile, clients, products, and invoices. This data is used to create and save invoices.','ანგარიშები დაცულია ავტორიზაციით. თითოეული მომხმარებელი ხედავს მხოლოდ საკუთარ მონაცემებს.':'Accounts are protected by authentication. Each user sees only their own data.','Invoice.com.ge განკუთვნილია ინვოისების შექმნის, შენახვისა და გადმოტვირთვისთვის. მომხმარებელი პასუხისმგებელია შეყვანილი ინფორმაციის სისწორეზე.':'Invoice.com.ge is intended for creating, saving, and downloading invoices. The user is responsible for the accuracy of entered information.','აკრძალულია სერვისის გამოყენება უკანონო მიზნებისთვის ან სხვა პირის მონაცემების არამართლზომიერი დამუშავებისთვის.':'It is prohibited to use the service for illegal purposes or to improperly process another person’s data.'
+  };
+  const RU = {
+    'შესვლა':'Войти','რეგისტრაცია':'Регистрация','შესვლა...':'Вход...','ინახება...':'Сохранение...','შედი':'Войти','შედი შენს ანგარიშში':'Войдите в аккаунт','მოგესალმებით! 👋':'Добро пожаловать! 👋','არ გაქვს ანგარიში?':'Нет аккаунта?','დარეგისტრირდი':'Зарегистрируйтесь','გაქვს ანგარიში?':'Уже есть аккаунт?','შექმენი ანგარიში':'Создать аккаунт','ერთხელ შეავსე — ყოველთვის გამოიყენე':'Заполните один раз — используйте всегда','სუბიექტის ტიპი':'Тип субъекта','ელ-ფოსტა':'Email','პაროლი':'Пароль','მინ. 6 სიმბოლო':'Мин. 6 символов','დაბადების თარიღი':'Дата рождения','კომპანია':'Компания','ფიზ. პირი':'Физ. лицо','ინდ. მეწარმე':'Предприниматель','კომპანიის სახელი':'Название компании','სახელი და გვარი':'Имя и фамилия','საიდ. კოდი':'Идентификационный код','საიდ. კოდი / პირადი №':'ID / личный номер','პირ. № / ID':'Личный номер / ID','შპს მაგალითი':'ООО Пример','შეავსე სავალდებულო ველები':'Заполните обязательные поля','ელ-ფოსტა და პაროლი შეავსე':'Введите email и пароль','შესვლა ვერ მოხერხდა. სცადე თავიდან.':'Не удалось войти. Попробуйте снова.','რეგისტრაცია წარმატებულია! გთხოვ შეამოწმე ელ-ფოსტა.':'Регистрация успешна! Проверьте email.',
+    '🇬🇪 ბიზნესისთვის':'Для бизнеса','ქართული ბიზნესისთვის':'Для грузинского бизнеса','შექმენი შენი ინვოისი':'Создайте счет','მარტივად':'легко','შექმენი შენი ინვოისი მარტივად':'Создавайте счета легко','პროფესიული ინვოისები წუთებში. შეინახე კლიენტები, პროდუქცია და გაგზავნე PDF-ით WhatsApp-ზე ან Viber-ზე.':'Профессиональные счета за минуты. Сохраняйте клиентов, товары и отправляйте PDF через WhatsApp или Viber.','უფასოდ დაიწყე →':'Начать бесплатно →','უფასო':'Бесплатно','ექსპორტი':'Экспорт','დღგ მხარდაჭერა':'Поддержка НДС','ფიჩერები':'Функции','ყველაფერი რაც გჭირდება':'Все, что нужно','კლიენტების ბაზა':'База клиентов','შეინახე კლიენტების მონაცემები ერთხელ და გამოიყენე ყოველ ინვოისზე.':'Сохраните данные клиента один раз и используйте в каждом счете.','პროდუქტების კატალოგი':'Каталог товаров','Excel-იდან იმპორტი ან ხელით დამატება. ინვოისზე ერთი კლიკით ჩასმა.':'Импорт из Excel или ручное добавление. Добавление в счет одним кликом.','PDF + WhatsApp/Viber':'PDF + WhatsApp/Viber','პროფესიული PDF გენერაცია და გაგზავნა WhatsApp-ით ან Viber-ით.':'Создание профессионального PDF и отправка через WhatsApp или Viber.','პროფესიული PDF გენერაცია და გაგზავნა WhatsApp/Viber-ით.':'Создание профессионального PDF и отправка через WhatsApp/Viber.','საბანკო რეკვიზიტები':'Банковские реквизиты','მრავალი ბანკის ანგარიში — ყოველ ინვოისზე ავტომატურად ჩაისმება.':'Несколько банковских счетов автоматически добавляются в каждый счет.','დღგ 18%':'НДС 18%','ავტომატური გამოთვლა. ჩართე ან გამორთე ერთი კლიკით.':'Автоматический расчет. Включайте или выключайте одним кликом.','ქართულად':'Локализовано','სრულად ქართულ ენაზე. კომპანია, ფიზ. პირი, ინდ. მეწარმე — ყველა ტიპი.':'Полная локализация. Поддерживаются компании, физлица и предприниматели.','✅ ინვოისი გაგზავნილია!':'✅ Счет отправлен!','ინვოისი':'Счет','სერვისი A':'Услуга A','სერვისი B':'Услуга B','შპს ბიზნესი':'ООО Бизнес',
+    'მთავარი':'Главная','ახალი ინვოისი':'Новый счет','ინვოისები':'Счета','კლიენტები':'Клиенты','პროდუქტები':'Товары','პროფილი':'Профиль','გამოსვლა':'Выход','ინვოისები სულ':'Всего счетов','ბოლო ინვოისები':'Последние счета','კლიენტები არ გაქვს დამატებული':'Клиенты еще не добавлены','პროდუქტები არ გაქვს დამატებული':'Товары еще не добавлены','ინვოისები ჯერ არ გაქვს':'Счетов пока нет','იტვირთება...':'Загрузка...','სულ':'Итого','მოქმედება':'Действия','ნახვა':'Открыть','წაშლა':'Удалить','რედაქტირება':'Редактировать','ახალი':'Новый','➕ ახალი':'➕ Новый','➕ ახალი ინვოისი':'➕ Новый счет','➕ კლიენტის დამატება':'➕ Добавить клиента','➕ პროდუქტი':'➕ Товар','📥 Excel-იდან იმპორტი':'📥 Импорт из Excel',
+    'ინფო':'Инфо','📋 ინფო':'📋 Инфо','📦 პროდუქტები':'📦 Позиции','გადახედვა':'Просмотр','👁 გადახედვა':'👁 Просмотр','ინვოისი №':'Счет №','თარიღი':'Дата','გადახდის ვადა':'Срок оплаты','ვადა':'Срок','კლიენტი':'Клиент','ძიება ან ახლის დამატება...':'Поиск или добавить нового...','კლიენტის მონაცემები ინვოისისთვის':'Данные клиента для счета','ახალი კლიენტი':'Новый клиент','კლიენტის სახელი':'Имя клиента','სახელი / კომპანია':'Имя / Компания','მისამართი':'Адрес','ტელეფონი':'Телефон','ტელ:':'Тел:','კლიენტების ბაზაში შენახვა':'Сохранить в базе клиентов','შენიშვნა':'Примечание','გადახდის პირობები...':'Условия оплаты...','შემდეგი → პროდუქტები':'Далее → Позиции','დასახელება':'Описание','რაოდ.':'Кол-во','ფასი':'Цена','ფასი ₾':'Цена ₾','ჯამი':'Итого','ჯამი ₾':'Итого ₾','პროდუქტის დამატება':'Добавить позицию','+ პროდუქტის დამატება':'Добавить позицию','კატალოგიდან ჩასმა...':'Добавить из каталога...','შუალედური ჯამი':'Промежуточный итог','მათ შორის დღგ':'Включая НДС','სულ გადასახდელი':'К оплате','უკან':'Назад','← უკან':'← Назад','← რედაქტირება':'← Редактировать','გადახედვა →':'Просмотр →','💾 შენახვა':'💾 Сохранить','შენახვა':'Сохранить','PDF':'PDF','WhatsApp':'WhatsApp','Viber':'Viber','გამგზავნი':'Отправитель','მიმღები':'Получатель','კოდი':'Код','ბანკი':'Банк','საბანკო ანგარიშები':'Банковские счета','+ ბანკის დამატება':'Добавить банк','ბანკის დამატება':'Добавить банк','ლოგო':'Логотип','📎 ლოგოს ატვირთვა (PNG, JPG)':'📎 Загрузить логотип (PNG, JPG)','ლოგოს ატვირთვა (PNG, JPG)':'Загрузить логотип (PNG, JPG)','ძირითადი ინფო':'Основная информация','ც., კგ., სთ.':'шт., кг, ч.','სერვისი / პროდუქტი':'Услуга / Товар','ერთეული':'Ед.','Excel ფაილი უნდა შეიცავდეს სვეტებს:':'Файл Excel должен содержать столбцы:','სახელი, ერთეული, ფასი':'Название, Ед., Цена','პროდუქტი':'Товар','პროდუქტი დაიმპორტდა ✓':'товар импортирован ✓',
+    'კლიენტის დამატება':'Добавить клиента','კლიენტის რედაქტირება':'Редактировать клиента','სახელი':'Имя','სახელი სავალდებულოა':'Имя обязательно','წაშლა?':'Удалить?','წავშალო ეს ინვოისი?':'Удалить этот счет?','კლიენტი შენახულია ✓':'Клиент сохранен ✓','პროფილი განახლდა ✓':'Профиль обновлен ✓','პროდუქტი დამატებულია ✓':'Товар добавлен ✓','ინვოისი შენახულია ✓':'Счет сохранен ✓','ინვოისი წაიშალა ✓':'Счет удален ✓','ჯერ შედი ანგარიშში':'Сначала войдите','PDF ფანჯარა გაიხსნა — აირჩიე Save as PDF':'Окно PDF открыто — выберите Save as PDF','ბრაუზერმა დაბლოკა PDF ფანჯარა. Pop-up დაუშვი და თავიდან სცადე.':'Браузер заблокировал окно PDF. Разрешите pop-up и попробуйте снова.','10 წუთი არააქტიური იყავი — უსაფრთხოებისთვის გამოხვედი':'Вы были неактивны 10 минут — выполнен выход для безопасности.',
+    'მფლობელი კომპანია':'Компания-владелец','მფლობელი კომპანია: შპს ბილდეკო':'Компания-владелец: ООО Buildeco','მფლობელი:':'Владелец:','კონფიდენციალურობა':'Политика конфиденциальности','წესები და პირობები':'Условия использования','კონტაქტი':'Контакт','ყველა უფლება დაცულია':'Все права защищены','უსაფრთხოება':'Безопасность','მონაცემების გამოყენება':'Использование данных','სერვისის გამოყენება':'Использование сервиса','შეზღუდვები':'Ограничения','დაგვიკავშირდით სამუშაო საკითხებზე ან ტექნიკური დახმარებისთვის.':'Свяжитесь с нами по рабочим вопросам или технической поддержке.','კითხვების შემთხვევაში დაგვიკავშირდით მითითებულ ნომერზე ან ელ-ფოსტაზე.':'По вопросам свяжитесь с нами по указанному телефону или email.','საიტი ინახავს მხოლოდ იმ ინფორმაციას, რომელსაც მომხმარებელი თავად ავსებს: პროფილი, კლიენტები, პროდუქტები და ინვოისები. ეს მონაცემები გამოიყენება ინვოისების შექმნისა და შენახვისთვის.':'Сайт хранит только информацию, которую пользователь вводит сам: профиль, клиенты, товары и счета. Эти данные используются для создания и сохранения счетов.','ანგარიშები დაცულია ავტორიზაციით. თითოეული მომხმარებელი ხედავს მხოლოდ საკუთარ მონაცემებს.':'Аккаунты защищены авторизацией. Каждый пользователь видит только свои данные.','Invoice.com.ge განკუთვნილია ინვოისების შექმნის, შენახვისა და გადმოტვირთვისთვის. მომხმარებელი პასუხისმგებელია შეყვანილი ინფორმაციის სისწორეზე.':'Invoice.com.ge предназначен для создания, сохранения и скачивания счетов. Пользователь отвечает за правильность введенных данных.','აკრძალულია სერვისის გამოყენება უკანონო მიზნებისთვის ან სხვა პირის მონაცემების არამართლზომიერი დამუშავებისთვის.':'Запрещено использовать сервис в незаконных целях или неправомерно обрабатывать данные другого лица.'
+  };
+  const MAPS = {en:EN, ru:RU};
+  const keys = Object.keys(EN).sort((a,b)=>b.length-a.length);
+  function baseLang(){ return window.currentLang || localStorage.getItem('invoice_lang') || 'ka'; }
+  window.t = function(key){
+    const lang = baseLang();
+    if(lang === 'ka') return key;
+    return (MAPS[lang] && MAPS[lang][key]) || key;
+  };
+  function translateString(str){
+    const lang = baseLang();
+    if(!str || lang === 'ka') return str;
+    let out = String(str);
+    const map = MAPS[lang] || {};
+    for(const k of keys){
+      if(out.includes(k)) out = out.split(k).join(map[k] || k);
+    }
+    return out;
+  }
+  function setBase(el, attr, value){
+    const key = 'base' + attr[0].toUpperCase() + attr.slice(1);
+    if(el.dataset && !el.dataset[key]) el.dataset[key] = value || '';
+    return (el.dataset && el.dataset[key]) || value || '';
+  }
+  window.applyTranslations = function(root=document.body){
+    if(!root) return;
+    const lang = baseLang();
+    document.documentElement.lang = lang;
+    document.querySelectorAll('.lang-current').forEach(btn=>{ btn.textContent = FLAGS[lang] || FLAGS.ka; });
+    const skip = new Set(['SCRIPT','STYLE','TEXTAREA','INPUT','SELECT','OPTION']);
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(node){
+        const p = node.parentElement;
+        if(!p || skip.has(p.tagName)) return NodeFilter.FILTER_REJECT;
+        if(p.closest && (p.closest('.lang-select') || p.closest('.no-translate'))) return NodeFilter.FILTER_REJECT;
+        if(!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const nodes=[];
+    while(walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(n=>{
+      if(!n.__baseKa) n.__baseKa = n.nodeValue;
+      n.nodeValue = lang === 'ka' ? n.__baseKa : translateString(n.__baseKa);
+    });
+    root.querySelectorAll && root.querySelectorAll('[placeholder]').forEach(el=>{
+      const base = setBase(el, 'placeholder', el.getAttribute('placeholder') || '');
+      el.setAttribute('placeholder', lang === 'ka' ? base : translateString(base));
+    });
+    root.querySelectorAll && root.querySelectorAll('option').forEach(el=>{
+      const base = setBase(el, 'text', el.textContent || '');
+      el.textContent = lang === 'ka' ? base : translateString(base);
+    });
+    root.querySelectorAll && root.querySelectorAll('input[type="button"],input[type="submit"]').forEach(el=>{
+      const base = setBase(el, 'value', el.value || '');
+      el.value = lang === 'ka' ? base : translateString(base);
+    });
+    updateMobileUserInfo();
+  };
+  window.setLang = function(lang){
+    if(!FLAGS[lang]) lang = 'ka';
+    window.currentLang = lang;
+    try{ localStorage.setItem('invoice_lang', lang); }catch(e){}
+    document.querySelectorAll('.lang-select.open').forEach(x=>x.classList.remove('open'));
+    window.applyTranslations(document.body);
+    if(typeof buildInvPreview === 'function'){
+      const prev = document.getElementById('inv-preview-content');
+      if(prev && prev.innerHTML.trim()) buildInvPreview();
+    }
+  };
+  window.translateDynamic = function(){ setTimeout(()=>window.applyTranslations(document.body), 0); };
+  function updateMobileUserInfo(){
+    let top = document.querySelector('.app-mobile-top');
+    if(!top) return;
+    let box = top.querySelector('.app-mobile-user');
+    if(!box){
+      box = document.createElement('div');
+      box.className = 'app-mobile-user';
+      box.innerHTML = '<div class="app-mobile-user-name" id="mb-username">—</div><div class="app-mobile-user-id" id="mb-userid">—</div>';
+      top.insertBefore(box, top.firstChild);
+    }
+    const name = document.getElementById('sb-username')?.textContent || '—';
+    const id = document.getElementById('sb-usertype')?.textContent || '—';
+    const n = document.getElementById('mb-username');
+    const i = document.getElementById('mb-userid');
+    if(n) n.textContent = name;
+    if(i) i.textContent = translateString(id);
+  }
+  const oldSetup = window.setupSidebar;
+  window.setupSidebar = function(){
+    if(typeof oldSetup === 'function') oldSetup.apply(this, arguments);
+    const sbType = document.getElementById('sb-usertype');
+    if(sbType && sbType.textContent.includes('ს/კ')){
+      sbType.__baseKa = sbType.textContent;
+      sbType.textContent = baseLang()==='ka' ? sbType.__baseKa : translateString(sbType.__baseKa);
+    }
+    updateMobileUserInfo();
+    window.applyTranslations(document.body);
+  };
+  const wrapNames = ['renderProfile','renderClients','renderCatalog','renderInvoices','renderDashboard','renderInvProducts','populateCatalogPick','showPage','viewInvoice','loadProfile','loadClients','loadProducts','loadInvoices','buildInvPreview','switchInvTab'];
+  function wrapLater(){
+    wrapNames.forEach(name=>{
+      const fn = window[name];
+      if(typeof fn !== 'function' || fn.__fullI18nWrapped) return;
+      const w = function(){
+        const r = fn.apply(this, arguments);
+        if(r && typeof r.then === 'function') r.finally(()=>window.translateDynamic());
+        else window.translateDynamic();
+        return r;
+      };
+      w.__fullI18nWrapped = true;
+      window[name] = w;
+    });
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    wrapLater();
+    setTimeout(()=>{ window.setLang(baseLang()); updateMobileUserInfo(); }, 100);
+  });
+  setTimeout(wrapLater, 500);
+})();
 </script>
 </body>
 </html>
