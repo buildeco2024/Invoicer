@@ -3,11 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ინვოისი.გე — შექმენი შენი ინვოისი მარტივად</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<title>Invoice.com.ge — შექმენი შენი ინვოისი მარტივად</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+
+// ========== LANGUAGE WRAPPERS ==========
+(function(){
+  const names = ['renderProfile','renderClients','renderCatalog','renderInvoices','renderDashboard','buildInvPreview','renderInvProducts','populateCatalogPick','showPage','viewInvoice','loadProfile','loadClients','loadProducts','loadInvoices'];
+  names.forEach(name=>{
+    const original = window[name];
+    if(typeof original !== 'function' || original.__langWrapped) return;
+    const wrapped = function(...args){
+      const result = original.apply(this,args);
+      if(result && typeof result.then === 'function') result.finally(()=>translateDynamic());
+      else translateDynamic();
+      return result;
+    };
+    wrapped.__langWrapped = true;
+    window[name] = wrapped;
+  });
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>setLang(currentLang),50));
+})();
+
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -108,6 +125,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 .type-pill.active{border-color:var(--gold);background:rgba(245,166,35,0.08);color:var(--ink);}
 .btn-submit{width:100%;padding:14px;background:var(--gold);border:none;border-radius:10px;font-size:15px;font-weight:700;color:var(--ink);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;margin-top:6px;}
 .btn-submit:hover{background:var(--gold2);transform:translateY(-1px);}
+button:disabled{opacity:.65;cursor:not-allowed;transform:none!important;}
 .auth-switch{text-align:center;margin-top:16px;font-size:13px;color:var(--muted);}
 .auth-switch a{color:var(--gold);cursor:pointer;font-weight:600;text-decoration:none;}
 .msg-error{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none;}
@@ -188,7 +206,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 
 /* PRODUCTS TABLE IN INVOICE */
 .prod-header{display:grid;grid-template-columns:3fr 70px 100px 100px 36px;gap:8px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;padding:0 4px;margin-bottom:6px;}
-.prod-row{display:grid;grid-template-columns:3fr 70px 100px 100px 36px;gap:8px;align-items:center;margin-bottom:8px;}
+.prod-row{display:grid;grid-template-columns:3fr 70px 100px 100px 36px;gap:0;align-items:center;margin-bottom:8px;}
 .prod-row input,.prod-row select{border:1.5px solid var(--border);border-radius:7px;padding:8px 10px;font-size:13px;font-family:'DM Sans',sans-serif;background:#fafafa;outline:none;width:100%;transition:border .2s;}
 .prod-row input:focus,.prod-row select:focus{border-color:var(--gold);background:#fff;}
 .prod-total{font-size:13px;font-weight:700;text-align:right;padding-right:4px;}
@@ -219,7 +237,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 .inv-pre-block h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
 .inv-pre-block p{font-size:14px;line-height:1.7;}
 .inv-pre-table{width:100%;border-collapse:collapse;margin-bottom:20px;}
-.inv-pre-table th{background:var(--ink);color:#fff;padding:10px 14px;font-size:12px;text-align:left;}
+.inv-pre-table th{background:var(--ink);color:#fff;padding:10px 14px;font-size:12px;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 .inv-pre-table th:last-child,.inv-pre-table td:last-child{text-align:right;}
 .inv-pre-table td{padding:11px 14px;font-size:13px;border-bottom:1px solid #eef0f5;}
 .inv-pre-totals{margin-left:auto;width:280px;}
@@ -239,7 +257,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 .client-opt:hover{background:#fafafa;}
 
 /* CATALOG */
-.catalog-row{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;align-items:center;margin-bottom:8px;}
+.catalog-row{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:0;align-items:center;margin-bottom:8px;}
 .catalog-row input{border:1.5px solid var(--border);border-radius:7px;padding:8px 11px;font-size:13px;font-family:'DM Sans',sans-serif;background:#fafafa;outline:none;width:100%;transition:border .2s;}
 .catalog-row input:focus{border-color:var(--gold);background:#fff;}
 
@@ -261,19 +279,123 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 .spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
+
+
+/* FOOTER / LEGAL */
+.site-footer{background:#0f0f1a;color:rgba(255,255,255,.72);padding:34px 48px;border-top:1px solid rgba(255,255,255,.08);}
+.site-footer-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr;gap:24px;align-items:start;}
+.site-footer h4{color:#fff;font-size:15px;margin-bottom:8px;}
+.site-footer p,.site-footer a{font-size:13px;line-height:1.7;color:rgba(255,255,255,.68);text-decoration:none;}
+.site-footer a:hover{color:var(--gold);}
+.footer-links{display:flex;gap:14px;flex-wrap:wrap;justify-content:flex-end;}
+.legal-modal-content{font-size:13px;line-height:1.7;color:#444;}
+.legal-modal-content h3{font-family:'Playfair Display',serif;font-size:22px;color:var(--ink);margin-bottom:10px;}
+.legal-modal-content h4{font-size:14px;margin:14px 0 6px;color:var(--ink);}
+
 /* RESPONSIVE */
-@media(max-width:768px){
-  .land-hero-inner{grid-template-columns:1fr;gap:40px;padding:100px 20px 60px;}
+@media(max-width:900px){
+  .land-nav{padding:14px 16px;}
+  .land-nav .brand{font-size:18px;}
+  .nav-btns{gap:8px;}
+  .btn-nav-login,.btn-nav-reg{padding:8px 12px;font-size:13px;}
+  .land-hero-inner{grid-template-columns:1fr;gap:28px;padding:96px 18px 48px;}
   .land-hero-img{display:none;}
-  .land-h1{font-size:38px;}
+  .land-h1{font-size:38px;line-height:1.1;}
+  .land-sub{font-size:16px;}
+  .land-stats{gap:18px;flex-wrap:wrap;margin-top:32px;}
+  .land-features{padding:56px 18px;}
+  .site-footer{padding:26px 18px 92px;}
+  .site-footer-inner{grid-template-columns:1fr;}
+  .footer-links{justify-content:flex-start;}
+  .section-title{font-size:30px;margin-bottom:30px;}
   .features-grid{grid-template-columns:1fr;}
-  .land-nav{padding:16px 20px;}
-  .sidebar{width:200px;}
-  .main-content{margin-left:200px;padding:20px;}
-  .stats-grid{grid-template-columns:1fr;}
-  .profile-grid{grid-template-columns:1fr;}
-  .land-features{padding:60px 20px;}
+
+  #page-app{padding-bottom:74px;}
+  .app-layout{display:block;min-height:100vh;}
+  .sidebar{position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;height:74px;z-index:1000;border-top:1px solid rgba(255,255,255,.10);display:block;overflow:hidden;}
+  .sidebar-brand,.sidebar-user,.sidebar-footer{display:none;}
+  .sidebar-nav{display:flex;align-items:center;gap:6px;overflow-x:auto;padding:8px 8px;height:74px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .sidebar-nav::-webkit-scrollbar{display:none;}
+  .nav-item{min-width:76px;flex:0 0 auto;flex-direction:column;gap:3px;justify-content:center;text-align:center;font-size:10px;padding:7px 8px;margin:0;border-radius:12px;white-space:nowrap;}
+  .nav-item .icon{font-size:18px;width:auto;}
+  .main-content{margin-left:0;padding:18px 14px 92px;}
+  .page-header{align-items:flex-start;gap:12px;flex-direction:column;margin-bottom:18px;}
+  .page-title{font-size:25px;}
+  .page-header .btn-primary,.page-header .btn-outline{width:100%;justify-content:center;}
+  .stats-grid{grid-template-columns:1fr;gap:12px;}
+  .card{padding:16px;border-radius:12px;margin-bottom:14px;}
+  .profile-grid{grid-template-columns:1fr;gap:14px;}
+  .form-row,.fm-row{flex-direction:column;gap:0;}
+  .type-sel{display:grid;grid-template-columns:1fr;gap:8px;}
+  .modal{max-width:calc(100vw - 24px);padding:28px 18px;border-radius:16px;}
+
+  .data-table{display:block;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;}
+  .data-table th,.data-table td{padding:10px 12px;font-size:13px;}
+  .actions-bar{display:grid;grid-template-columns:1fr;gap:10px;}
+  .actions-bar button,.btn-primary,.btn-secondary,.btn-outline{justify-content:center;}
+
+  .inv-tabs{overflow-x:auto;gap:0;-webkit-overflow-scrolling:touch;}
+  .inv-tab{flex:0 0 auto;padding:11px 14px;font-size:13px;}
+  .prod-header{display:none;}
+  .prod-row{grid-template-columns:1fr 1fr 1fr 34px;gap:8px;background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:10px;margin-bottom:10px;}
+  .prod-row input:first-child{grid-column:1 / -1;}
+  .prod-total{text-align:left;background:#fff;border:1px solid var(--border);border-radius:7px;padding:8px 10px;}
+  .totals-panel{padding:16px;}
+
+  .inv-preview-wrap{max-width:100%;padding:22px 16px;border-radius:14px;overflow-x:auto;}
+  .inv-pre-header{gap:14px;flex-direction:column;}
+  .inv-pre-title{font-size:28px;}
+  .inv-pre-meta{grid-template-columns:1fr;gap:16px;}
+  .inv-pre-table{min-width:560px;}
+  .inv-pre-totals{width:100%;}
+  .inv-pre-bank{display:block;line-height:1.55;}
+  .inv-pre-bank-label{display:block;min-width:0;}
 }
+
+@media(max-width:420px){
+  .land-h1{font-size:32px;}
+  .land-cta{width:100%;justify-content:center;}
+  .land-stat-num{font-size:23px;}
+  .main-content{padding:14px 10px 92px;}
+  .card{padding:14px;}
+  .nav-item{min-width:68px;font-size:9px;}
+  .modal{padding:24px 14px;}
+  .btn-primary,.btn-secondary,.btn-outline,.btn-submit{width:100%;}
+}
+
+/* LANGUAGE */
+.lang-select{position:relative;display:inline-flex;align-items:center;}
+.lang-current{border:1.5px solid rgba(255,255,255,.28);background:rgba(255,255,255,.06);color:#fff;border-radius:9px;padding:8px 10px;cursor:pointer;font-size:14px;font-weight:700;line-height:1;}
+.lang-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);min-width:54px;overflow:hidden;z-index:2000;}
+.lang-select:hover .lang-menu,.lang-select.open .lang-menu{display:block;}
+.lang-menu button{display:flex;width:100%;gap:0;align-items:center;background:#fff;border:0;padding:10px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:20px;text-align:center;justify-content:center;}
+.lang-menu button:hover{background:#fafafa;}
+.sidebar-brand{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.sidebar-brand .lang-current{padding:6px 8px;font-size:12px;border-color:rgba(255,255,255,.18);}
+.sidebar-brand .lang-menu{left:auto;right:0;}
+.site-footer{display:block;}
+#page-app{min-height:100vh;}
+@media(max-width:768px){.nav-btns{gap:8px}.lang-current{padding:8px}.lang-menu{right:-10px}.site-footer{padding-bottom:102px}.sidebar-brand{display:none!important;}}
+
+
+.app-mobile-top{display:none;}
+@media(max-width:768px){.app-mobile-top{display:flex;justify-content:flex-end;margin-bottom:10px}.app-mobile-top .lang-current{background:#0f0f1a;color:#fff;border-color:#0f0f1a}.app-mobile-top .lang-menu{right:0}}
+
+
+/* FULL I18N + USER INFO FIX */
+@media(min-width:769px){
+  .sidebar-brand{display:flex!important;}
+  .sidebar-user{display:block!important;}
+  .sidebar-footer{display:block!important;}
+}
+.app-mobile-user{display:none;}
+@media(max-width:768px){
+  .app-mobile-top{justify-content:space-between!important;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow);}
+  .app-mobile-user{display:block;min-width:0;}
+  .app-mobile-user-name{font-weight:800;font-size:13px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px;}
+  .app-mobile-user-id{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px;margin-top:2px;}
+}
+
 </style>
 </head>
 <body>
@@ -281,19 +403,27 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
 <!-- ========== LANDING PAGE ========== -->
 <div id="page-landing">
   <nav class="land-nav">
-    <div class="brand">ინვოისი<span>.გე</span></div>
+    <div class="brand">Invoice<span>.com.ge</span></div>
     <div class="nav-btns">
       <button type="button" class="btn-nav-login" onclick="openAuth('login')">შესვლა</button>
       <button type="button" class="btn-nav-reg" onclick="openAuth('register')">რეგისტრაცია</button>
+      <div class="lang-select" id="landing-lang">
+        <button type="button" class="lang-current" onclick="toggleLangMenu('landing-lang')">🇬🇪</button>
+        <div class="lang-menu">
+          <button type="button" onclick="setLang('ka')" title="ქართული">🇬🇪</button>
+          <button type="button" onclick="setLang('en')" title="English">🇬🇧</button>
+          <button type="button" onclick="setLang('ru')" title="Русский">🇷🇺</button>
+        </div>
+      </div>
     </div>
   </nav>
 
   <section class="land-hero">
     <div class="land-hero-inner">
       <div class="land-hero-text">
-        <div class="land-badge">🇬🇪 ქართული ბიზნესისთვის</div>
+        <div class="land-badge">🇬🇪 ბიზნესისთვის</div>
         <h1 class="land-h1">შექმენი შენი ინვოისი <span>მარტივად</span></h1>
-        <p class="land-sub">პროფესიული ინვოისები წუთებში. შეინახე კლიენტები, პროდუქცია და გაგზავნე PDF-ით პირდაპირ WhatsApp-ზე.</p>
+        <p class="land-sub">პროფესიული ინვოისები წუთებში. შეინახე კლიენტები, პროდუქცია და გაგზავნე PDF-ით WhatsApp-ზე ან Viber-ზე.</p>
         <button type="button" class="land-cta" onclick="openAuth('register')">
           უფასოდ დაიწყე →
         </button>
@@ -331,13 +461,24 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
       <div class="features-grid">
         <div class="feature-card"><span class="feature-icon">👤</span><div class="feature-title">კლიენტების ბაზა</div><div class="feature-desc">შეინახე კლიენტების მონაცემები ერთხელ და გამოიყენე ყოველ ინვოისზე.</div></div>
         <div class="feature-card"><span class="feature-icon">📦</span><div class="feature-title">პროდუქტების კატალოგი</div><div class="feature-desc">Excel-იდან იმპორტი ან ხელით დამატება. ინვოისზე ერთი კლიკით ჩასმა.</div></div>
-        <div class="feature-card"><span class="feature-icon">📄</span><div class="feature-title">PDF + WhatsApp</div><div class="feature-desc">პროფესიული PDF გენერაცია და გაგზავნა WhatsApp-ით პირდაპირ.</div></div>
+        <div class="feature-card"><span class="feature-icon">📄</span><div class="feature-title">PDF + WhatsApp/Viber</div><div class="feature-desc">პროფესიული PDF გენერაცია და გაგზავნა WhatsApp-ით ან Viber-ით.</div></div>
         <div class="feature-card"><span class="feature-icon">🏦</span><div class="feature-title">საბანკო რეკვიზიტები</div><div class="feature-desc">მრავალი ბანკის ანგარიში — ყოველ ინვოისზე ავტომატურად ჩაისმება.</div></div>
         <div class="feature-card"><span class="feature-icon">💰</span><div class="feature-title">დღგ 18%</div><div class="feature-desc">ავტომატური გამოთვლა. ჩართე ან გამორთე ერთი კლიკით.</div></div>
         <div class="feature-card"><span class="feature-icon">🇬🇪</span><div class="feature-title">ქართულად</div><div class="feature-desc">სრულად ქართულ ენაზე. კომპანია, ფიზ. პირი, ინდ. მეწარმე — ყველა ტიპი.</div></div>
       </div>
     </div>
   </section>
+
+
+
+</div>
+
+<!-- LEGAL MODAL -->
+<div class="modal-overlay" id="legal-modal">
+  <div class="modal">
+    <button type="button" class="modal-close" onclick="closeLegal()">✕</button>
+    <div id="legal-content" class="legal-modal-content"></div>
+  </div>
 </div>
 
 <!-- ========== AUTH MODAL ========== -->
@@ -379,6 +520,8 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
       <div class="fm-group"><label class="fm-label">ელ-ფოსტა</label><input class="fm-input" type="email" id="reg-email" placeholder="you@example.com"></div>
       <div class="fm-group"><label class="fm-label">პაროლი</label><input class="fm-input" type="password" id="reg-pass" placeholder="მინ. 6 სიმბოლო"></div>
       <div class="fm-group"><label class="fm-label">დაბადების თარიღი</label><input class="fm-input" type="date" id="reg-birth"></div>
+      <div class="fm-group"><label class="fm-label">მისამართი</label><input class="fm-input" id="reg-address" placeholder="მისამართი"></div>
+      <div class="fm-group"><label class="fm-label">ტელეფონი</label><input class="fm-input" id="reg-phone" placeholder="ტელეფონი"></div>
       <button type="button" class="btn-submit" onclick="doRegister()">რეგისტრაცია</button>
       <div class="auth-switch">გაქვს ანგარიში? <a onclick="switchAuthTab('login')">შედი</a></div>
     </div>
@@ -390,7 +533,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
   <div class="app-layout">
     <!-- SIDEBAR -->
     <aside class="sidebar">
-      <div class="sidebar-brand"><div class="sidebar-brand-name">ინვოისი<span>.გე</span></div></div>
+      <div class="sidebar-brand"><div class="sidebar-brand-name">Invoice<span>.com.ge</span></div><div class="lang-select" id="app-lang"><button type="button" class="lang-current" onclick="toggleLangMenu('app-lang')">🇬🇪</button><div class="lang-menu"><button type="button" onclick="setLang('ka')" title="ქართული">🇬🇪</button><button type="button" onclick="setLang('en')" title="English">🇬🇧</button><button type="button" onclick="setLang('ru')" title="Русский">🇷🇺</button></div></div></div>
       <div class="sidebar-user">
         <div class="sidebar-user-name" id="sb-username">—</div>
         <div class="sidebar-user-type" id="sb-usertype">—</div>
@@ -402,12 +545,15 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
         <div class="nav-item" onclick="showPage('clients')"><span class="icon">👥</span>კლიენტები</div>
         <div class="nav-item" onclick="showPage('catalog')"><span class="icon">📦</span>პროდუქტები</div>
         <div class="nav-item" onclick="showPage('profile')"><span class="icon">⚙️</span>პროფილი</div>
+        <div class="nav-item nav-logout" onclick="doLogout()"><span class="icon">🚪</span>გამოსვლა</div>
       </nav>
       <div class="sidebar-footer"><button type="button" class="btn-logout" onclick="doLogout()">გამოსვლა</button></div>
     </aside>
 
     <!-- MAIN -->
     <main class="main-content">
+
+      <div class="app-mobile-top"><div class="lang-select" id="app-mobile-lang"><button type="button" class="lang-current" onclick="toggleLangMenu('app-mobile-lang')">🇬🇪</button><div class="lang-menu"><button type="button" onclick="setLang('ka')" title="ქართული">🇬🇪</button><button type="button" onclick="setLang('en')" title="English">🇬🇧</button><button type="button" onclick="setLang('ru')" title="Русский">🇷🇺</button></div></div></div>
 
       <!-- DASHBOARD -->
       <div id="pg-dashboard" class="app-page">
@@ -448,6 +594,15 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
               </div>
             </div>
             <div id="selected-client-info" style="display:none;background:#f0fdf4;border-radius:8px;padding:12px 14px;font-size:13px;margin-bottom:14px;border:1px solid #bbf7d0;"></div>
+            <div id="selected-client-fields" style="display:none;background:#fafafa;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;">
+              <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.5px;">კლიენტის მონაცემები ინვოისისთვის</div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">საიდ. კოდი / პირადი №</label><input class="form-input" id="sc-id" placeholder=""></div>
+                <div class="form-group"><label class="form-label">ტელეფონი</label><input class="form-input" id="sc-phone" placeholder=""></div>
+              </div>
+              <div class="form-group"><label class="form-label">მისამართი</label><input class="form-input" id="sc-addr" placeholder=""></div>
+              <div class="form-group"><label class="form-label">ელ-ფოსტა</label><input class="form-input" id="sc-email" type="email" placeholder=""></div>
+            </div>
             <div id="new-client-fields" style="display:none">
               <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.5px;">ახალი კლიენტი</div>
               <div class="form-row">
@@ -481,9 +636,9 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
               <span class="toggle-label">დღგ 18%</span>
             </div>
             <div class="totals-panel">
-              <div class="totals-line"><span>შუალედური ჯამი</span><span id="inv-sub">₾0.00</span></div>
-              <div class="totals-line" id="inv-vat-row" style="display:none"><span>დღგ (18%)</span><span id="inv-vat-amt">₾0.00</span></div>
-              <div class="totals-line grand"><span>სულ გადასახდელი</span><span id="inv-total">₾0.00</span></div>
+              <div class="totals-line"><span data-i18n="შუალედური ჯამი">შუალედური ჯამი</span><span id="inv-sub">₾0.00</span></div>
+              <div class="totals-line" id="inv-vat-row" style="display:none"><span data-i18n="მათ შორის დღგ">მათ შორის დღგ</span><span id="inv-vat-amt">₾0.00</span></div>
+              <div class="totals-line grand"><span data-i18n="სულ გადასახდელი">სულ გადასახდელი</span><span id="inv-total">₾0.00</span></div>
             </div>
             <div style="display:flex;gap:12px;margin-top:16px;">
               <button type="button" class="btn-outline" onclick="switchInvTab('info')">← უკან</button>
@@ -498,6 +653,7 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
               <button type="button" class="btn-primary" onclick="saveInvoice()">💾 შენახვა</button>
               <button type="button" class="btn-secondary" onclick="downloadInvPDF()">⬇ PDF</button>
               <button type="button" class="btn-outline" style="background:#25D366;color:#fff;border-color:#25D366;" onclick="sendInvWhatsApp()">📲 WhatsApp</button>
+              <button type="button" class="btn-outline" style="background:#7360f2;color:#fff;border-color:#7360f2;" onclick="sendInvViber()">💬 Viber</button>
               <button type="button" class="btn-outline" onclick="switchInvTab('items')">← რედაქტირება</button>
             </div>
           </div>
@@ -586,6 +742,21 @@ input:checked+.tog-slider:before{transform:translateX(18px);}
   </div>
 </div>
 
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <div>
+        <h4>Invoice.com.ge</h4>
+        <p>მფლობელი კომპანია: შპს ბილდეკო</p>
+        <p>ტელ: 551343410 · Email: Buildeco2024@gmail.com</p>
+      </div>
+      <div class="footer-links">
+        <a href="#" onclick="openLegal('privacy');return false;">Privacy Policy</a>
+        <a href="#" onclick="openLegal('terms');return false;">Terms & Conditions</a>
+        <a href="#" onclick="openLegal('contact');return false;">Contact</a>
+      </div>
+    </div>
+  </footer>
+
 <!-- CLIENT MODAL -->
 <div class="modal-overlay" id="client-modal">
   <div class="modal">
@@ -651,9 +822,126 @@ let editingClientId = null;
 let isLoggingOut = false;
 let authReady = false;
 let authSubscription = null;
+let inactivityTimer = null;
+const INACTIVITY_LIMIT_MS = 10 * 60 * 1000;
+let currentInvoiceId = null;
+let invoiceDirty = true;
+
+function markInvoiceDirty(){ invoiceDirty = true; }
+function stopInactivityTimer(){
+  if(inactivityTimer) clearTimeout(inactivityTimer);
+  inactivityTimer = null;
+}
+function resetInactivityTimer(){
+  if(!currentUser || isLoggingOut) return;
+  stopInactivityTimer();
+  inactivityTimer = setTimeout(() => {
+    toast('10 წუთი არააქტიური იყავი — უსაფრთხოებისთვის გამოხვედი', 'error');
+    doLogout();
+  }, INACTIVITY_LIMIT_MS);
+}
+function setupInactivityWatcher(){
+  ['click','mousemove','keydown','touchstart','scroll'].forEach(ev => {
+    window.addEventListener(ev, resetInactivityTimer, { passive:true });
+  });
+}
+function setupLoginEnterKey(){
+  ['login-email','login-pass'].forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('keydown', e => {
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        doLogin();
+      }
+    });
+  });
+}
+function clearInvoiceClientFields(){
+  ['sc-id','sc-phone','sc-addr','sc-email'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+}
+
+
+// ========== LANGUAGE ==========
+const LANG_FLAGS = { ka: '🇬🇪', en: '🇬🇧', ru: '🇷🇺' };
+let currentLang = localStorage.getItem('invoice_lang') || 'ka';
+
+const UI_TRANSLATIONS = {
+  en: {
+    'შესვლა':'Login','რეგისტრაცია':'Register','ქართული ბიზნესისთვის':'For Georgian business','შექმენი შენი ინვოისი მარტივად':'Create your invoice easily','პროფესიული ინვოისები წუთებში. შეინახე კლიენტები, პროდუქცია და გაგზავნე PDF-ით WhatsApp-ზე ან Viber-ზე.':'Professional invoices in minutes. Save clients, products and send PDF via WhatsApp or Viber.','უფასოდ დაიწყე →':'Start free →','უფასო':'Free','ექსპორტი':'Export','დღგ მხარდაჭერა':'VAT support','ფიჩერები':'Features','ყველაფერი რაც გჭირდება':'Everything you need','კლიენტების ბაზა':'Client database','შეინახე კლიენტების მონაცემები ერთხელ და გამოიყენე ყოველ ინვოისზე.':'Save client details once and use them in every invoice.','პროდუქტების კატალოგი':'Product catalog','Excel-იდან იმპორტი ან ხელით დამატება. ინვოისზე ერთი კლიკით ჩასმა.':'Import from Excel or add manually. Add to invoices in one click.','PDF + WhatsApp/Viber':'PDF + WhatsApp/Viber','პროფესიული PDF გენერაცია და გაგზავნა WhatsApp/Viber-ით.':'Generate professional PDFs and send via WhatsApp/Viber.','საბანკო რეკვიზიტები':'Bank details','მრავალი ბანკის ანგარიში — ყოველ ინვოისზე ავტომატურად ჩაისმება.':'Multiple bank accounts automatically appear on each invoice.','დღგ 18%':'VAT 18%','ავტომატური გამოთვლა. ჩართე ან გამორთე ერთი კლიკით.':'Automatic calculation. Enable or disable in one click.','ქართულად':'In Georgian','სრულად ქართულ ენაზე. კომპანია, ფიზ. პირი, ინდ. მეწარმე — ყველა ტიპი.':'Fully localized. Company, individual and entrepreneur supported.','მოგესალმებით! 👋':'Welcome! 👋','შედი შენს ანგარიშში':'Sign in to your account','ელ-ფოსტა':'Email','პაროლი':'Password','არ გაქვს ანგარიში?':'No account?','დარეგისტრირდი':'Register','შექმენი ანგარიში':'Create account','ერთხელ შეავსე — ყოველთვის გამოიყენე':'Fill once — use every time','სუბიექტის ტიპი':'Entity type','კომპანია':'Company','ფიზ. პირი':'Individual','ინდ. მეწარმე':'Entrepreneur','კომპანიის სახელი':'Company name','სახელი და გვარი':'Full name','საიდ. კოდი':'ID number','პირ. № / ID':'Personal ID','მინ. 6 სიმბოლო':'Min. 6 characters','დაბადების თარიღი':'Birth date','გაქვს ანგარიში?':'Already have an account?','შედი':'Login','მთავარი':'Dashboard','ახალი ინვოისი':'New invoice','ინვოისები':'Invoices','კლიენტები':'Clients','პროდუქტები':'Products','პროფილი':'Profile','გამოსვლა':'Logout','ინვოისები სულ':'Total invoices','ბოლო ინვოისები':'Recent invoices','ინფო':'Info','პროდუქტები':'Items','გადახედვა':'Preview','ინვოისი №':'Invoice No.','თარიღი':'Date','გადახდის ვადა':'Due date','კლიენტი':'Client','ძიება ან ახლის დამატება...':'Search or add new...','ახალი კლიენტი':'New client','სახელი / კომპანია':'Name / Company','მისამართი':'Address','ტელეფონი':'Phone','კლიენტების ბაზაში შენახვა':'Save to client database','შენიშვნა':'Note','გადახდის პირობები...':'Payment terms...','შემდეგი → პროდუქტები':'Next → Items','დასახელება':'Description','რაოდ.':'Qty','ფასი ₾':'Price ₾','ჯამი ₾':'Total ₾','პროდუქტის დამატება':'Add item','კატალოგიდან ჩასმა...':'Add from catalog...','შუალედური ჯამი':'Subtotal','მათ შორის დღგ':'Including VAT','სულ გადასახდელი':'Total due','უკან':'Back','რედაქტირება':'Edit','შენახვა':'Save','PDF':'PDF','WhatsApp':'WhatsApp','Viber':'Viber','ახალი':'New','სულ':'Total','მოქმედება':'Actions','ნახვა':'View','წაშლა':'Delete','კლიენტის დამატება':'Add client','კლიენტის რედაქტირება':'Edit client','პროდუქტი':'Product','Excel-იდან იმპორტი':'Import from Excel','Excel ფაილი უნდა შეიცავდეს სვეტებს:':'Excel file must contain columns:','სახელი, ერთეული, ფასი':'Name, Unit, Price','ერთეული':'Unit','ძირითადი ინფო':'Main info','ლოგო':'Logo','ლოგოს ატვირთვა (PNG, JPG)':'Upload logo (PNG, JPG)','ბანკის დამატება':'Add bank','ბანკი':'Bank','საბანკო ანგარიშები':'Bank accounts','გამგზავნი':'Sender','მიმღები':'Recipient','კოდი':'ID','საბანკო რეკვიზიტები':'Bank details','სულ გადასახდელი':'Total due','მფლობელი კომპანია':'Owner company','კონფიდენციალურობა':'Privacy Policy','წესები და პირობები':'Terms & Conditions','კონტაქტი':'Contact','ყველა უფლება დაცულია':'All rights reserved','ჯერ შედი ანგარიშში':'Please log in first','პროფილი განახლდა ✓':'Profile updated ✓','კლიენტი შენახულია ✓':'Client saved ✓','ინვოისი შენახულია ✓':'Invoice saved ✓','ინვოისი წაიშალა ✓':'Invoice deleted ✓'
+  },
+  ru: {
+    'შესვლა':'Войти','რეგისტრაცია':'Регистрация','ქართული ბიზნესისთვის':'Для бизнеса','შექმენი შენი ინვოისი მარტივად':'Создавайте счета легко','პროფესიული ინვოისები წუთებში. შეინახე კლიენტები, პროდუქცია და გაგზავნე PDF-ით WhatsApp-ზე ან Viber-ზე.':'Профессиональные счета за минуты. Сохраняйте клиентов, товары и отправляйте PDF через WhatsApp или Viber.','უფასოდ დაიწყე →':'Начать бесплатно →','უფასო':'Бесплатно','ექსპორტი':'Экспорт','დღგ მხარდაჭერა':'Поддержка НДС','ფიჩერები':'Функции','ყველაფერი რაც გჭირდება':'Все, что нужно','კლიენტების ბაზა':'База клиентов','შეინახე კლიენტების მონაცემები ერთხელ და გამოიყენე ყოველ ინვოისზე.':'Сохраните данные клиента один раз и используйте в каждом счете.','პროდუქტების კატალოგი':'Каталог товаров','Excel-იდან იმპორტი ან ხელით დამატება. ინვოისზე ერთი კლიკით ჩასმა.':'Импорт из Excel или ручное добавление. Один клик для счета.','PDF + WhatsApp/Viber':'PDF + WhatsApp/Viber','პროფესიული PDF გენერაცია და გაგზავნა WhatsApp/Viber-ით.':'Создание профессионального PDF и отправка через WhatsApp/Viber.','საბანკო რეკვიზიტები':'Банковские реквизиты','მრავალი ბანკის ანგარიში — ყოველ ინვოისზე ავტომატურად ჩაისმება.':'Несколько банковских счетов автоматически попадают в счет.','დღგ 18%':'НДС 18%','ავტომატური გამოთვლა. ჩართე ან გამორთე ერთი კლიკით.':'Автоматический расчет. Включайте/выключайте одним кликом.','ქართულად':'На грузинском','სრულად ქართულ ენაზე. კომპანია, ფიზ. პირი, ინდ. მეწარმე — ყველა ტიპი.':'Полная локализация. Компания, физлицо и предприниматель.','მოგესალმებით! 👋':'Добро пожаловать! 👋','შედი შენს ანგარიშში':'Войдите в аккаунт','ელ-ფოსტა':'Email','პაროლი':'Пароль','არ გაქვს ანგარიში?':'Нет аккаунта?','დარეგისტრირდი':'Зарегистрируйтесь','შექმენი ანგარიში':'Создать аккаунт','ერთხელ შეავსე — ყოველთვის გამოიყენე':'Заполните один раз — используйте всегда','სუბიექტის ტიპი':'Тип субъекта','კომპანია':'Компания','ფიზ. პირი':'Физ. лицо','ინდ. მეწარმე':'Предприниматель','კომპანიის სახელი':'Название компании','სახელი და გვარი':'Имя и фамилия','საიდ. კოდი':'Идентификационный код','პირ. № / ID':'Личный номер / ID','მინ. 6 სიმბოლო':'Мин. 6 символов','დაბადების თარიღი':'Дата рождения','გაქვს ანგარიში?':'Уже есть аккаунт?','შედი':'Войти','მთავარი':'Главная','ახალი ინვოისი':'Новый счет','ინვოისები':'Счета','კლიენტები':'Клиенты','პროდუქტები':'Товары','პროფილი':'Профиль','გამოსვლა':'Выход','ინვოისები სულ':'Всего счетов','ბოლო ინვოისები':'Последние счета','ინფო':'Инфо','პროდუქტები':'Позиции','გადახედვა':'Просмотр','ინვოისი №':'Счет №','თარიღი':'Дата','გადახდის ვადა':'Срок оплаты','კლიენტი':'Клиент','ძიება ან ახლის დამატება...':'Поиск или добавить нового...','ახალი კლიენტი':'Новый клиент','სახელი / კომპანია':'Имя / Компания','მისამართი':'Адрес','ტელეფონი':'Телефон','კლიენტების ბაზაში შენახვა':'Сохранить в базе клиентов','შენიშვნა':'Примечание','გადახდის პირობები...':'Условия оплаты...','შემდეგი → პროდუქტები':'Далее → Позиции','დასახელება':'Описание','რაოდ.':'Кол-во','ფასი ₾':'Цена ₾','ჯამი ₾':'Итого ₾','პროდუქტის დამატება':'Добавить позицию','კატალოგიდან ჩასმა...':'Добавить из каталога...','შუალედური ჯამი':'Промежуточный итог','მათ შორის დღგ':'Включая НДС','სულ გადასახდელი':'К оплате','უკან':'Назад','რედაქტირება':'Редактировать','შენახვა':'Сохранить','PDF':'PDF','WhatsApp':'WhatsApp','Viber':'Viber','ახალი':'Новый','სულ':'Итого','მოქმედება':'Действия','ნახვა':'Открыть','წაშლა':'Удалить','კლიენტის დამატება':'Добавить клиента','კლიენტის რედაქტირება':'Редактировать клиента','პროდუქტი':'Товар','Excel-იდან იმპორტი':'Импорт из Excel','Excel ფაილი უნდა შეიცავდეს სვეტებს:':'Файл Excel должен содержать столбцы:','სახელი, ერთეული, ფასი':'Название, Ед., Цена','ერთეული':'Ед.','ძირითადი ინფო':'Основная информация','ლოგო':'Логотип','ლოგოს ატვირთვა (PNG, JPG)':'Загрузить логотип (PNG, JPG)','ბანკის დამატება':'Добавить банк','ბანკი':'Банк','საბანკო ანგარიშები':'Банковские счета','გამგზავნი':'Отправитель','მიმღები':'Получатель','კოდი':'Код','საბანკო რეკვიზიტები':'Банковские реквизиты','მფლობელი კომპანია':'Компания-владелец','კონფიდენციალურობა':'Политика конфиденциальности','წესები და პირობები':'Условия использования','კონტაქტი':'Контакт','ყველა უფლება დაცულია':'Все права защищены','ჯერ შედი ანგარიშში':'Сначала войдите','პროფილი განახლდა ✓':'Профиль обновлен ✓','კლიენტი შენახულია ✓':'Клиент сохранен ✓','ინვოისი შენახულია ✓':'Счет сохранен ✓','ინვოისი წაიშალა ✓':'Счет удален ✓'
+  }
+};
+
+function trText(original){
+  if(!original) return original;
+  if(currentLang === 'ka') return original;
+  const clean = String(original).replace(/\s+/g,' ').trim();
+  const translated = UI_TRANSLATIONS[currentLang]?.[clean];
+  if(!translated) return original;
+  return String(original).replace(clean, translated);
+}
+
+function toggleLangMenu(id){
+  const box = document.getElementById(id);
+  if(!box) return;
+  document.querySelectorAll('.lang-select.open').forEach(x=>{ if(x.id !== id) x.classList.remove('open'); });
+  box.classList.toggle('open');
+}
+
+function updateLangButtons(){
+  document.querySelectorAll('.lang-current').forEach(btn=>{ btn.textContent = LANG_FLAGS[currentLang] || '🇬🇪'; });
+}
+
+function applyTranslations(root=document.body){
+  if(!root) return;
+  updateLangButtons();
+  const skipTags = new Set(['SCRIPT','STYLE','TEXTAREA','INPUT','SELECT','OPTION']);
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node){
+      const parent = node.parentElement;
+      if(!parent || skipTags.has(parent.tagName)) return NodeFilter.FILTER_REJECT;
+      if(parent.closest && parent.closest('.lang-select')) return NodeFilter.FILTER_REJECT;
+      if(!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const nodes=[];
+  while(walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(node=>{
+    if(!node.__origText) node.__origText = node.nodeValue;
+    node.nodeValue = currentLang === 'ka' ? node.__origText : trText(node.__origText);
+  });
+  root.querySelectorAll && root.querySelectorAll('[placeholder]').forEach(el=>{
+    if(!el.dataset.origPlaceholder) el.dataset.origPlaceholder = el.getAttribute('placeholder') || '';
+    el.setAttribute('placeholder', currentLang === 'ka' ? el.dataset.origPlaceholder : trText(el.dataset.origPlaceholder));
+  });
+}
+
+function setLang(lang){
+  if(!LANG_FLAGS[lang]) lang = 'ka';
+  currentLang = lang;
+  localStorage.setItem('invoice_lang', currentLang);
+  document.documentElement.lang = currentLang;
+  document.querySelectorAll('.lang-select.open').forEach(x=>x.classList.remove('open'));
+  applyTranslations(document.body);
+  if(typeof buildInvPreview === 'function'){
+    const preview = document.getElementById('inv-preview-content');
+    if(preview && preview.innerHTML.trim()) applyTranslations(preview);
+  }
+}
+
+function translateDynamic(){ setTimeout(()=>applyTranslations(document.body), 0); }
+
+document.addEventListener('click', e=>{
+  if(!e.target.closest || !e.target.closest('.lang-select')) document.querySelectorAll('.lang-select.open').forEach(x=>x.classList.remove('open'));
+});
 
 // ========== INIT ==========
 document.addEventListener('DOMContentLoaded', async () => {
+  setTimeout(()=>setLang(currentLang), 0);
   const today = new Date();
   const due = new Date(); due.setDate(due.getDate()+14);
   if(document.getElementById('ii-date')) {
@@ -698,6 +986,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       const dd = document.getElementById('client-dd');
       if(dd) dd.classList.remove('open');
     }
+  });
+  setupLoginEnterKey();
+  setupInactivityWatcher();
+  ['ii-num','ii-date','ii-due','ii-note','ii-client-search','nc-name','nc-id','nc-addr','nc-phone','sc-id','sc-addr','sc-phone','sc-email','inv-vat'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('input', markInvoiceDirty);
+    if(el) el.addEventListener('change', markInvoiceDirty);
   });
 });
 
@@ -755,6 +1050,9 @@ function resetLocalState(){
   profileLogoUrl = null;
   selectedClientId = null;
   editingClientId = null;
+  currentInvoiceId = null;
+  invoiceDirty = true;
+  stopInactivityTimer();
 }
 
 // ========== AUTH ==========
@@ -771,7 +1069,21 @@ function openAuth(tab){
     if(pass) pass.value = '';
   }
 }
-function closeAuth(){document.getElementById('auth-modal').classList.remove('open');}
+function closeAuth(){
+  const modal = document.getElementById('auth-modal');
+  if(modal) modal.classList.remove('open');
+
+  const loginError = document.getElementById('login-error');
+  const regError = document.getElementById('reg-error');
+  const regSuccess = document.getElementById('reg-success');
+
+  [loginError, regError, regSuccess].forEach(el=>{
+    if(el){
+      el.style.display = 'none';
+      el.textContent = '';
+    }
+  });
+}
 function switchAuthTab(tab){
   document.getElementById('auth-login').style.display=tab==='login'?'block':'none';
   document.getElementById('auth-register').style.display=tab==='register'?'block':'none';
@@ -787,14 +1099,22 @@ function setRegType(type,el){
 }
 
 async function doLogin(){
-  const email = document.getElementById('login-email').value.trim();
-  const pass = document.getElementById('login-pass').value;
+  const emailEl = document.getElementById('login-email');
+  const passEl = document.getElementById('login-pass');
   const err = document.getElementById('login-error');
-  err.style.display = 'none';
+  const email = (emailEl?.value || '').trim();
+  const pass = passEl?.value || '';
+
+  if(err){
+    err.style.display = 'none';
+    err.textContent = '';
+  }
 
   if(!email || !pass){
-    err.textContent = 'ელ-ფოსტა და პაროლი შეავსე';
-    err.style.display = 'block';
+    if(err){
+      err.textContent = 'შეიყვანე ელ-ფოსტა და პაროლი.';
+      err.style.display = 'block';
+    }
     return;
   }
 
@@ -803,83 +1123,101 @@ async function doLogin(){
   if(btn){ btn.disabled = true; btn.textContent = 'შესვლა...'; }
 
   try{
-    const { data, error } = await withTimeout(db.auth.signInWithPassword({ email, password: pass }), 12000, 'შესვლა');
+    const { data, error } = await withTimeout(
+      db.auth.signInWithPassword({ email, password: pass }),
+      12000,
+      'შესვლა'
+    );
+
     if(error){
-      err.textContent = error.message;
-      err.style.display = 'block';
+      if(err){
+        err.textContent = 'შესვლა ვერ მოხერხდა. შეამოწმე ელ-ფოსტა ან პაროლი.';
+        err.style.display = 'block';
+      }
       return;
     }
-    if(data && data.user){
+
+    const user = data?.user || data?.session?.user;
+    if(user){
+      if(err){
+        err.style.display = 'none';
+        err.textContent = '';
+      }
       closeAuth();
-      await loginSuccess(data.user);
+      await loginSuccess(user);
+      return;
+    }
+
+    if(err){
+      err.textContent = 'შესვლა ვერ მოხერხდა. სცადე თავიდან.';
+      err.style.display = 'block';
     }
   }catch(e){
     console.error(e);
-    err.textContent = 'შესვლა ვერ მოხერხდა. სცადე თავიდან.';
-    err.style.display = 'block';
+    if(err){
+      err.textContent = 'შესვლა ვერ მოხერხდა. სცადე თავიდან.';
+      err.style.display = 'block';
+    }
   }finally{
     if(btn){ btn.disabled = false; btn.textContent = oldText || 'შესვლა'; }
   }
 }
 
 async function doRegister(){
-  const name=document.getElementById('reg-name').value;
-  const idnum=document.getElementById('reg-idnum').value;
-  const email=document.getElementById('reg-email').value;
+  const name=document.getElementById('reg-name').value.trim();
+  const idnum=document.getElementById('reg-idnum').value.trim();
+  const email=document.getElementById('reg-email').value.trim();
   const pass=document.getElementById('reg-pass').value;
   const birth=document.getElementById('reg-birth').value;
+  const address=(document.getElementById('reg-address')?.value || '').trim();
+  const phone=(document.getElementById('reg-phone')?.value || '').trim();
   const err=document.getElementById('reg-error');
   const suc=document.getElementById('reg-success');
   err.style.display='none'; suc.style.display='none';
   if(!name||!email||!pass){err.textContent='შეავსე სავალდებულო ველები';err.style.display='block';return;}
-  const {data,error}=await db.auth.signUp({email,password:pass,options:{data:{full_name:name}}});
+  const {data,error}=await db.auth.signUp({email,password:pass,options:{data:{full_name:name,entity_type:regType,id_number:idnum,address,phone,birth_date:birth||null}}});
   if(error){err.textContent=error.message;err.style.display='block';return;}
   if(data.user){
     await db.from('profiles').upsert({
-      id:data.user.id,entity_type:regType,full_name:name,id_number:idnum,email,
+      id:data.user.id,
+      entity_type:regType,
+      full_name:name,
+      id_number:idnum,
+      email,
+      address,
+      phone,
       birth_date:birth||null
-    });
+    }, { onConflict:'id' });
   }
   suc.textContent='რეგისტრაცია წარმატებულია! გთხოვ შეამოწმე ელ-ფოსტა.';
   suc.style.display='block';
 }
 
 async function doLogout(){
-  const btn = document.querySelector('.btn-logout');
-  const oldText = btn ? btn.textContent : '';
-  if(btn){ btn.disabled = true; btn.textContent = 'გამოსვლა...'; }
+  // Fast logout: UI is changed immediately; Supabase signOut continues in the background.
   isLoggingOut = true;
-
-  try{
-    if(authSubscription) authSubscription.unsubscribe();
-  }catch(e){ console.error(e); }
-
-  try{
-    await withTimeout(db.auth.signOut({ scope: 'global' }), 8000, 'გამოსვლა');
-  }catch(e){
-    console.error(e);
-  }
-
-  clearSupabaseStorage();
+  stopInactivityTimer();
+  try{ if(authSubscription) authSubscription.unsubscribe(); }catch(e){ console.error(e); }
   resetLocalState();
+  clearSupabaseStorage();
   closeAuth();
   showLanding();
-
-  // სრული გასუფთავებისთვის გვერდს ვხსნით loggedout პარამეტრით.
-  // ასე refresh-ზე აღარ შემოვა ძველი session-ით.
-  window.location.replace(window.location.origin + window.location.pathname + '?loggedout=1');
+  setLang(currentLang);
+  db.auth.signOut({ scope:'global' }).catch(e=>console.error(e));
+  setTimeout(()=>{
+    try{ clearSupabaseStorage(); }catch(e){}
+  }, 300);
 }
 
 
 async function loginSuccess(user){
   currentUser=user;
-  await loadProfile();
-  await loadClients();
-  await loadProducts();
-  await loadInvoices();
+  await Promise.all([loadProfile(), loadClients(), loadProducts(), loadInvoices()]);
   showApp();
   showPage('dashboard');
   setupSidebar();
+  applyLanguage();
+  resetInactivityTimer();
 }
 
 // ========== PROFILE ==========
@@ -908,8 +1246,15 @@ async function loadProfile(){
 function setupSidebar(){
   if(!userProfile) return;
   const types={company:'კომპანია',individual:'ფიზ. პირი',entrepreneur:'ინდ. მეწარმე'};
-  document.getElementById('sb-username').textContent=userProfile.full_name||currentUser.email;
-  document.getElementById('sb-usertype').textContent=types[userProfile.entity_type]||'';
+  const nameEl = document.getElementById('sb-username');
+  const typeEl = document.getElementById('sb-usertype');
+  if(nameEl) nameEl.textContent = userProfile.full_name || currentUser.email || '—';
+  if(typeEl){
+    const idValue = userProfile.id_number || '';
+    const baseText = idValue ? `ს/კ / პირადი №: ${idValue}` : (types[userProfile.entity_type] || '');
+    typeEl.__baseKa = baseText;
+    typeEl.textContent = baseText;
+  }
 }
 
 function renderProfile(){
@@ -1093,22 +1438,23 @@ function editClient(id){
 }
 
 async function saveClient(){
-  const name=document.getElementById('cm-name').value;
+  const name=document.getElementById('cm-name').value.trim();
   if(!name){toast('სახელი სავალდებულოა','error');return;}
   const row={
     user_id:currentUser.id,
     full_name:name,
-    id_number:document.getElementById('cm-id').value,
-    address:document.getElementById('cm-addr').value,
-    phone:document.getElementById('cm-phone').value,
-    email:document.getElementById('cm-email').value
+    id_number:document.getElementById('cm-id').value.trim(),
+    address:document.getElementById('cm-addr').value.trim(),
+    phone:document.getElementById('cm-phone').value.trim(),
+    email:document.getElementById('cm-email').value.trim()
   };
 
   let result;
   if(editingClientId){
-    result = await db.from('clients').update(row).eq('id',editingClientId).eq('user_id',currentUser.id);
+    // Upsert ინარჩუნებს იგივე ID-ს და ყოველ რედაქტირებაზე ნამდვილად ანახლებს ჩანაწერს.
+    result = await db.from('clients').upsert({ id: editingClientId, ...row }, { onConflict:'id' }).select().single();
   }else{
-    result = await db.from('clients').insert(row);
+    result = await db.from('clients').insert(row).select().single();
   }
 
   if(result.error){
@@ -1147,14 +1493,23 @@ function selectClient(id){
   document.getElementById('client-dd').classList.remove('open');
   document.getElementById('selected-client-info').style.display='block';
   document.getElementById('selected-client-info').innerHTML=`✅ <strong>${c.full_name}</strong>${c.id_number?' | კოდი: '+c.id_number:''}${c.address?' | '+c.address:''}`;
+  document.getElementById('selected-client-fields').style.display='block';
+  document.getElementById('sc-id').value=c.id_number||'';
+  document.getElementById('sc-addr').value=c.address||'';
+  document.getElementById('sc-phone').value=c.phone||'';
+  document.getElementById('sc-email').value=c.email||'';
   document.getElementById('new-client-fields').style.display='none';
+  markInvoiceDirty();
 }
 function useNewClient(){
   selectedClientId=null;
   document.getElementById('client-dd').classList.remove('open');
   document.getElementById('new-client-fields').style.display='block';
   document.getElementById('selected-client-info').style.display='none';
+  document.getElementById('selected-client-fields').style.display='none';
+  clearInvoiceClientFields();
   document.getElementById('nc-name').value=document.getElementById('ii-client-search').value;
+  markInvoiceDirty();
 }
 
 // ========== PRODUCTS / CATALOG ==========
@@ -1203,8 +1558,23 @@ async function deleteCatalogItem(id){
   await loadProducts(); renderCatalog(); populateCatalogPick();
 }
 
+
+function ensureXLSXLoaded(){
+  if(window.XLSX) return Promise.resolve();
+  if(window.__xlsxLoading) return window.__xlsxLoading;
+  window.__xlsxLoading = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = resolve;
+    s.onerror = () => reject(new Error('Excel ბიბლიოთეკა ვერ ჩაიტვირთა'));
+    document.head.appendChild(s);
+  });
+  return window.__xlsxLoading;
+}
+
 async function importExcel(input){
   const file=input.files[0]; if(!file) return;
+  try{ await ensureXLSXLoaded(); }catch(e){ toast(e.message || 'Excel იმპორტი ვერ ჩაიტვირთა','error'); return; }
   const reader=new FileReader();
   reader.onload=async e=>{
     const wb=XLSX.read(e.target.result,{type:'binary'});
@@ -1226,7 +1596,7 @@ async function importExcel(input){
 function populateCatalogPick(){
   const sel=document.getElementById('catalog-pick');
   if(!sel) return;
-  sel.innerHTML='<option value="">კატალოგიდან ჩასმა...</option>'+
+  sel.innerHTML='<option value="">'+t('კატალოგიდან ჩასმა...')+'</option>'+
     userProducts.map(p=>`<option value="${p.id}">${p.name} — ${fmt(p.price)}</option>`).join('');
 }
 
@@ -1249,16 +1619,68 @@ function renderInvoices(){
   const el=document.getElementById('invoices-list');
   if(!userInvoices.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><p>ინვოისები ჯერ არ გაქვს</p></div>';return;}
   el.innerHTML=`<table class="data-table">
-    <thead><tr><th>№</th><th>კლიენტი</th><th>თარიღი</th><th>სულ</th></tr></thead>
+    <thead><tr><th>№</th><th>კლიენტი</th><th>თარიღი</th><th>სულ</th><th>მოქმედება</th></tr></thead>
     <tbody>${userInvoices.map(inv=>`
       <tr>
         <td><strong>#${inv.invoice_number}</strong></td>
         <td>${inv.clients?.full_name||'—'}</td>
         <td>${inv.invoice_date||'—'}</td>
         <td><strong>${fmt(inv.total)}</strong></td>
+        <td style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="btn-outline btn-sm" onclick="viewInvoice('${inv.id}')">ნახვა</button>
+          <button type="button" class="btn-danger btn-sm" onclick="deleteInvoice('${inv.id}')">წაშლა</button>
+        </td>
       </tr>
     `).join('')}</tbody>
   </table>`;
+}
+
+async function deleteInvoice(id){
+  if(!confirm('წავშალო ეს ინვოისი?')) return;
+  const {error}=await db.from('invoices').delete().eq('id',id).eq('user_id',currentUser.id);
+  if(error){toast('ინვოისი ვერ წაიშალა: '+error.message,'error');return;}
+  if(currentInvoiceId===id) currentInvoiceId=null;
+  await loadInvoices();
+  renderInvoices();
+  renderDashInvoices();
+  toast('ინვოისი წაიშალა ✓','success');
+}
+
+async function viewInvoice(id){
+  const {data:inv,error}=await db.from('invoices').select('*,clients(*)').eq('id',id).eq('user_id',currentUser.id).single();
+  if(error||!inv){toast('ინვოისი ვერ მოიძებნა','error');return;}
+  const {data:items,error:itemError}=await db.from('invoice_items').select('*').eq('invoice_id',id).order('id');
+  if(itemError){toast('ინვოისის პროდუქტები ვერ ჩაიტვირთა: '+itemError.message,'error');return;}
+
+  showPage('invoice-new');
+  currentInvoiceId=inv.id;
+  invoiceDirty=false;
+  document.getElementById('ii-num').value=inv.invoice_number||'001';
+  document.getElementById('ii-date').value=inv.invoice_date||fmtDate(new Date());
+  document.getElementById('ii-due').value=inv.due_date||fmtDate(new Date());
+  document.getElementById('ii-note').value=inv.note||'';
+  document.getElementById('inv-vat').checked=!!inv.vat_enabled;
+
+  invProducts=(items||[]).map(x=>({name:x.name||'',qty:Number(x.qty||0),price:Number(x.price||0)}));
+  if(!invProducts.length) invProducts=[{name:'',qty:1,price:0}];
+
+  selectedClientId=inv.client_id||null;
+  if(inv.clients){
+    document.getElementById('ii-client-search').value=inv.clients.full_name||'';
+    document.getElementById('selected-client-info').style.display='block';
+    document.getElementById('selected-client-info').innerHTML=`✅ <strong>${inv.clients.full_name||''}</strong>${inv.clients.id_number?' | კოდი: '+inv.clients.id_number:''}${inv.clients.address?' | '+inv.clients.address:''}`;
+    document.getElementById('selected-client-fields').style.display='block';
+    document.getElementById('sc-id').value=inv.clients.id_number||'';
+    document.getElementById('sc-addr').value=inv.clients.address||'';
+    document.getElementById('sc-phone').value=inv.clients.phone||'';
+    document.getElementById('sc-email').value=inv.clients.email||'';
+    document.getElementById('new-client-fields').style.display='none';
+  }
+
+  renderInvProducts();
+  calcInvTotals();
+  buildInvPreview();
+  switchInvTab('preview');
 }
 
 function renderDashInvoices(){
@@ -1293,7 +1715,7 @@ function renderInvProducts(){
   const el=document.getElementById('inv-prod-rows');
   el.innerHTML=invProducts.map((p,i)=>`
     <div class="prod-row">
-      <input value="${p.name||''}" placeholder="დასახელება" oninput="invProducts[${i}].name=this.value">
+      <input value="${p.name||''}" placeholder="${t('დასახელება')}" oninput="invProducts[${i}].name=this.value">
       <input type="number" value="${p.qty ?? ''}" min="0" step="0.01" oninput="invProducts[${i}].qty=parseFloat(this.value)||0;calcInvTotals()">
       <input type="number" value="${p.price ? p.price : ''}" placeholder="0.00" min="0" step="0.01" oninput="invProducts[${i}].price=parseFloat(this.value)||0;calcInvTotals()">
       <div class="prod-total" data-index="${i}">${fmt((p.qty||0)*(p.price||0))}</div>
@@ -1311,7 +1733,7 @@ function calcInvTotals(){
   const sub=invProducts.reduce((s,p)=>s+((p.qty||0)*(p.price||0)),0);
   const vatOn=document.getElementById('inv-vat').checked;
   const vat=vatOn?sub*0.18:0;
-  const total=sub+vat;
+  const total=sub;
   document.getElementById('inv-sub').textContent=fmt(sub);
   document.getElementById('inv-vat-amt').textContent=fmt(vat);
   document.getElementById('inv-total').textContent=fmt(total);
@@ -1324,6 +1746,28 @@ function switchInvTab(name){
   if(name==='preview') buildInvPreview();
 }
 
+function getInvoiceClientSnapshot(){
+  if(selectedClientId){
+    const c=userClients.find(x=>x.id===selectedClientId) || {};
+    return {
+      id:selectedClientId,
+      full_name:document.getElementById('ii-client-search').value || c.full_name || '',
+      id_number:document.getElementById('sc-id')?.value || c.id_number || '',
+      address:document.getElementById('sc-addr')?.value || c.address || '',
+      phone:document.getElementById('sc-phone')?.value || c.phone || '',
+      email:document.getElementById('sc-email')?.value || c.email || ''
+    };
+  }
+  return {
+    id:null,
+    full_name:document.getElementById('nc-name')?.value || document.getElementById('ii-client-search')?.value || '',
+    id_number:document.getElementById('nc-id')?.value || '',
+    address:document.getElementById('nc-addr')?.value || '',
+    phone:document.getElementById('nc-phone')?.value || '',
+    email:''
+  };
+}
+
 function buildInvPreview(){
   const p=userProfile||{};
   const num=document.getElementById('ii-num').value;
@@ -1331,97 +1775,134 @@ function buildInvPreview(){
   const due=document.getElementById('ii-due').value;
   const note=document.getElementById('ii-note').value;
   const vatOn=document.getElementById('inv-vat').checked;
-  const sub=invProducts.reduce((s,p)=>s+(p.qty*p.price),0);
+  const sub=invProducts.reduce((s,p)=>s+((p.qty||0)*(p.price||0)),0);
   const vat=vatOn?sub*0.18:0;
-  const total=sub+vat;
+  const total=sub;
 
-  // client info
+  const client=getInvoiceClientSnapshot();
   let clientHtml='—';
-  if(selectedClientId){
-    const c=userClients.find(x=>x.id===selectedClientId);
-    if(c) clientHtml=`<strong>${c.full_name}</strong>${c.id_number?'<br>კოდი: '+c.id_number:''}${c.address?'<br>'+c.address:''}`;
-  } else {
-    const cn=document.getElementById('nc-name')?.value;
-    if(cn) clientHtml=`<strong>${cn}</strong>`;
+  if(client.full_name){
+    clientHtml=`<strong>${client.full_name}</strong>${client.id_number?'<br>'+t('კოდი')+': '+client.id_number:''}${client.address?'<br>'+client.address:''}${client.phone?'<br>'+client.phone:''}${client.email?'<br>'+client.email:''}`;
   }
 
   const logoHtml=profileLogoUrl?`<img src="${profileLogoUrl}" style="max-height:60px;max-width:160px;">`:
     `<div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:900">${p.full_name||''}</div>`;
 
   const banksHtml=userBanks.filter(b=>b.iban).map(b=>`
-    <div class="inv-pre-bank"><span class="inv-pre-bank-label">${b.bank_name||'ბანკი'}:</span><span>${b.iban}</span></div>
+    <div class="inv-pre-bank"><span class="inv-pre-bank-label">${b.bank_name||t('ბანკი')}:</span><span>${b.iban}</span></div>
   `).join('');
 
   const rowsHtml=invProducts.filter(p=>p.name||p.price).map(p=>`
-    <tr><td>${p.name||'—'}</td><td style="text-align:center">${p.qty}</td><td style="text-align:right">${fmt(p.price)}</td><td style="text-align:right">${fmt(p.qty*p.price)}</td></tr>
+    <tr><td>${p.name||'—'}</td><td style="text-align:center">${p.qty||0}</td><td style="text-align:right">${fmt(p.price||0)}</td><td style="text-align:right">${fmt((p.qty||0)*(p.price||0))}</td></tr>
   `).join('');
 
   document.getElementById('inv-preview-content').innerHTML=`
     <div class="inv-pre-header">
       <div>${logoHtml}</div>
-      <div style="text-align:right"><div class="inv-pre-title">ინვოისი</div><div class="inv-pre-num">№ ${num}</div></div>
+      <div style="text-align:right"><div class="inv-pre-title">${t('ინვოისი')}</div><div class="inv-pre-num">№ ${num}</div></div>
     </div>
     <div class="inv-pre-meta">
-      <div class="inv-pre-block"><h4>გამგზავნი</h4><p><strong>${p.full_name||''}</strong>${p.id_number?'<br>კოდი: '+p.id_number:''}${p.address?'<br>'+p.address:''}${p.phone?'<br>'+p.phone:''}</p></div>
-      <div class="inv-pre-block"><h4>მიმღები</h4><p>${clientHtml}</p><div style="margin-top:10px;font-size:12px;color:#888">თარიღი: <strong>${date}</strong><br>ვადა: <strong>${due}</strong></div></div>
+      <div class="inv-pre-block"><h4>${t('გამგზავნი')}</h4><p><strong>${p.full_name||''}</strong>${p.id_number?'<br>'+t('კოდი')+': '+p.id_number:''}${p.address?'<br>'+p.address:''}${p.phone?'<br>'+p.phone:''}</p></div>
+      <div class="inv-pre-block"><h4>${t('მიმღები')}</h4><p>${clientHtml}</p><div style="margin-top:10px;font-size:12px;color:#888">${t('თარიღი')}: <strong>${date}</strong><br>${t('ვადა')}: <strong>${due}</strong></div></div>
     </div>
     <table class="inv-pre-table">
-      <thead><tr><th>დასახელება</th><th style="text-align:center">რაოდ.</th><th style="text-align:right">ფასი</th><th style="text-align:right">ჯამი</th></tr></thead>
+      <thead><tr><th>${t('დასახელება')}</th><th style="text-align:center">${t('რაოდ.')}</th><th style="text-align:right">${t('ფასი')}</th><th style="text-align:right">${t('ჯამი')}</th></tr></thead>
       <tbody>${rowsHtml}</tbody>
     </table>
     <div class="inv-pre-totals">
-      <div class="inv-pre-tot-row"><span>შუალედური ჯამი</span><span>${fmt(sub)}</span></div>
-      ${vatOn?`<div class="inv-pre-tot-row"><span>დღგ (18%)</span><span>${fmt(vat)}</span></div>`:''}
-      <div class="inv-pre-tot-row grand"><span>სულ გადასახდელი</span><span>${fmt(total)}</span></div>
+      <div class="inv-pre-tot-row"><span>${t('შუალედური ჯამი')}</span><span>${fmt(sub)}</span></div>
+      ${vatOn?`<div class="inv-pre-tot-row"><span>${t('მათ შორის დღგ')}</span><span>${fmt(vat)}</span></div>`:''}
+      <div class="inv-pre-tot-row grand"><span>${t('სულ გადასახდელი')}</span><span>${fmt(total)}</span></div>
     </div>
-    ${banksHtml?`<div class="inv-pre-banks"><h4>საბანკო რეკვიზიტები</h4>${banksHtml}</div>`:''}
+    ${banksHtml?`<div class="inv-pre-banks"><h4>${t('საბანკო რეკვიზიტები')}</h4>${banksHtml}</div>`:''}
     ${note?`<div style="margin-top:20px;padding:14px;background:#f4f6f9;border-radius:8px;font-size:13px;color:#666">${note}</div>`:''}
   `;
 }
 
-async function saveInvoice(){
-  const p=userProfile;
-  const vatOn=document.getElementById('inv-vat').checked;
-  const sub=invProducts.reduce((s,p)=>s+(p.qty*p.price),0);
-  const vat=vatOn?sub*0.18:0;
-  const total=sub+vat;
+async function saveInvoice(silent=false){
+  if(!currentUser){ toast('ჯერ შედი ანგარიშში','error'); return null; }
+  if(currentInvoiceId && !invoiceDirty && silent) return currentInvoiceId;
 
-  // save new client if needed
+  const vatOn=document.getElementById('inv-vat').checked;
+  const sub=invProducts.reduce((s,p)=>s+((p.qty||0)*(p.price||0)),0);
+  const vat=vatOn?sub*0.18:0;
+  const total=sub;
+  const client=getInvoiceClientSnapshot();
+
   let cid=selectedClientId;
-  if(!cid){
-    const cn=document.getElementById('nc-name')?.value;
+  if(cid){
+    // კლიენტის ძირითადი მონაცემები განვაახლოთ, თუ ინვოისის შექმნისას ჩაასწორე.
+    await db.from('clients').update({
+      id_number:client.id_number,
+      address:client.address,
+      phone:client.phone,
+      email:client.email
+    }).eq('id',cid).eq('user_id',currentUser.id);
+    await loadClients();
+  }
+
+  if(!cid && client.full_name){
     const saveNew=document.getElementById('nc-save')?.checked;
-    if(cn&&saveNew){
-      const {data}=await db.from('clients').insert({
-        user_id:currentUser.id,full_name:cn,
-        id_number:document.getElementById('nc-id').value,
-        address:document.getElementById('nc-addr').value,
-        phone:document.getElementById('nc-phone').value
+    if(saveNew){
+      const {data,error}=await db.from('clients').insert({
+        user_id:currentUser.id,
+        full_name:client.full_name,
+        id_number:client.id_number,
+        address:client.address,
+        phone:client.phone
       }).select().single();
-      if(data){cid=data.id;await loadClients();}
+      if(error){ toast('კლიენტი ვერ შეინახა: '+error.message,'error'); return null; }
+      if(data){cid=data.id;selectedClientId=cid;await loadClients();}
     }
   }
 
-  const {data:inv}=await db.from('invoices').insert({
+  const invoiceRow={
     user_id:currentUser.id,
     invoice_number:document.getElementById('ii-num').value,
     client_id:cid||null,
     invoice_date:document.getElementById('ii-date').value,
     due_date:document.getElementById('ii-due').value,
-    vat_enabled:vatOn,note:document.getElementById('ii-note').value,
-    subtotal:sub,vat_amount:vat,total
-  }).select().single();
+    vat_enabled:vatOn,
+    note:document.getElementById('ii-note').value,
+    subtotal:sub,
+    vat_amount:vat,
+    total
+  };
 
-  if(inv){
-    const items=invProducts.filter(p=>p.name||p.price).map(p=>({invoice_id:inv.id,name:p.name,qty:p.qty,price:p.price,total:p.qty*p.price}));
-    if(items.length) await db.from('invoice_items').insert(items);
+  let inv=null, error=null;
+  if(currentInvoiceId){
+    const res=await db.from('invoices').update(invoiceRow).eq('id',currentInvoiceId).eq('user_id',currentUser.id).select().single();
+    inv=res.data; error=res.error;
+  }else{
+    const res=await db.from('invoices').insert(invoiceRow).select().single();
+    inv=res.data; error=res.error;
   }
+
+  if(error){
+    console.error(error);
+    toast('ინვოისი ვერ შეინახა: '+error.message,'error');
+    return null;
+  }
+
+  currentInvoiceId=inv.id;
+  await db.from('invoice_items').delete().eq('invoice_id',inv.id);
+  const items=invProducts.filter(p=>p.name||p.price).map(p=>({invoice_id:inv.id,name:p.name,qty:p.qty||0,price:p.price||0,total:(p.qty||0)*(p.price||0)}));
+  if(items.length){
+    const {error:itemError}=await db.from('invoice_items').insert(items);
+    if(itemError){ toast('ინვოისის პროდუქტები ვერ შეინახა: '+itemError.message,'error'); return null; }
+  }
+
+  invoiceDirty=false;
   await loadInvoices();
-  toast('ინვოისი შენახულია ✓','success');
+  if(!silent) toast('ინვოისი შენახულია ✓','success');
+  return currentInvoiceId;
 }
 
 async function downloadInvPDF(){
+  const savedId = await saveInvoice(true);
+  if(!savedId) return;
   buildInvPreview();
+  applyTranslations(document.getElementById('inv-preview-content'));
 
   const preview = document.getElementById('inv-preview-content');
   const num = document.getElementById('ii-num').value || '001';
@@ -1432,69 +1913,129 @@ async function downloadInvPDF(){
   }
 
   try{
-    toast('PDF მზადდება...', '');
-
-    const oldTransform = preview.style.transform;
-    const oldTransformOrigin = preview.style.transformOrigin;
-    preview.style.transform = 'none';
-    preview.style.transformOrigin = 'top left';
-
-    const canvas = await html2canvas(preview, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-      windowWidth: preview.scrollWidth,
-      windowHeight: preview.scrollHeight
-    });
-
-    preview.style.transform = oldTransform;
-    preview.style.transformOrigin = oldTransformOrigin;
-
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('p', 'mm', 'a4');
-
-    const pageW = 210;
-    const pageH = 297;
-    const margin = 10;
-    const imgW = pageW - margin * 2;
-    const imgH = canvas.height * imgW / canvas.width;
-
-    const imgData = canvas.toDataURL('image/jpeg', 0.98);
-
-    if(imgH <= pageH - margin * 2){
-      pdf.addImage(imgData, 'JPEG', margin, margin, imgW, imgH);
-    }else{
-      let remainingH = imgH;
-      let positionY = margin;
-      pdf.addImage(imgData, 'JPEG', margin, positionY, imgW, imgH);
-      remainingH -= (pageH - margin * 2);
-
-      while(remainingH > 0){
-        pdf.addPage();
-        positionY = margin - (imgH - remainingH);
-        pdf.addImage(imgData, 'JPEG', margin, positionY, imgW, imgH);
-        remainingH -= (pageH - margin * 2);
-      }
+    const printWindow = window.open('', '_blank', 'width=900,height=1100');
+    if(!printWindow){
+      toast('ბრაუზერმა დაბლოკა PDF ფანჯარა. Pop-up დაუშვი და თავიდან სცადე.', 'error');
+      return;
     }
 
-    pdf.save(`ინვოისი №${num}.pdf`);
-    toast('PDF ჩამოიტვირთა ✓', 'success');
+    const invoiceHtml = preview.innerHTML;
+
+    printWindow.document.open();
+    printWindow.document.write(`
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<title>ინვოისი №${num}</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0f0f1a;
+    --gold:#f5a623;
+    --muted:#8a8fa8;
+    --border:#e8eaf0;
+  }
+  *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  html,body{margin:0;padding:0;background:#f4f5f9;color:var(--ink);font-family:'DM Sans', Arial, sans-serif;}
+  .print-page{width:210mm;min-height:297mm;margin:0 auto;background:#fff;padding:18mm 16mm;}
+  .inv-pre-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--gold);padding-bottom:18px;margin-bottom:24px;}
+  .inv-pre-title{font-family:'Playfair Display',serif;font-size:34px;font-weight:900;color:var(--ink);}
+  .inv-pre-num{font-size:14px;color:var(--muted);margin-top:4px;}
+  .inv-pre-meta{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:26px;}
+  .inv-pre-block h4,.inv-pre-banks h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:0 0 8px;}
+  .inv-pre-block p{font-size:14px;line-height:1.7;margin:0;}
+  .inv-pre-table{width:100%;border-collapse:collapse;margin-bottom:20px;border-radius:8px;overflow:hidden;}
+  .inv-pre-table thead{background:#0f0f1a;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .inv-pre-table th{background:#0f0f1a !important;color:#fff !important;padding:11px 14px;font-size:12px;text-align:left;font-weight:700;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .inv-pre-table td{padding:11px 14px;font-size:13px;border-bottom:1px solid #eef0f5;}
+  .inv-pre-table th:last-child,.inv-pre-table td:last-child{text-align:right;}
+  .inv-pre-totals{margin-left:auto;width:290px;}
+  .inv-pre-tot-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;color:var(--ink);}
+  .inv-pre-tot-row.grand{font-size:17px;font-weight:800;border-top:2px solid var(--ink);padding-top:10px;margin-top:6px;}
+  .inv-pre-banks{margin-top:28px;border-top:1px solid var(--border);padding-top:18px;}
+  .inv-pre-bank{font-size:13px;display:flex;gap:10px;margin-bottom:6px;}
+  .inv-pre-bank-label{font-weight:700;min-width:120px;}
+  img{max-width:160px;max-height:60px;}
+  @page{size:A4;margin:0;}
+  @media print{
+    html,body{background:#fff;}
+    .print-page{margin:0;box-shadow:none;width:210mm;min-height:297mm;}
+    .inv-pre-table thead,.inv-pre-table th{background:#0f0f1a !important;color:#fff !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  }
+</style>
+</head>
+<body>
+  <main class="print-page">${invoiceHtml}</main>
+  <script>
+    window.onload = function(){
+      setTimeout(function(){ window.print(); }, 300);
+    };
+  <\/script>
+</body>
+</html>`);
+    printWindow.document.close();
+    toast('PDF ფანჯარა გაიხსნა — აირჩიე Save as PDF', 'success');
   }catch(err){
     console.error(err);
     toast('PDF ვერ შეიქმნა: ' + (err.message || err), 'error');
   }
 }
 
-function sendInvWhatsApp(){
+function buildShareMessage(){
   const num=document.getElementById('ii-num').value;
-  const vatOn=document.getElementById('inv-vat').checked;
-  const sub=invProducts.reduce((s,p)=>s+(p.qty*p.price),0);
-  const total=sub+(vatOn?sub*0.18:0);
-  const msg=encodeURIComponent(`გამარჯობა!\n\nგიგზავნით ინვოისს №${num}\nგადასახდელი: ${fmt(total)}\n\nგმადლობთ!`);
+  const total=invProducts.reduce((s,p)=>s+((p.qty||0)*(p.price||0)),0);
+  return `გამარჯობა!\n\nგიგზავნით ინვოისს №${num}\nგადასახდელი: ${fmt(total)}\n\nPDF ინვოისი გაიხსნა ცალკე ფანჯარაში — შეინახეთ PDF და სურვილის შემთხვევაში მიამაგრეთ შეტყობინებას.`;
+}
+
+async function sendInvWhatsApp(){
+  const savedId = await saveInvoice(true);
+  if(!savedId) return;
+  buildInvPreview();
+  await downloadInvPDF();
+  const msg=encodeURIComponent(buildShareMessage());
   window.open(`https://wa.me/?text=${msg}`,'_blank');
 }
+
+async function sendInvViber(){
+  const savedId = await saveInvoice(true);
+  if(!savedId) return;
+  buildInvPreview();
+  await downloadInvPDF();
+  const msg=encodeURIComponent(buildShareMessage());
+  window.open(`viber://forward?text=${msg}`,'_blank');
+}
+
+// ========== LEGAL ==========
+function openLegal(type){
+  const c=document.getElementById('legal-content');
+  const owner = currentLang==='ka'
+    ? '<p><strong>მფლობელი:</strong> შპს ბილდეკო<br><strong>ტელ:</strong> 551343410<br><strong>Email:</strong> Buildeco2024@gmail.com</p>'
+    : currentLang==='en'
+      ? '<p><strong>Owner:</strong> LLC Buildeco<br><strong>Phone:</strong> 551343410<br><strong>Email:</strong> Buildeco2024@gmail.com</p>'
+      : '<p><strong>Владелец:</strong> LLC Buildeco<br><strong>Тел:</strong> 551343410<br><strong>Email:</strong> Buildeco2024@gmail.com</p>';
+  if(type==='privacy'){
+    c.innerHTML = currentLang==='ka'
+      ? `<h3>Privacy Policy</h3>${owner}<h4>მონაცემების გამოყენება</h4><p>საიტი ინახავს მხოლოდ იმ ინფორმაციას, რომელსაც მომხმარებელი თავად ავსებს: პროფილი, კლიენტები, პროდუქტები და ინვოისები. ეს მონაცემები გამოიყენება ინვოისების შექმნისა და შენახვისთვის.</p><h4>უსაფრთხოება</h4><p>ანგარიშები დაცულია ავტორიზაციით. თითოეული მომხმარებელი ხედავს მხოლოდ საკუთარ მონაცემებს.</p><h4>კონტაქტი</h4><p>კითხვების შემთხვევაში დაგვიკავშირდით მითითებულ ნომერზე ან ელ-ფოსტაზე.</p>`
+      : currentLang==='en'
+        ? `<h3>Privacy Policy</h3>${owner}<h4>Data use</h4><p>The service stores only the information entered by the user: profile, clients, products, and invoices. This data is used to create, save, and manage invoices.</p><h4>Security</h4><p>Accounts are protected by authentication. Each user can access only their own data.</p><h4>Contact</h4><p>For questions, contact us by phone or email.</p>`
+        : `<h3>Политика конфиденциальности</h3>${owner}<h4>Использование данных</h4><p>Сервис хранит только данные, которые пользователь вводит сам: профиль, клиентов, товары и счета. Эти данные используются для создания и хранения счетов.</p><h4>Безопасность</h4><p>Аккаунты защищены авторизацией. Каждый пользователь видит только свои данные.</p><h4>Контакты</h4><p>По вопросам свяжитесь с нами по телефону или email.</p>`;
+  }else if(type==='terms'){
+    c.innerHTML = currentLang==='ka'
+      ? `<h3>Terms & Conditions</h3>${owner}<h4>სერვისის გამოყენება</h4><p>Invoice.com.ge განკუთვნილია ინვოისების შექმნის, შენახვისა და გადმოტვირთვისთვის. მომხმარებელი პასუხისმგებელია შეყვანილი ინფორმაციის სისწორეზე.</p><h4>შეზღუდვები</h4><p>აკრძალულია სერვისის გამოყენება უკანონო მიზნებისთვის ან სხვა პირის მონაცემების არამართლზომიერი დამუშავებისთვის.</p>`
+      : currentLang==='en'
+        ? `<h3>Terms & Conditions</h3>${owner}<h4>Use of service</h4><p>Invoice.com.ge is intended for creating, saving, and downloading invoices. The user is responsible for the accuracy of entered information.</p><h4>Restrictions</h4><p>It is prohibited to use the service for illegal purposes or improper processing of another person’s data.</p>`
+        : `<h3>Условия использования</h3>${owner}<h4>Использование сервиса</h4><p>Invoice.com.ge предназначен для создания, сохранения и скачивания счетов. Пользователь отвечает за правильность введённых данных.</p><h4>Ограничения</h4><p>Запрещено использовать сервис в незаконных целях или неправомерно обрабатывать данные других лиц.</p>`;
+  }else{
+    c.innerHTML = currentLang==='ka'
+      ? `<h3>Contact</h3>${owner}<p>დაგვიკავშირდით სამუშაო საკითხებზე ან ტექნიკური დახმარებისთვის.</p>`
+      : currentLang==='en'
+        ? `<h3>Contact</h3>${owner}<p>Contact us for business questions or technical support.</p>`
+        : `<h3>Контакты</h3>${owner}<p>Свяжитесь с нами по рабочим вопросам или для технической помощи.</p>`;
+  }
+  document.getElementById('legal-modal').classList.add('open');
+}
+function closeLegal(){document.getElementById('legal-modal').classList.remove('open');}
 
 // ========== PAGES ==========
 function showPage(name){
@@ -1518,8 +2059,12 @@ function showPage(name){
   if(name==='invoice-new'){
     invProducts=[];
     selectedClientId=null;
+    currentInvoiceId=null;
+    invoiceDirty=true;
     document.getElementById('ii-client-search').value='';
     document.getElementById('selected-client-info').style.display='none';
+    const scf=document.getElementById('selected-client-fields'); if(scf) scf.style.display='none';
+    clearInvoiceClientFields();
     document.getElementById('new-client-fields').style.display='none';
     document.getElementById('inv-vat').checked=false;
     addInvProduct(); addInvProduct();
@@ -1530,9 +2075,152 @@ function showPage(name){
     if(last){
       const n=parseInt(last.invoice_number)||0;
       document.getElementById('ii-num').value=String(n+1).padStart(3,'0');
+    }else{
+      document.getElementById('ii-num').value='001';
     }
   }
+  setTimeout(applyLanguage, 0);
 }
+
+setTimeout(()=>setLang(currentLang), 100);
+</script>
+<script>
+// ========== COMPLETE TRANSLATION + SIDEBAR USER FIX ==========
+(function(){
+  const FLAGS = {ka:'🇬🇪', en:'🇬🇧', ru:'🇷🇺'};
+  const EN = {
+    'შესვლა':'Login','რეგისტრაცია':'Register','შესვლა...':'Logging in...','ინახება...':'Saving...','შედი':'Login','შედი შენს ანგარიშში':'Sign in to your account','მოგესალმებით! 👋':'Welcome! 👋','არ გაქვს ანგარიში?':'No account?','დარეგისტრირდი':'Register','გაქვს ანგარიში?':'Already have an account?','შექმენი ანგარიში':'Create account','ერთხელ შეავსე — ყოველთვის გამოიყენე':'Fill once — use every time','სუბიექტის ტიპი':'Entity type','ელ-ფოსტა':'Email','პაროლი':'Password','მინ. 6 სიმბოლო':'Min. 6 characters','დაბადების თარიღი':'Birth date','კომპანია':'Company','ფიზ. პირი':'Individual','ინდ. მეწარმე':'Entrepreneur','კომპანიის სახელი':'Company name','სახელი და გვარი':'Full name','საიდ. კოდი':'ID number','საიდ. კოდი / პირადი №':'ID / personal number','პირ. № / ID':'Personal ID','შპს მაგალითი':'Example LLC','შეავსე სავალდებულო ველები':'Please fill required fields','ელ-ფოსტა და პაროლი შეავსე':'Enter email and password','შესვლა ვერ მოხერხდა. სცადე თავიდან.':'Login failed. Try again.','რეგისტრაცია წარმატებულია! გთხოვ შეამოწმე ელ-ფოსტა.':'Registration successful. Please check your email.',
+    '🇬🇪 ბიზნესისთვის':'For business','ქართული ბიზნესისთვის':'For Georgian business','შექმენი შენი ინვოისი':'Create your invoice','მარტივად':'easily','შექმენი შენი ინვოისი მარტივად':'Create your invoice easily','პროფესიული ინვოისები წუთებში. შეინახე კლიენტები, პროდუქცია და გაგზავნე PDF-ით WhatsApp-ზე ან Viber-ზე.':'Professional invoices in minutes. Save clients, products and send PDFs via WhatsApp or Viber.','უფასოდ დაიწყე →':'Start free →','უფასო':'Free','ექსპორტი':'Export','დღგ მხარდაჭერა':'VAT support','ფიჩერები':'Features','ყველაფერი რაც გჭირდება':'Everything you need','კლიენტების ბაზა':'Client database','შეინახე კლიენტების მონაცემები ერთხელ და გამოიყენე ყოველ ინვოისზე.':'Save client details once and use them on every invoice.','პროდუქტების კატალოგი':'Product catalog','Excel-იდან იმპორტი ან ხელით დამატება. ინვოისზე ერთი კლიკით ჩასმა.':'Import from Excel or add manually. Add to invoices in one click.','PDF + WhatsApp/Viber':'PDF + WhatsApp/Viber','პროფესიული PDF გენერაცია და გაგზავნა WhatsApp-ით ან Viber-ით.':'Generate professional PDFs and send via WhatsApp or Viber.','პროფესიული PDF გენერაცია და გაგზავნა WhatsApp/Viber-ით.':'Generate professional PDFs and send via WhatsApp/Viber.','საბანკო რეკვიზიტები':'Bank details','მრავალი ბანკის ანგარიში — ყოველ ინვოისზე ავტომატურად ჩაისმება.':'Multiple bank accounts are added automatically to every invoice.','დღგ 18%':'VAT 18%','ავტომატური გამოთვლა. ჩართე ან გამორთე ერთი კლიკით.':'Automatic calculation. Enable or disable in one click.','ქართულად':'Localized','სრულად ქართულ ენაზე. კომპანია, ფიზ. პირი, ინდ. მეწარმე — ყველა ტიპი.':'Fully localized. Company, individual and entrepreneur are supported.','✅ ინვოისი გაგზავნილია!':'✅ Invoice sent!','ინვოისი':'Invoice','სერვისი A':'Service A','სერვისი B':'Service B','შპს ბიზნესი':'Business LLC',
+    'მთავარი':'Dashboard','ახალი ინვოისი':'New invoice','ინვოისები':'Invoices','კლიენტები':'Clients','პროდუქტები':'Products','პროფილი':'Profile','გამოსვლა':'Logout','ინვოისები სულ':'Total invoices','ბოლო ინვოისები':'Recent invoices','კლიენტები არ გაქვს დამატებული':'No clients added yet','პროდუქტები არ გაქვს დამატებული':'No products added yet','ინვოისები ჯერ არ გაქვს':'No invoices yet','იტვირთება...':'Loading...','სულ':'Total','მოქმედება':'Actions','ნახვა':'View','წაშლა':'Delete','რედაქტირება':'Edit','ახალი':'New','➕ ახალი':'➕ New','➕ ახალი ინვოისი':'➕ New invoice','➕ კლიენტის დამატება':'➕ Add client','➕ პროდუქტი':'➕ Product','📥 Excel-იდან იმპორტი':'📥 Import from Excel',
+    'ინფო':'Info','📋 ინფო':'📋 Info','📦 პროდუქტები':'📦 Items','გადახედვა':'Preview','👁 გადახედვა':'👁 Preview','ინვოისი №':'Invoice No.','თარიღი':'Date','გადახდის ვადა':'Due date','ვადა':'Due date','კლიენტი':'Client','ძიება ან ახლის დამატება...':'Search or add new...','კლიენტის მონაცემები ინვოისისთვის':'Client details for invoice','ახალი კლიენტი':'New client','კლიენტის სახელი':'Client name','სახელი / კომპანია':'Name / Company','მისამართი':'Address','ტელეფონი':'Phone','ტელ:':'Phone:','კლიენტების ბაზაში შენახვა':'Save to client database','შენიშვნა':'Note','გადახდის პირობები...':'Payment terms...','შემდეგი → პროდუქტები':'Next → Items','დასახელება':'Description','რაოდ.':'Qty','ფასი':'Price','ფასი ₾':'Price ₾','ჯამი':'Total','ჯამი ₾':'Total ₾','პროდუქტის დამატება':'Add item','+ პროდუქტის დამატება':'Add item','კატალოგიდან ჩასმა...':'Add from catalog...','შუალედური ჯამი':'Subtotal','მათ შორის დღგ':'Including VAT','სულ გადასახდელი':'Total due','უკან':'Back','← უკან':'← Back','← რედაქტირება':'← Edit','გადახედვა →':'Preview →','💾 შენახვა':'💾 Save','შენახვა':'Save','PDF':'PDF','WhatsApp':'WhatsApp','Viber':'Viber','გამგზავნი':'Sender','მიმღები':'Recipient','კოდი':'ID','ბანკი':'Bank','საბანკო ანგარიშები':'Bank accounts','+ ბანკის დამატება':'Add bank','ბანკის დამატება':'Add bank','ლოგო':'Logo','📎 ლოგოს ატვირთვა (PNG, JPG)':'📎 Upload logo (PNG, JPG)','ლოგოს ატვირთვა (PNG, JPG)':'Upload logo (PNG, JPG)','ძირითადი ინფო':'Main information','ც., კგ., სთ.':'pcs, kg, hr','სერვისი / პროდუქტი':'Service / Product','ერთეული':'Unit','Excel ფაილი უნდა შეიცავდეს სვეტებს:':'Excel file must contain columns:','სახელი, ერთეული, ფასი':'Name, Unit, Price','პროდუქტი':'Product','პროდუქტი დაიმპორტდა ✓':'product imported ✓',
+    'კლიენტის დამატება':'Add client','კლიენტის რედაქტირება':'Edit client','სახელი':'Name','სახელი სავალდებულოა':'Name is required','წაშლა?':'Delete?','წავშალო ეს ინვოისი?':'Delete this invoice?','კლიენტი შენახულია ✓':'Client saved ✓','პროფილი განახლდა ✓':'Profile updated ✓','პროდუქტი დამატებულია ✓':'Product added ✓','ინვოისი შენახულია ✓':'Invoice saved ✓','ინვოისი წაიშალა ✓':'Invoice deleted ✓','ჯერ შედი ანგარიშში':'Please log in first','PDF ფანჯარა გაიხსნა — აირჩიე Save as PDF':'PDF window opened — choose Save as PDF','ბრაუზერმა დაბლოკა PDF ფანჯარა. Pop-up დაუშვი და თავიდან სცადე.':'The browser blocked the PDF window. Allow pop-ups and try again.','10 წუთი არააქტიური იყავი — უსაფრთხოებისთვის გამოხვედი':'You were inactive for 10 minutes — logged out for security.',
+    'მფლობელი კომპანია':'Owner company','მფლობელი კომპანია: შპს ბილდეკო':'Owner company: Buildeco LLC','მფლობელი:':'Owner:','კონფიდენციალურობა':'Privacy Policy','წესები და პირობები':'Terms & Conditions','კონტაქტი':'Contact','ყველა უფლება დაცულია':'All rights reserved','უსაფრთხოება':'Security','მონაცემების გამოყენება':'Data usage','სერვისის გამოყენება':'Use of service','შეზღუდვები':'Restrictions','დაგვიკავშირდით სამუშაო საკითხებზე ან ტექნიკური დახმარებისთვის.':'Contact us for business matters or technical support.','კითხვების შემთხვევაში დაგვიკავშირდით მითითებულ ნომერზე ან ელ-ფოსტაზე.':'For questions, contact us using the phone number or email provided.','საიტი ინახავს მხოლოდ იმ ინფორმაციას, რომელსაც მომხმარებელი თავად ავსებს: პროფილი, კლიენტები, პროდუქტები და ინვოისები. ეს მონაცემები გამოიყენება ინვოისების შექმნისა და შენახვისთვის.':'The site stores only the information entered by the user: profile, clients, products, and invoices. This data is used to create and save invoices.','ანგარიშები დაცულია ავტორიზაციით. თითოეული მომხმარებელი ხედავს მხოლოდ საკუთარ მონაცემებს.':'Accounts are protected by authentication. Each user sees only their own data.','Invoice.com.ge განკუთვნილია ინვოისების შექმნის, შენახვისა და გადმოტვირთვისთვის. მომხმარებელი პასუხისმგებელია შეყვანილი ინფორმაციის სისწორეზე.':'Invoice.com.ge is intended for creating, saving, and downloading invoices. The user is responsible for the accuracy of entered information.','აკრძალულია სერვისის გამოყენება უკანონო მიზნებისთვის ან სხვა პირის მონაცემების არამართლზომიერი დამუშავებისთვის.':'It is prohibited to use the service for illegal purposes or to improperly process another person’s data.'
+  };
+  const RU = {
+    'შესვლა':'Войти','რეგისტრაცია':'Регистрация','შესვლა...':'Вход...','ინახება...':'Сохранение...','შედი':'Войти','შედი შენს ანგარიშში':'Войдите в аккаунт','მოგესალმებით! 👋':'Добро пожаловать! 👋','არ გაქვს ანგარიში?':'Нет аккаунта?','დარეგისტრირდი':'Зарегистрируйтесь','გაქვს ანგარიში?':'Уже есть аккаунт?','შექმენი ანგარიში':'Создать аккаунт','ერთხელ შეავსე — ყოველთვის გამოიყენე':'Заполните один раз — используйте всегда','სუბიექტის ტიპი':'Тип субъекта','ელ-ფოსტა':'Email','პაროლი':'Пароль','მინ. 6 სიმბოლო':'Мин. 6 символов','დაბადების თარიღი':'Дата рождения','კომპანია':'Компания','ფიზ. პირი':'Физ. лицо','ინდ. მეწარმე':'Предприниматель','კომპანიის სახელი':'Название компании','სახელი და გვარი':'Имя и фамилия','საიდ. კოდი':'Идентификационный код','საიდ. კოდი / პირადი №':'ID / личный номер','პირ. № / ID':'Личный номер / ID','შპს მაგალითი':'ООО Пример','შეავსე სავალდებულო ველები':'Заполните обязательные поля','ელ-ფოსტა და პაროლი შეავსე':'Введите email и пароль','შესვლა ვერ მოხერხდა. სცადე თავიდან.':'Не удалось войти. Попробуйте снова.','რეგისტრაცია წარმატებულია! გთხოვ შეამოწმე ელ-ფოსტა.':'Регистрация успешна! Проверьте email.',
+    '🇬🇪 ბიზნესისთვის':'Для бизнеса','ქართული ბიზნესისთვის':'Для грузинского бизнеса','შექმენი შენი ინვოისი':'Создайте счет','მარტივად':'легко','შექმენი შენი ინვოისი მარტივად':'Создавайте счета легко','პროფესიული ინვოისები წუთებში. შეინახე კლიენტები, პროდუქცია და გაგზავნე PDF-ით WhatsApp-ზე ან Viber-ზე.':'Профессиональные счета за минуты. Сохраняйте клиентов, товары и отправляйте PDF через WhatsApp или Viber.','უფასოდ დაიწყე →':'Начать бесплатно →','უფასო':'Бесплатно','ექსპორტი':'Экспорт','დღგ მხარდაჭერა':'Поддержка НДС','ფიჩერები':'Функции','ყველაფერი რაც გჭირდება':'Все, что нужно','კლიენტების ბაზა':'База клиентов','შეინახე კლიენტების მონაცემები ერთხელ და გამოიყენე ყოველ ინვოისზე.':'Сохраните данные клиента один раз и используйте в каждом счете.','პროდუქტების კატალოგი':'Каталог товаров','Excel-იდან იმპორტი ან ხელით დამატება. ინვოისზე ერთი კლიკით ჩასმა.':'Импорт из Excel или ручное добавление. Добавление в счет одним кликом.','PDF + WhatsApp/Viber':'PDF + WhatsApp/Viber','პროფესიული PDF გენერაცია და გაგზავნა WhatsApp-ით ან Viber-ით.':'Создание профессионального PDF и отправка через WhatsApp или Viber.','პროფესიული PDF გენერაცია და გაგზავნა WhatsApp/Viber-ით.':'Создание профессионального PDF и отправка через WhatsApp/Viber.','საბანკო რეკვიზიტები':'Банковские реквизиты','მრავალი ბანკის ანგარიში — ყოველ ინვოისზე ავტომატურად ჩაისმება.':'Несколько банковских счетов автоматически добавляются в каждый счет.','დღგ 18%':'НДС 18%','ავტომატური გამოთვლა. ჩართე ან გამორთე ერთი კლიკით.':'Автоматический расчет. Включайте или выключайте одним кликом.','ქართულად':'Локализовано','სრულად ქართულ ენაზე. კომპანია, ფიზ. პირი, ინდ. მეწარმე — ყველა ტიპი.':'Полная локализация. Поддерживаются компании, физлица и предприниматели.','✅ ინვოისი გაგზავნილია!':'✅ Счет отправлен!','ინვოისი':'Счет','სერვისი A':'Услуга A','სერვისი B':'Услуга B','შპს ბიზნესი':'ООО Бизнес',
+    'მთავარი':'Главная','ახალი ინვოისი':'Новый счет','ინვოისები':'Счета','კლიენტები':'Клиенты','პროდუქტები':'Товары','პროფილი':'Профиль','გამოსვლა':'Выход','ინვოისები სულ':'Всего счетов','ბოლო ინვოისები':'Последние счета','კლიენტები არ გაქვს დამატებული':'Клиенты еще не добавлены','პროდუქტები არ გაქვს დამატებული':'Товары еще не добавлены','ინვოისები ჯერ არ გაქვს':'Счетов пока нет','იტვირთება...':'Загрузка...','სულ':'Итого','მოქმედება':'Действия','ნახვა':'Открыть','წაშლა':'Удалить','რედაქტირება':'Редактировать','ახალი':'Новый','➕ ახალი':'➕ Новый','➕ ახალი ინვოისი':'➕ Новый счет','➕ კლიენტის დამატება':'➕ Добавить клиента','➕ პროდუქტი':'➕ Товар','📥 Excel-იდან იმპორტი':'📥 Импорт из Excel',
+    'ინფო':'Инфо','📋 ინფო':'📋 Инфо','📦 პროდუქტები':'📦 Позиции','გადახედვა':'Просмотр','👁 გადახედვა':'👁 Просмотр','ინვოისი №':'Счет №','თარიღი':'Дата','გადახდის ვადა':'Срок оплаты','ვადა':'Срок','კლიენტი':'Клиент','ძიება ან ახლის დამატება...':'Поиск или добавить нового...','კლიენტის მონაცემები ინვოისისთვის':'Данные клиента для счета','ახალი კლიენტი':'Новый клиент','კლიენტის სახელი':'Имя клиента','სახელი / კომპანია':'Имя / Компания','მისამართი':'Адрес','ტელეფონი':'Телефон','ტელ:':'Тел:','კლიენტების ბაზაში შენახვა':'Сохранить в базе клиентов','შენიშვნა':'Примечание','გადახდის პირობები...':'Условия оплаты...','შემდეგი → პროდუქტები':'Далее → Позиции','დასახელება':'Описание','რაოდ.':'Кол-во','ფასი':'Цена','ფასი ₾':'Цена ₾','ჯამი':'Итого','ჯამი ₾':'Итого ₾','პროდუქტის დამატება':'Добавить позицию','+ პროდუქტის დამატება':'Добавить позицию','კატალოგიდან ჩასმა...':'Добавить из каталога...','შუალედური ჯამი':'Промежуточный итог','მათ შორის დღგ':'Включая НДС','სულ გადასახდელი':'К оплате','უკან':'Назад','← უკან':'← Назад','← რედაქტირება':'← Редактировать','გადახედვა →':'Просмотр →','💾 შენახვა':'💾 Сохранить','შენახვა':'Сохранить','PDF':'PDF','WhatsApp':'WhatsApp','Viber':'Viber','გამგზავნი':'Отправитель','მიმღები':'Получатель','კოდი':'Код','ბანკი':'Банк','საბანკო ანგარიშები':'Банковские счета','+ ბანკის დამატება':'Добавить банк','ბანკის დამატება':'Добавить банк','ლოგო':'Логотип','📎 ლოგოს ატვირთვა (PNG, JPG)':'📎 Загрузить логотип (PNG, JPG)','ლოგოს ატვირთვა (PNG, JPG)':'Загрузить логотип (PNG, JPG)','ძირითადი ინფო':'Основная информация','ც., კგ., სთ.':'шт., кг, ч.','სერვისი / პროდუქტი':'Услуга / Товар','ერთეული':'Ед.','Excel ფაილი უნდა შეიცავდეს სვეტებს:':'Файл Excel должен содержать столбцы:','სახელი, ერთეული, ფასი':'Название, Ед., Цена','პროდუქტი':'Товар','პროდუქტი დაიმპორტდა ✓':'товар импортирован ✓',
+    'კლიენტის დამატება':'Добавить клиента','კლიენტის რედაქტირება':'Редактировать клиента','სახელი':'Имя','სახელი სავალდებულოა':'Имя обязательно','წაშლა?':'Удалить?','წავშალო ეს ინვოისი?':'Удалить этот счет?','კლიენტი შენახულია ✓':'Клиент сохранен ✓','პროფილი განახლდა ✓':'Профиль обновлен ✓','პროდუქტი დამატებულია ✓':'Товар добавлен ✓','ინვოისი შენახულია ✓':'Счет сохранен ✓','ინვოისი წაიშალა ✓':'Счет удален ✓','ჯერ შედი ანგარიშში':'Сначала войдите','PDF ფანჯარა გაიხსნა — აირჩიე Save as PDF':'Окно PDF открыто — выберите Save as PDF','ბრაუზერმა დაბლოკა PDF ფანჯარა. Pop-up დაუშვი და თავიდან სცადე.':'Браузер заблокировал окно PDF. Разрешите pop-up и попробуйте снова.','10 წუთი არააქტიური იყავი — უსაფრთხოებისთვის გამოხვედი':'Вы были неактивны 10 минут — выполнен выход для безопасности.',
+    'მფლობელი კომპანია':'Компания-владелец','მფლობელი კომპანია: შპს ბილდეკო':'Компания-владелец: ООО Buildeco','მფლობელი:':'Владелец:','კონფიდენციალურობა':'Политика конфиденциальности','წესები და პირობები':'Условия использования','კონტაქტი':'Контакт','ყველა უფლება დაცულია':'Все права защищены','უსაფრთხოება':'Безопасность','მონაცემების გამოყენება':'Использование данных','სერვისის გამოყენება':'Использование сервиса','შეზღუდვები':'Ограничения','დაგვიკავშირდით სამუშაო საკითხებზე ან ტექნიკური დახმარებისთვის.':'Свяжитесь с нами по рабочим вопросам или технической поддержке.','კითხვების შემთხვევაში დაგვიკავშირდით მითითებულ ნომერზე ან ელ-ფოსტაზე.':'По вопросам свяжитесь с нами по указанному телефону или email.','საიტი ინახავს მხოლოდ იმ ინფორმაციას, რომელსაც მომხმარებელი თავად ავსებს: პროფილი, კლიენტები, პროდუქტები და ინვოისები. ეს მონაცემები გამოიყენება ინვოისების შექმნისა და შენახვისთვის.':'Сайт хранит только информацию, которую пользователь вводит сам: профиль, клиенты, товары и счета. Эти данные используются для создания и сохранения счетов.','ანგარიშები დაცულია ავტორიზაციით. თითოეული მომხმარებელი ხედავს მხოლოდ საკუთარ მონაცემებს.':'Аккаунты защищены авторизацией. Каждый пользователь видит только свои данные.','Invoice.com.ge განკუთვნილია ინვოისების შექმნის, შენახვისა და გადმოტვირთვისთვის. მომხმარებელი პასუხისმგებელია შეყვანილი ინფორმაციის სისწორეზე.':'Invoice.com.ge предназначен для создания, сохранения и скачивания счетов. Пользователь отвечает за правильность введенных данных.','აკრძალულია სერვისის გამოყენება უკანონო მიზნებისთვის ან სხვა პირის მონაცემების არამართლზომიერი დამუშავებისთვის.':'Запрещено использовать сервис в незаконных целях или неправомерно обрабатывать данные другого лица.'
+  };
+  const MAPS = {en:EN, ru:RU};
+  const keys = Object.keys(EN).sort((a,b)=>b.length-a.length);
+  function baseLang(){ return window.currentLang || localStorage.getItem('invoice_lang') || 'ka'; }
+  window.t = function(key){
+    const lang = baseLang();
+    if(lang === 'ka') return key;
+    return (MAPS[lang] && MAPS[lang][key]) || key;
+  };
+  function translateString(str){
+    const lang = baseLang();
+    if(!str || lang === 'ka') return str;
+    let out = String(str);
+    const map = MAPS[lang] || {};
+    for(const k of keys){
+      if(out.includes(k)) out = out.split(k).join(map[k] || k);
+    }
+    return out;
+  }
+  function setBase(el, attr, value){
+    const key = 'base' + attr[0].toUpperCase() + attr.slice(1);
+    if(el.dataset && !el.dataset[key]) el.dataset[key] = value || '';
+    return (el.dataset && el.dataset[key]) || value || '';
+  }
+  window.applyTranslations = function(root=document.body){
+    if(!root) return;
+    const lang = baseLang();
+    document.documentElement.lang = lang;
+    document.querySelectorAll('.lang-current').forEach(btn=>{ btn.textContent = FLAGS[lang] || FLAGS.ka; });
+    const skip = new Set(['SCRIPT','STYLE','TEXTAREA','INPUT','SELECT','OPTION']);
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(node){
+        const p = node.parentElement;
+        if(!p || skip.has(p.tagName)) return NodeFilter.FILTER_REJECT;
+        if(p.closest && (p.closest('.lang-select') || p.closest('.no-translate'))) return NodeFilter.FILTER_REJECT;
+        if(!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const nodes=[];
+    while(walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(n=>{
+      if(!n.__baseKa) n.__baseKa = n.nodeValue;
+      n.nodeValue = lang === 'ka' ? n.__baseKa : translateString(n.__baseKa);
+    });
+    root.querySelectorAll && root.querySelectorAll('[placeholder]').forEach(el=>{
+      const base = setBase(el, 'placeholder', el.getAttribute('placeholder') || '');
+      el.setAttribute('placeholder', lang === 'ka' ? base : translateString(base));
+    });
+    root.querySelectorAll && root.querySelectorAll('option').forEach(el=>{
+      const base = setBase(el, 'text', el.textContent || '');
+      el.textContent = lang === 'ka' ? base : translateString(base);
+    });
+    root.querySelectorAll && root.querySelectorAll('input[type="button"],input[type="submit"]').forEach(el=>{
+      const base = setBase(el, 'value', el.value || '');
+      el.value = lang === 'ka' ? base : translateString(base);
+    });
+    updateMobileUserInfo();
+  };
+  window.setLang = function(lang){
+    if(!FLAGS[lang]) lang = 'ka';
+    window.currentLang = lang;
+    try{ localStorage.setItem('invoice_lang', lang); }catch(e){}
+    document.querySelectorAll('.lang-select.open').forEach(x=>x.classList.remove('open'));
+    window.applyTranslations(document.body);
+    if(typeof buildInvPreview === 'function'){
+      const prev = document.getElementById('inv-preview-content');
+      if(prev && prev.innerHTML.trim()) buildInvPreview();
+    }
+  };
+  window.translateDynamic = function(){ setTimeout(()=>window.applyTranslations(document.body), 0); };
+  function updateMobileUserInfo(){
+    let top = document.querySelector('.app-mobile-top');
+    if(!top) return;
+    let box = top.querySelector('.app-mobile-user');
+    if(!box){
+      box = document.createElement('div');
+      box.className = 'app-mobile-user';
+      box.innerHTML = '<div class="app-mobile-user-name" id="mb-username">—</div><div class="app-mobile-user-id" id="mb-userid">—</div>';
+      top.insertBefore(box, top.firstChild);
+    }
+    const name = document.getElementById('sb-username')?.textContent || '—';
+    const id = document.getElementById('sb-usertype')?.textContent || '—';
+    const n = document.getElementById('mb-username');
+    const i = document.getElementById('mb-userid');
+    if(n) n.textContent = name;
+    if(i) i.textContent = translateString(id);
+  }
+  const oldSetup = window.setupSidebar;
+  window.setupSidebar = function(){
+    if(typeof oldSetup === 'function') oldSetup.apply(this, arguments);
+    const sbType = document.getElementById('sb-usertype');
+    if(sbType && sbType.__baseKa){
+      sbType.textContent = baseLang()==='ka' ? sbType.__baseKa : translateString(sbType.__baseKa);
+    }
+    updateMobileUserInfo();
+  };
+  const wrapNames = ['renderProfile','renderClients','renderCatalog','renderInvoices','renderDashboard','renderInvProducts','populateCatalogPick','showPage','viewInvoice','loadProfile','loadClients','loadProducts','loadInvoices','buildInvPreview','switchInvTab'];
+  function wrapLater(){
+    wrapNames.forEach(name=>{
+      const fn = window[name];
+      if(typeof fn !== 'function' || fn.__fullI18nWrapped) return;
+      const w = function(){
+        const r = fn.apply(this, arguments);
+        if(r && typeof r.then === 'function') r.finally(()=>window.translateDynamic());
+        else window.translateDynamic();
+        return r;
+      };
+      w.__fullI18nWrapped = true;
+      window[name] = w;
+    });
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    wrapLater();
+    setTimeout(()=>{ window.setLang(baseLang()); updateMobileUserInfo(); }, 100);
+  });
+  setTimeout(wrapLater, 500);
+})();
 </script>
 </body>
 </html>
